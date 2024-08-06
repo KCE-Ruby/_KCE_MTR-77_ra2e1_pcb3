@@ -22,6 +22,7 @@
 #define Timer_Limit_Counter_Max  (600000) //10min; 600s
 
 /* variables -----------------------------------------------------------------*/
+static bool scan_complete_flag = false;
 __IO r_tmr tmr;
 
 /* Global Function definitions ------------------------------------------------------*/
@@ -86,6 +87,17 @@ fsp_err_t uart_receive(uint8_t *p_data, uint32_t length)
   return FSP_SUCCESS;
 }
 
+//ADC
+bool get_scanflag(void)
+{
+  return scan_complete_flag;
+}
+
+void set_scanflag(bool flag)
+{
+  scan_complete_flag = flag;
+}
+
 /* callback Function definitions by code generated ------------------------------------------------------*/
 void r_wdt_callback(wdt_callback_args_t * p_args)
 {
@@ -105,6 +117,7 @@ void timer0_callback(timer_callback_args_t *p_args)
   {
     tmr.Cnt_1ms++;
     if((tmr.Cnt_1ms%1)==0) tmr.Flag_5ms = true;
+    if((tmr.Cnt_1ms%100)==0) tmr.Flag_100ms = true;
     if((tmr.Cnt_1ms%500)==0) tmr.Flag_500ms = true;
     if((tmr.Cnt_1ms%2000)==0) tmr.Flag_2s = true;
     if((tmr.Cnt_1ms%100)==0) tmr.Cnt_1s++;
@@ -112,3 +125,11 @@ void timer0_callback(timer_callback_args_t *p_args)
     tmr.Cnt_1ms = (tmr.Cnt_1ms>Timer_Limit_Counter_Max)? 1:tmr.Cnt_1ms;
   }
 }
+
+void user_adc_callback(adc_callback_args_t * p_args)
+{
+  scan_complete_flag = false;
+  FSP_PARAMETER_NOT_USED(p_args);
+  scan_complete_flag = true;
+}
+

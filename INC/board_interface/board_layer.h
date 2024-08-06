@@ -22,7 +22,7 @@
 /* typedef definitions -----------------------------------------------------*/
 typedef struct  //different timer flags
 {
-  bool Flag_1ms, Flag_5ms, Flag_500ms, Flag_1s, Flag_2s;
+  bool Flag_1ms, Flag_5ms, Flag_100ms, Flag_500ms, Flag_1s, Flag_2s;
   int16_t Cnt_1s;
   uint32_t Cnt_1ms;
 }r_tmr;
@@ -33,5 +33,6 @@ void WDT_Feed(void);
 fsp_err_t uart_init(void);
 fsp_err_t uart_send(uint8_t *p_data, uint32_t length);
 fsp_err_t uart_receive(uint8_t *p_data, uint32_t length);
-
+bool get_scanflag(void);
+void set_scanflag(bool flag);
 #endif /* INC_BOARD_LAYER_H_ */

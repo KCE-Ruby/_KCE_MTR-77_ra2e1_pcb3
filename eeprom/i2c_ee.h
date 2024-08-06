@@ -18,7 +18,7 @@ void I2C_EE_Writepage(unsigned char* ptr_write , unsigned char WriteAddr,unsigne
 void I2C_EE_BufferWrite(uint8_t* pBuffer, uint8_t WriteAddr,uint16_t NumByteToWrite);
 void I2C_EE_BufferRead(unsigned char* ptr_read,unsigned char address,unsigned char byte);
 void I2C_EE_WaitState(void);
-void I2C_EE_Writedrase();
+void I2C_EE_Writederase();
 uint8_t I2C_Test(void);
 
 

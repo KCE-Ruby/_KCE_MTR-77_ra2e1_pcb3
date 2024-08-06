@@ -187,7 +187,7 @@ void I2C_EE_BufferRead(unsigned char* ptr_read,unsigned char address,unsigned ch
 /**
 * @brief I2C EEPROM清空数据
 */
-void I2C_EE_Writedrase()
+void I2C_EE_Writederase()
 {
     unsigned char I2c_Buf_Write[256] = {};
     for(int i = 0 ; i<256 ; i++)
