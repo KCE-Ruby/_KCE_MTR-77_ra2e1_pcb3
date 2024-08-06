@@ -12,9 +12,6 @@
 #define INC_INDICATOR_ENCODE_H_ 
 #ifdef INC_INDICATOR_ENCODE_H_
 
-/* Public function protocol -----------------------------------------------*/
-void dsp_main(void);
-
 /* Enum type definitions -----------------------------------------------------*/
 enum digitis
 {
@@ -76,9 +73,9 @@ typedef union
     uint8_t M1_f:1;
     uint8_t M1_g:1;
     uint8_t M1_minus:1;
-  }scan3;
-  uint8_t led_scan3;
-} LED_SCAN3;
+  }scan1;
+  uint8_t pincombine;
+} LED_SCAN1;
 
 typedef union
 {
@@ -93,7 +90,7 @@ typedef union
     uint8_t M2_g:1;
     uint8_t M2_dp:1;
   }scan2;
-  uint8_t led_scan2;
+  uint8_t pincombine;
 } LED_SCAN2;
 
 typedef union
@@ -108,9 +105,9 @@ typedef union
     uint8_t M3_f:1;
     uint8_t M3_g:1;
     uint8_t M3_dp:1;
-  }scan1;
-  uint8_t led_scan1;
-} LED_SCAN1;
+  }scan3;
+  uint8_t pincombine;
+} LED_SCAN3;
 
 typedef union
 {
@@ -125,7 +122,7 @@ typedef union
     uint8_t enhanced_cooling:1;
     uint8_t clock:1;
   }scan4;
-  uint8_t icon_scan4;
+  uint8_t pincombine;
 } ICON_SCAN4;
 
 typedef union
@@ -135,9 +132,12 @@ typedef union
     uint8_t fan:1;
     uint8_t degress_c:1;
     uint8_t degress_f:1;
-    uint8_t ret:5;
+    uint8_t ret:5;        //reserved
   }scan5;
-  uint8_t icon_scan5;
+  uint8_t pincombine;
 } ICON_SCAN5;
+
+/* Public function protocol -----------------------------------------------*/
+void TempNumber(int16_t temp);
 
 #endif /* INC_INDICATOR_ENCODE_H_ */

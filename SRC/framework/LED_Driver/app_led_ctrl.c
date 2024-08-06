@@ -20,7 +20,7 @@
 extern __IO r_tmr tmr;
 
 /* variables -----------------------------------------------------------------*/
-
+__IO bool ALL_LED_FLAG;
 
 /* static private function protocol -----------------------------------------------*/
 static bool Flash_timer_setting(void);
@@ -48,8 +48,8 @@ static bool Flash_timer_setting(void)
 /* Function definitions ------------------------------------------------------*/
 void ALL_LED_ON(void)
 {
-  //TODO: S1~S5掃描全亮, a~dp 75HC595掃描全開
-
+  //TODO: S1~S5掃描全亮, a~dp全開
+  ALL_LED_FLAG = true;
 }
 
 void ALL_LED_OFF(void)

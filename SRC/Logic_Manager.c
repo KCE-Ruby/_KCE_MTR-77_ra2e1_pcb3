@@ -54,9 +54,7 @@ void Task_Main(void)
     }
     else
     {
-      //  Key_main();
-      // ShowNumber(tmr.Cnt_1s);
-      // LED_Display_main();
+      LED_Display();
       // tmr.Cnt_1s = (tmr.Cnt_1s>999)? -999:tmr.Cnt_1s;
     }
 

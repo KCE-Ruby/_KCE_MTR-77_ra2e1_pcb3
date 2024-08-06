@@ -15,7 +15,7 @@
 /* typedef definitions -----------------------------------------------------*/
 typedef struct  //different timer flags
 {
-  int16_t sensor1;
+  int16_t sensor1;  //已放大十倍成整數型態(可負數))
   int16_t sensor2;
   int16_t sensor3;
   int16_t sensor4;

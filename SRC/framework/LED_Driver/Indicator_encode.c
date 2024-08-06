@@ -13,24 +13,10 @@
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/LED_Driver/Indicator_encode.h"
 
-
 /* Private defines ----------------------------------------------------------*/
 
 /* Private macro ----------------------------------------------------------*/
-const uint8_t digitMap[10] = {
-    0x3F, // 0: A B C D E F
-    0x06, // 1: B C
-    0x5B, // 2: A B D E G
-    0x4F, // 3: A B C D G
-    0x66, // 4: B C F G
-    0x6D, // 5: A C D F G
-    0x7D, // 6: A C D E F G
-    0x07, // 7: A B C
-    0x7F, // 8: A B C D E F G
-    0x6F  // 9: A B C D F G
-};
-
-const char _7seg_LookupTable[][8] = {
+const uint8_t _7seg_LookupTable[][8] = {
   {1,1,1,1,0,0,1,1},     // diplay number '0'  F3
   {1,0,0,0,0,0,0,1},     // diplay number '1'  81
   {0,1,1,0,1,0,1,1},     // diplay number '2'  6B
@@ -43,7 +29,7 @@ const char _7seg_LookupTable[][8] = {
   {1,1,0,1,1,0,1,1},     // diplay number '9'  DB
 };
 
-const char _char_LookupTable[][8] = {   //TODO: 未校正
+const uint8_t _char_LookupTable[][8] = {   //TODO: 未校正
   {1,1,1,1,0,1,1,0},     // diplay number 'A'  BB
   {1,1,1,1,0,1,1,0},     // diplay number 'b'  F8
   {1,1,1,1,0,1,1,0},     // diplay number 'C'  72
@@ -86,59 +72,65 @@ __IO LED_SCAN3 Scan3Led;
 __IO ICON_SCAN4 Scan4Icon;
 __IO ICON_SCAN5 Scan5Icon;
 
+__IO LED_SCAN1 Scan1Digi;
+__IO LED_SCAN2 Scan2LedDigi;
+__IO LED_SCAN3 Scan3LedDigi;
+
 /* static private function protocol -----------------------------------------------*/
-static void set_led_segments(uint8_t segments);
-static void display_digit(uint8_t digit, uint8_t position);
+static void main_M1(uint16_t num, bool flag);
+static void main_M2(uint16_t num);
+static void main_M3(uint16_t num);
 
 /* static Private Function definitions ------------------------------------------------------*/
-static void main_M1(int8_t num)
+static void main_M1(uint16_t num, bool flag)
 {
-  //M1為個位數, 但是dp被當作負號使用
-  uint8_t i, digi, minus_flag;
-  
-  minus_flag = (num < 0)? true:false;
-  num = (num > 99)? (num-=100):num;
-  digi = num % 10;
+  //M1為最右邊的數字, 但是dp被當作負號使用
+  uint8_t i;
+  uint16_t digi;
+
+  num = (num > 999)? (num-=1000):num;
+  digi = num % 100;
 
   //若負號成立則亮燈
-  Scan3Led.scan3.M1_minus = minus_flag? _char_LookupTable[dig_minus][4]:0;
+  Scan1Led.scan1.M1_minus = flag? _char_LookupTable[dig_minus][4]:0;
 
   for(i=0; i<7;i++)
   {
     switch (i)
     {
       case 0:
-        Scan3Led.scan3.M1_a = _7seg_LookupTable[digi][i];
+        Scan1Led.scan1.M1_a = _7seg_LookupTable[digi][i];
       break;
       case 1:
-        Scan3Led.scan3.M1_b = _7seg_LookupTable[digi][i];
+        Scan1Led.scan1.M1_b = _7seg_LookupTable[digi][i];
       break;
       case 2:
-        Scan3Led.scan3.M1_c = _7seg_LookupTable[digi][i];
+        Scan1Led.scan1.M1_c = _7seg_LookupTable[digi][i];
       break;
       case 3:
-        Scan3Led.scan3.M1_d = _7seg_LookupTable[digi][i];
+        Scan1Led.scan1.M1_d = _7seg_LookupTable[digi][i];
       break;
       case 4:
-        Scan3Led.scan3.M1_e = _7seg_LookupTable[digi][i];
+        Scan1Led.scan1.M1_e = _7seg_LookupTable[digi][i];
       break;
       case 5:
-        Scan3Led.scan3.M1_f = _7seg_LookupTable[digi][i];
+        Scan1Led.scan1.M1_f = _7seg_LookupTable[digi][i];
       break;
       case 6:
-        Scan3Led.scan3.M1_g = _7seg_LookupTable[digi][i];
+        Scan1Led.scan1.M1_g = _7seg_LookupTable[digi][i];
       break;
     }
   }
 }
 
-static void main_M2(uint8_t num)
+static void main_M2(uint16_t num)
 {
-  uint8_t i, digi, value=num;
+  //M2為中邊的數字
+  uint8_t i;
+  uint16_t digi, value;
   value = (num > 99)? (value-=100):num;
   digi = value / 10;
   digi = (num<100 && digi==0)? (digi=10):digi;
-
 
   for(i=0; i<7;i++)
   {
@@ -169,38 +161,39 @@ static void main_M2(uint8_t num)
   }
 }
 
-static void main_M3(uint8_t num)
+static void main_M3(uint16_t num)
 {
-  uint8_t i, digi, value=num;
+  //M3為最左邊的數字
+  uint8_t i;
+  uint16_t digi, value;
   value = (num > 99)? (value-=100):num;
   digi = value / 10;
   digi = (num<100 && digi==0)? (digi=10):digi;
-
 
   for(i=0; i<7;i++)
   {
     switch (i)
     {
       case 0:
-        Scan1Led.scan1.M3_a = _7seg_LookupTable[digi][i];
+        Scan3Led.scan3.M3_a = _7seg_LookupTable[digi][i];
       break;
       case 1:
-        Scan1Led.scan1.M3_b = _7seg_LookupTable[digi][i];
+        Scan3Led.scan3.M3_b = _7seg_LookupTable[digi][i];
       break;
       case 2:
-        Scan1Led.scan1.M3_c = _7seg_LookupTable[digi][i];
+        Scan3Led.scan3.M3_c = _7seg_LookupTable[digi][i];
       break;
       case 3:
-        Scan1Led.scan1.M3_d = _7seg_LookupTable[digi][i];
+        Scan3Led.scan3.M3_d = _7seg_LookupTable[digi][i];
       break;
       case 4:
-        Scan1Led.scan1.M3_e = _7seg_LookupTable[digi][i];
+        Scan3Led.scan3.M3_e = _7seg_LookupTable[digi][i];
       break;
       case 5:
-        Scan1Led.scan1.M3_f = _7seg_LookupTable[digi][i];
+        Scan3Led.scan3.M3_f = _7seg_LookupTable[digi][i];
       break;
       case 6:
-        Scan1Led.scan1.M3_g = _7seg_LookupTable[digi][i];
+        Scan3Led.scan3.M3_g = _7seg_LookupTable[digi][i];
       break;
     }
   }
@@ -209,11 +202,17 @@ static void main_M3(uint8_t num)
 /* Function definitions ------------------------------------------------------*/
 void TempNumber(int16_t temp)
 {
-  main_M1(temp);
-  main_M2(temp);
-  main_M3(temp);
+  static bool minus_flag;
+  if(temp < 0)
+  {
+    minus_flag = true;
+    temp *= (-1);
+  }
+  //收進來的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
+  main_M1((uint16_t)temp, minus_flag);
+  main_M2((uint16_t)temp);
+  main_M3((uint16_t)temp);
 }
-
 
 
 

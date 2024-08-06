@@ -23,6 +23,7 @@
 typedef struct  //different timer flags
 {
   bool Flag_1ms, Flag_5ms, Flag_100ms, Flag_500ms, Flag_1s, Flag_2s;
+  uint8_t COM_Port, COM_Port_pre;
   int16_t Cnt_1s;
   uint32_t Cnt_1ms;
 }r_tmr;
