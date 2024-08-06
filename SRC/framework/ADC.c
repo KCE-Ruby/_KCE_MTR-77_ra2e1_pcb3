@@ -6,6 +6,7 @@
  * @author  Ruby
  *
  * @copyright Copyright © 2024 KCE. All rights reserved.
+ * 100ms取一次AD值, 取5次, 一秒更新兩次溫度值
  ******************************************************************************
  */
 
@@ -13,28 +14,30 @@
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/ADC.h"
 
-#define FILTER_SIZE                 (5)
-#define TABLE_SIZE                  (10)
+#define FILTER_SIZE                 (9)
+#define TABLE_SIZE                  (12)
 #define ERROR_AD                    (-999)
 
 /*---------------------- extern variables ----------------------*/
 extern __IO bool scan_complete_flag;
 
 /*---------------------- variables ----------------------*/
-static uint16_t AD[5];
-static ADC_TemperatureValue TempValue;
+uint16_t AD[5];
+ADC_TemperatureValue TempValue;
 static TemperatureAdTable table[TABLE_SIZE] = 
 {
-  { -40.0, 100 },
-  { -20.0, 200 },
-  { 0.0, 300 },
-  { 20.0, 400 },
-  { 40.0, 500 },
-  { 60.0, 600 },
-  { 80.0, 700 },
-  { 100.0, 800 },
-  { 120.0, 900 },
-  { 140.0, 1000 }
+  { -10.0, 3658 },
+  { 0.0, 3452 },
+  { 10.0, 3189 },
+  { 20.0, 2880 },
+  { 30.0, 2542 },
+  { 40.0, 2186 },
+  { 50.0, 1840 },
+  { 60.0, 1520 },
+  { 70.0, 1246 },
+  { 80.0, 1005 },
+  { 90.0, 794 },
+  { 100.0, 655 }
 };
 
 /*---------------------- Private function protocol ----------------------*/
@@ -51,20 +54,23 @@ static int16_t converADtoNTC_multiply10(uint16_t adValue);
 //Convert AD to NTC temperature value
 static int16_t ADCtest(adc_channel_t const channel);
 
+uint16_t test;
 /*---------------------- Function definitions ----------------------*/
 void ADC_Main(void)
 {
-  // TempValue.sensor1 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_1));
-  // R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
+  test = getFiltedAD(ADC_CHANNEL_1);
+  TempValue.sensor1 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_1));
+  R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
 
   // TempValue.sensor2 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_2));
   // R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
 
   //AD convert Test API
-  TempValue.sensor1 = (ADCtest(ADC_CHANNEL_1));
-  R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
-  TempValue.sensor1 = (ADCtest(ADC_CHANNEL_2));
-  R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
+    // AD[1] = Read_ADC_Voltage_Value(ADC_CHANNEL_1);
+  // TempValue.sensor1 = (ADCtest(ADC_CHANNEL_1));
+  // R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
+  // TempValue.sensor2 = (ADCtest(ADC_CHANNEL_2));
+  // R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
 }
 
 /*---------------------- Static Function definitions ----------------------*/
@@ -96,17 +102,28 @@ static int medianFilter(int new_ad_value)
 {
   static int ad_values[FILTER_SIZE];
   static int ad_index = 0;
+  bool sort_flag=false;
 
+  // Store new value and update index
   ad_values[ad_index] = new_ad_value;
   ad_index = (ad_index + 1) % FILTER_SIZE;
 
-  int sorted_values[FILTER_SIZE];
-  for (int i = 0; i < FILTER_SIZE; i++) {
-    sorted_values[i] = ad_values[i];
+  // Set sort flag if we've filled the buffer
+  if (ad_index == 0) {
+    sort_flag = true;
   }
 
-  qsort(sorted_values, FILTER_SIZE, sizeof(int), compare);
+  static int sorted_values[FILTER_SIZE];
+  // Copy and sort the array if sort_flag is set
+  if (sort_flag)
+  {
+    for (int i = 0; i < FILTER_SIZE; i++) {
+      sorted_values[i] = ad_values[i];
+    }
+    qsort(sorted_values, FILTER_SIZE, sizeof(int), compare);
+  }
 
+  // Return the median value
   return sorted_values[FILTER_SIZE / 2];
 }
 
@@ -116,14 +133,12 @@ static uint16_t getFiltedAD(adc_channel_t const channel)
   {
     case ADC_CHANNEL_1:
       AD[1] = Read_ADC_Voltage_Value(ADC_CHANNEL_1);
-      medianFilter(AD[1]);
-      return AD[1];
+      return medianFilter(AD[1]);
       break;
 
     case ADC_CHANNEL_2:
       AD[2] = Read_ADC_Voltage_Value(ADC_CHANNEL_2);
-      medianFilter(AD[2]);
-      return AD[2];
+      return medianFilter(AD[2]);
       break;
   
     default:
@@ -135,17 +150,27 @@ static uint16_t getFiltedAD(adc_channel_t const channel)
 //Convert AD to NTC temperature value
 static int16_t converADtoNTC_multiply10(uint16_t adValue)
 {
-  int16_t ret;
+  int16_t ret = ERROR_AD; // 初始化为错误值
 
-  for (int i = 0; i < TABLE_SIZE - 1; i++) {
-    if (adValue >= table[i].adValue && adValue <= table[i + 1].adValue) {
-      // 线性插值计算
-      float ratio = (float)((adValue - table[i].adValue) / (table[i + 1].adValue - table[i].adValue));
-      ret = (int16_t)((table[i].temperature + ratio * (table[i + 1].temperature - table[i].temperature))*10);
-      return ret;
+  for (int i = 0; i < TABLE_SIZE - 1; i++)
+  {
+    uint16_t adValueLow = table[i].adValue;
+    uint16_t adValueHigh = table[i + 1].adValue;
+
+    if (adValue >= adValueLow && adValue <= adValueHigh)
+    {
+      // 计算差值
+      int16_t tempDiff = table[i + 1].temperature - table[i].temperature;
+      uint16_t adDiff = adValueHigh - adValueLow;
+      uint16_t adOffset = adValue - adValueLow;
+
+      // 线性插值计算并乘以10
+      ret = (int16_t)((table[i].temperature * 10) + (tempDiff * adOffset * 10) / adDiff);
+      break;
     }
   }
-  return ERROR_AD; // 返回-999表示未找到匹配的AD值
+
+  return ret;
 }
 
 

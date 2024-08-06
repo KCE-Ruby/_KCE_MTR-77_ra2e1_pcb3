@@ -119,12 +119,32 @@ void timer0_callback(timer_callback_args_t *p_args)
     
     if((tmr.Cnt_1ms%1)==0) tmr.Flag_5ms = true;
     if((tmr.Cnt_1ms%100)==0) tmr.Flag_100ms = true;
+    if((tmr.Cnt_1ms%200)==0) tmr.Flag_200ms = true;
     if((tmr.Cnt_1ms%500)==0) tmr.Flag_500ms = true;
+    if((tmr.Cnt_1ms%1000)==0) tmr.Flag_1s = true;
     if((tmr.Cnt_1ms%2000)==0) tmr.Flag_2s = true;
-    if((tmr.Cnt_1ms%100)==0) tmr.Cnt_1s++;
+    if((tmr.Cnt_1ms%1000)==0) tmr.Cnt_1s++;
 
     tmr.Cnt_1ms = (tmr.Cnt_1ms>Timer_Limit_Counter_Max)? 1:tmr.Cnt_1ms;
   }
+}
+
+void timer1_callback(timer_callback_args_t *p_args)
+{
+  // if (TIMER_EVENT_CYCLE_END == p_args->event)
+  // {
+  //   tmr.Cnt_1ms++;
+    
+  //   if((tmr.Cnt_1ms%1)==0) tmr.Flag_5ms = true;
+  //   if((tmr.Cnt_1ms%100)==0) tmr.Flag_100ms = true;
+  //   if((tmr.Cnt_1ms%200)==0) tmr.Flag_200ms = true;
+  //   if((tmr.Cnt_1ms%500)==0) tmr.Flag_500ms = true;
+  //   if((tmr.Cnt_1ms%1000)==0) tmr.Flag_1s = true;
+  //   if((tmr.Cnt_1ms%2000)==0) tmr.Flag_2s = true;
+  //   if((tmr.Cnt_1ms%1000)==0) tmr.Cnt_1s++;
+
+  //   tmr.Cnt_1ms = (tmr.Cnt_1ms>Timer_Limit_Counter_Max)? 1:tmr.Cnt_1ms;
+  // }
 }
 
 void user_adc_callback(adc_callback_args_t * p_args)

@@ -30,6 +30,5 @@ typedef struct
 
 /* task function protocol -----------------------------------------------*/
 void ADC_Main(void);
-void r_adc_callback(adc_callback_args_t * p_args);
 
 #endif /* INC_ADC_H_ */

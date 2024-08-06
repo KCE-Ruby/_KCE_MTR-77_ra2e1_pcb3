@@ -47,15 +47,15 @@ void Task_Main(void)
   I2C_Test();
   while(1)
   {
-    if(tmr.Flag_100ms)
+    if(tmr.Flag_500ms)
     {
       ADC_Main();
-      tmr.Flag_100ms = false;
+      tmr.Flag_200ms = false;
     }
     else
     {
-      LED_Display();
-      // tmr.Cnt_1s = (tmr.Cnt_1s>999)? -999:tmr.Cnt_1s;
+      // LED_Display();
+      tmr.Cnt_1s = (tmr.Cnt_1s>999)? -999:tmr.Cnt_1s;
     }
 
     WDT_Feed();
@@ -82,6 +82,13 @@ static void TMR_init(void)
   assert(FSP_SUCCESS == err);
   /* Start the timer. */
   (void) R_GPT_Start(&g_timer0_ctrl);
+
+  // /* Initializes the module. */
+  // err = R_AGT_Open(&g_timer1_ctrl, &g_timer1_cfg);
+  // /* Handle any errors. This function should be defined by the user. */
+  // assert(FSP_SUCCESS == err);
+  // /* Start the timer. */
+  // (void) R_AGT_Start(&g_timer1_ctrl);
 }
 
 static void ADC_init(void)
