@@ -18,11 +18,12 @@
 
 
 /* variables -----------------------------------------------------------------*/
-uint8_t KeyPin;
+__IO uint8_t KeyPin;
 static int key_valid[6];
-uint8_t pin_sta[6];
+__IO uint8_t pin_sta[6];
 static int key_cnt[6];
 static int key_mode = 0, key_m = 0;
+__IO uint8_t disp_level;
 
 /* Private function protocol -----------------------------------------------*/
 static void key_scan(void);
@@ -34,7 +35,7 @@ void Key_main(void)
 {
 //  Key_Read;
 //   key_scan();
-   single_k1();
+  single_k1();
 }
 
 static single_k1(void)
@@ -59,7 +60,6 @@ static void key_scan(void)
   // 用數組來簡化開關的切換
   const int SMG_CLOSE[6] = {SMG_6_CLOSE, SMG_1_CLOSE, SMG_2_CLOSE, SMG_3_CLOSE, SMG_4_CLOSE, SMG_5_CLOSE};
   const int SMG_OPEN[6] = {SMG_1_OPEN, SMG_2_OPEN, SMG_3_OPEN, SMG_4_OPEN, SMG_5_OPEN, SMG_6_OPEN};
-
 
   // 關閉當前段，打開下一段
   SMG_CLOSE[key_m];
@@ -97,7 +97,7 @@ static void clear_key(void)
       {
         if (i != j)
         {
-            key_valid[j] = 0;
+          key_valid[j] = 0;
         }
       }
       break; // 找到第一個大於0的值後就可以退出迴圈

@@ -29,9 +29,8 @@ typedef struct  //different timer flags
 }r_tmr;
 
 /* task function protocol -----------------------------------------------*/
-void WDT_init(void);
+void boot_init(void);
 void WDT_Feed(void);
-fsp_err_t uart_init(void);
 fsp_err_t uart_send(uint8_t *p_data, uint32_t length);
 fsp_err_t uart_receive(uint8_t *p_data, uint32_t length);
 bool get_scanflag(void);

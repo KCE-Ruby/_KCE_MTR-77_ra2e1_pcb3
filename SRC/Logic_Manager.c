@@ -23,14 +23,15 @@
 /* extern variables -----------------------------------------------------------------*/
 extern r_tmr tmr;
 extern volatile uint8_t data;
+extern ADC_TemperatureValue TempValue;
 
 /* variables -----------------------------------------------------------------*/
 uint32_t Device_Version;
 
 /* Private function protocol -----------------------------------------------*/
-static void boot_init(void);
-static void TMR_init(void);
-static void ADC_init(void);
+// static void boot_init(void);
+// static void TMR_init(void);
+// static void ADC_init(void);
 
 /* Function definitions ------------------------------------------------------*/
 void Task_Main(void)
@@ -50,11 +51,13 @@ void Task_Main(void)
     if(tmr.Flag_500ms)
     {
       ADC_Main();
+      TempNumber(-11.2);
+      // TempNumber(TempValue.sensor1);
       tmr.Flag_200ms = false;
     }
     else
     {
-      // LED_Display();
+      LED_Display();
       tmr.Cnt_1s = (tmr.Cnt_1s>999)? -999:tmr.Cnt_1s;
     }
 
@@ -64,39 +67,4 @@ void Task_Main(void)
 }
 
 /* Static Function definitions ------------------------------------------------------*/
-static void boot_init(void)
-{
-  WDT_init();   //16384 cycle watchdog
-  TMR_init();   //1ms Timer
-  Debug_UART1_Init();
-  ADC_init();
-  I2C_EE_Init();
-}
-
-static void TMR_init(void)
-{
-  fsp_err_t err = FSP_SUCCESS;
-  /* Initializes the module. */
-  err = R_GPT_Open(&g_timer0_ctrl, &g_timer0_cfg);
-  /* Handle any errors. This function should be defined by the user. */
-  assert(FSP_SUCCESS == err);
-  /* Start the timer. */
-  (void) R_GPT_Start(&g_timer0_ctrl);
-
-  // /* Initializes the module. */
-  // err = R_AGT_Open(&g_timer1_ctrl, &g_timer1_cfg);
-  // /* Handle any errors. This function should be defined by the user. */
-  // assert(FSP_SUCCESS == err);
-  // /* Start the timer. */
-  // (void) R_AGT_Start(&g_timer1_ctrl);
-}
-
-static void ADC_init(void)
-{
-  fsp_err_t status;
-  status = R_ADC_Open(&g_adc0_ctrl, &g_adc0_cfg);
-  status = R_ADC_ScanCfg(&g_adc0_ctrl, &g_adc0_channel_cfg);
-  assert(FSP_SUCCESS == status);
-}
-
 

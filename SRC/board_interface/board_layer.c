@@ -24,10 +24,55 @@
 /* variables -----------------------------------------------------------------*/
 static bool scan_complete_flag = false;
 __IO r_tmr tmr;
+static bool debug=false;
+
+/* task function protocol -----------------------------------------------*/
+static void TMR_init(void);
+static void ADC_init(void);
+static void WDT_init(void);
+static fsp_err_t uart_init(void);
 
 /* Global Function definitions ------------------------------------------------------*/
+void boot_init(void)
+{
+  WDT_init();   //16384 cycle watchdog
+  TMR_init();   //1ms Timer
+  if(debug)
+    Debug_UART1_Init();
+  else
+    uart_init();
+  ADC_init();
+  I2C_EE_Init();
+}
+
+static void TMR_init(void)
+{
+  fsp_err_t err = FSP_SUCCESS;
+  /* Initializes the module. */
+  err = R_GPT_Open(&g_timer0_ctrl, &g_timer0_cfg);
+  /* Handle any errors. This function should be defined by the user. */
+  assert(FSP_SUCCESS == err);
+  /* Start the timer. */
+  (void) R_GPT_Start(&g_timer0_ctrl);
+
+  // /* Initializes the module. */
+  // err = R_AGT_Open(&g_timer1_ctrl, &g_timer1_cfg);
+  // /* Handle any errors. This function should be defined by the user. */
+  // assert(FSP_SUCCESS == err);
+  // /* Start the timer. */
+  // (void) R_AGT_Start(&g_timer1_ctrl);
+}
+
+static void ADC_init(void)
+{
+  fsp_err_t status;
+  status = R_ADC_Open(&g_adc0_ctrl, &g_adc0_cfg);
+  status = R_ADC_ScanCfg(&g_adc0_ctrl, &g_adc0_channel_cfg);
+  assert(FSP_SUCCESS == status);
+}
+
 //watchdog
-void WDT_init(void)
+static void WDT_init(void)
 {
   fsp_err_t status;
 
@@ -49,7 +94,7 @@ void WDT_Feed(void)
 }
 
 //uart
-fsp_err_t uart_init(void)
+static fsp_err_t uart_init(void)
 {
   fsp_err_t err;
   err = R_SCI_UART_Open(&g_uart9_ctrl, &g_uart9_cfg);
@@ -129,8 +174,8 @@ void timer0_callback(timer_callback_args_t *p_args)
   }
 }
 
-void timer1_callback(timer_callback_args_t *p_args)
-{
+// void timer1_callback(timer_callback_args_t *p_args)
+// {
   // if (TIMER_EVENT_CYCLE_END == p_args->event)
   // {
   //   tmr.Cnt_1ms++;
@@ -145,7 +190,7 @@ void timer1_callback(timer_callback_args_t *p_args)
 
   //   tmr.Cnt_1ms = (tmr.Cnt_1ms>Timer_Limit_Counter_Max)? 1:tmr.Cnt_1ms;
   // }
-}
+// }
 
 void user_adc_callback(adc_callback_args_t * p_args)
 {
