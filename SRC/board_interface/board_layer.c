@@ -24,6 +24,7 @@
 /* variables -----------------------------------------------------------------*/
 static bool scan_complete_flag = false;
 __IO r_tmr tmr;
+__IO bsp_io_level_t KeyPin;
 static bool debug=false;
 
 /* task function protocol -----------------------------------------------*/
@@ -141,6 +142,69 @@ bool get_scanflag(void)
 void set_scanflag(bool flag)
 {
   scan_complete_flag = flag;
+}
+
+//IO
+void SMG_OPEN(uint8_t smg)
+{
+  switch (smg)
+  {
+    case 1:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_01_PIN_00, BSP_IO_LEVEL_LOW);
+      break;
+    case 2:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_01_PIN_01, BSP_IO_LEVEL_LOW);
+      break;
+    case 3:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_01_PIN_02, BSP_IO_LEVEL_LOW);
+      break;
+    case 4:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_01_PIN_03, BSP_IO_LEVEL_LOW);
+      break;
+    case 5:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_13, BSP_IO_LEVEL_LOW);
+      break;
+    case 6:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_04_PIN_07, BSP_IO_LEVEL_LOW);
+      break;
+
+    default:
+      break;
+  }
+}
+
+void SMG_CLOSE(uint8_t smg)
+{
+  switch (smg)
+  {
+    case 1:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_01_PIN_00, BSP_IO_LEVEL_HIGH);
+      break;
+    case 2:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_01_PIN_01, BSP_IO_LEVEL_HIGH);
+      break;
+    case 3:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_01_PIN_02, BSP_IO_LEVEL_HIGH);
+      break;
+    case 4:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_01_PIN_03, BSP_IO_LEVEL_HIGH);
+      break;
+    case 5:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_13, BSP_IO_LEVEL_HIGH);
+      break;
+    case 6:
+      R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_04_PIN_07, BSP_IO_LEVEL_HIGH);
+      break;
+
+    default:
+      break;
+  }
+}
+
+void Key_ReadPin(void)
+{
+  fsp_err_t err;
+  err = R_IOPORT_PinRead(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_14, &KeyPin);
 }
 
 /* callback Function definitions by code generated ------------------------------------------------------*/

@@ -15,12 +15,11 @@
 #include "INC/framework/Display.h"
 
 /* extern variables -----------------------------------------------------------------*/
-
+extern __IO bsp_io_level_t KeyPin;
 
 /* variables -----------------------------------------------------------------*/
-__IO uint8_t KeyPin;
+__IO bsp_io_level_t pin_sta[6];
 static int key_valid[6];
-__IO uint8_t pin_sta[6];
 static int key_cnt[6];
 static int key_mode = 0, key_m = 0;
 __IO uint8_t disp_level;
@@ -29,62 +28,46 @@ __IO uint8_t disp_level;
 static void key_scan(void);
 static void clear_key(void);
 
-static single_k1(void);
+static void single_k1(uint8_t in);
 /* Function definitions ------------------------------------------------------*/
 void Key_main(void)
 {
-//  Key_Read;
-//   key_scan();
-  single_k1();
+  Key_ReadPin();
+  // key_scan();
 }
 
-static single_k1(void)
+static void single_k1(uint8_t in)
 {
-  // 關閉當前段，打開下一段
-  SMG_1_CLOSE;
-  SMG_2_CLOSE;
-  SMG_3_CLOSE;
-  SMG_4_CLOSE;
-  SMG_5_CLOSE;
-  SMG_6_CLOSE;
-  SMG_6_OPEN;
-  Key_Read;
-  // 假設 KeyPin 是一個函數或宏，返回當前按鍵狀態
-  pin_sta[0] = KeyPin ? false : true;
+  // uint8_t i=6;
+  // while(i>0)
+  // {
+  //   SMG_CLOSE(i);
+  //   i--;
+  // }
+  // SMG_OPEN(key);
+
+  // Key_ReadPin();
+  // pin_sta[key] = KeyPin ? false : true;
 }
 
 static void key_scan(void)
 {
   key_m = key_mode % 6;
 
-  // 用數組來簡化開關的切換
-  const int SMG_CLOSE[6] = {SMG_6_CLOSE, SMG_1_CLOSE, SMG_2_CLOSE, SMG_3_CLOSE, SMG_4_CLOSE, SMG_5_CLOSE};
-  const int SMG_OPEN[6] = {SMG_1_OPEN, SMG_2_OPEN, SMG_3_OPEN, SMG_4_OPEN, SMG_5_OPEN, SMG_6_OPEN};
-
-  // 關閉當前段，打開下一段
-  SMG_CLOSE[key_m];
-  SMG_OPEN[key_m];
-
+  single_k1(key_m);
   key_mode++;
 
-  // 假設 KeyPin 是一個函數或宏，返回當前按鍵狀態
-  pin_sta[key_m] = KeyPin ? false : true;
+ if (pin_sta[key_m])
+  key_cnt[key_m]++;
+ else
+  key_cnt[key_m] = 0;
 
-//  if (pin_sta[key_m])
-//  {
-//      key_cnt[key_m]++;
-//  }
-//  else
-//  {
-//      key_cnt[key_m] = 0;
-//  }
-//
-//  if (key_cnt[key_m] >= 30)
-//  {
-//      key_valid[key_m]++;
-//  }
-//
-//  clear_key();
+
+ if (key_cnt[key_m] >= 30)
+  key_valid[key_m]++;
+
+
+ clear_key();
 }
 
 static void clear_key(void)

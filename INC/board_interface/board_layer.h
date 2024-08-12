@@ -35,4 +35,7 @@ fsp_err_t uart_send(uint8_t *p_data, uint32_t length);
 fsp_err_t uart_receive(uint8_t *p_data, uint32_t length);
 bool get_scanflag(void);
 void set_scanflag(bool flag);
+void SMG_OPEN(uint8_t smg);
+void SMG_CLOSE(uint8_t smg);
+void Key_ReadPin(void);
 #endif /* INC_BOARD_LAYER_H_ */

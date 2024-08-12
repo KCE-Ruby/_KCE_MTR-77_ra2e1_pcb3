@@ -51,8 +51,6 @@ void Task_Main(void)
     if(tmr.Flag_500ms)
     {
       ADC_Main();
-      TempNumber(-11.2);
-      // TempNumber(TempValue.sensor1);
       tmr.Flag_200ms = false;
     }
     else

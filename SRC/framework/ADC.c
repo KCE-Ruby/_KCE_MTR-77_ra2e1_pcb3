@@ -62,6 +62,9 @@ void ADC_Main(void)
   TempValue.sensor1 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_1));
   R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
 
+  TempNumber(-11.2);
+  // TempNumber(TempValue.sensor1);
+  
   // TempValue.sensor2 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_2));
   // R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
 

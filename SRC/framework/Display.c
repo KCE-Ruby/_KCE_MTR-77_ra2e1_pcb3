@@ -26,6 +26,8 @@ extern __IO LED_SCAN1 Scan1Digi;
 extern __IO LED_SCAN2 Scan2LedDigi;
 extern __IO LED_SCAN3 Scan3LedDigi;
 
+extern __IO bsp_io_level_t KeyPin;
+extern __IO bsp_io_level_t pin_sta[6];
 /* variables -----------------------------------------------------------------*/
 
 
@@ -64,12 +66,12 @@ static void COM_lightup(uint8_t com, bool switch_com)
 
 static void Disalbe_COM(void)
 {
-  SMG_1_CLOSE;
-  SMG_2_CLOSE;
-  SMG_3_CLOSE;
-  SMG_4_CLOSE;
-  SMG_5_CLOSE;
-  SMG_6_CLOSE;
+  SMG_CLOSE(1);
+  SMG_CLOSE(2);
+  SMG_CLOSE(3);
+  SMG_CLOSE(4);
+  SMG_CLOSE(5);
+  SMG_CLOSE(6);
 }
 
 static void SetValue_COM(uint8_t com)
@@ -127,27 +129,9 @@ static void PUSHPIN(uint8_t com)
 
 static void Enable_COM(uint8_t com)
 {
-  switch (com)
-  {
-    case 0:
-      SMG_1_OPEN;
-      break;
-    case 1:
-      SMG_2_OPEN;
-      break;
-    case 2:
-      SMG_3_OPEN;
-      break;
-    case 3:
-      SMG_4_OPEN;
-      break;
-    case 4:
-      SMG_5_OPEN;
-      break;
-    case 5:
-      SMG_6_OPEN;
-      break;
-  }
+  SMG_OPEN(com+1);
+  Key_ReadPin();
+  pin_sta[key] = KeyPin ? false : true;
 }
 
 static void LED_WriteIOState(uint8_t StateBuff)
