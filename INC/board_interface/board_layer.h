@@ -28,6 +28,11 @@ typedef struct  //different timer flags
   uint32_t Cnt_1ms;
 }r_tmr;
 
+typedef struct  //different timer flags
+{
+  uint8_t decimalIndex;
+}s_Var;
+
 /* task function protocol -----------------------------------------------*/
 void boot_init(void);
 void WDT_Feed(void);

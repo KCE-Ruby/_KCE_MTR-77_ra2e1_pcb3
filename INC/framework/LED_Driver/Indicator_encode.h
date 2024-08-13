@@ -60,19 +60,25 @@ enum digitis
   dig_underscore = 35,
 };
 
+typedef enum {
+  DECIMAL_AT_2 = 2, // 2.34
+  DECIMAL_AT_1 = 1, // 23.4
+  DECIMAL_AT_0 = 0  // 234 (无小数点)
+} decimalIndex;
+
 /* typedef definitions -----------------------------------------------------*/
 typedef union
 {
   struct
   {
-    uint8_t M1_a:1;
-    uint8_t M1_b:1;
-    uint8_t M1_c:1;
-    uint8_t M1_d:1;
-    uint8_t M1_e:1;
-    uint8_t M1_f:1;
-    uint8_t M1_g:1;
-    uint8_t M1_minus:1;
+    bool M1_a:1;
+    bool M1_b:1;
+    bool M1_c:1;
+    bool M1_d:1;
+    bool M1_e:1;
+    bool M1_f:1;
+    bool M1_g:1;
+    bool M1_minus:1;
   }scan1;
   uint8_t pincombine;
 } LED_SCAN1;
@@ -81,14 +87,14 @@ typedef union
 {
   struct
   {
-    uint8_t M2_a:1;
-    uint8_t M2_b:1;
-    uint8_t M2_c:1;
-    uint8_t M2_d:1;
-    uint8_t M2_e:1;
-    uint8_t M2_f:1;
-    uint8_t M2_g:1;
-    uint8_t M2_dp:1;
+    bool M2_a:1;
+    bool M2_b:1;
+    bool M2_c:1;
+    bool M2_d:1;
+    bool M2_e:1;
+    bool M2_f:1;
+    bool M2_g:1;
+    bool M2_dp:1;
   }scan2;
   uint8_t pincombine;
 } LED_SCAN2;
@@ -97,14 +103,14 @@ typedef union
 {
   struct
   {
-    uint8_t M3_a:1;
-    uint8_t M3_b:1;
-    uint8_t M3_c:1;
-    uint8_t M3_d:1;
-    uint8_t M3_e:1;
-    uint8_t M3_f:1;
-    uint8_t M3_g:1;
-    uint8_t M3_dp:1;
+    bool M3_a:1;
+    bool M3_b:1;
+    bool M3_c:1;
+    bool M3_d:1;
+    bool M3_e:1;
+    bool M3_f:1;
+    bool M3_g:1;
+    bool M3_dp:1;
   }scan3;
   uint8_t pincombine;
 } LED_SCAN3;
@@ -113,14 +119,14 @@ typedef union
 {
   struct
   {
-    uint8_t bulb:1;
-    uint8_t defrost:1;
-    uint8_t energy_saving:1;
-    uint8_t alarm:1;
-    uint8_t refrigerate:1;
-    uint8_t aux:1;
-    uint8_t enhanced_cooling:1;
-    uint8_t clock:1;
+    bool bulb:1;
+    bool defrost:1;
+    bool energy_saving:1;
+    bool alarm:1;
+    bool refrigerate:1;
+    bool aux:1;
+    bool enhanced_cooling:1;
+    bool clock:1;
   }scan4;
   uint8_t pincombine;
 } ICON_SCAN4;
@@ -129,9 +135,9 @@ typedef union
 {
   struct
   {
-    uint8_t fan:1;
-    uint8_t degress_c:1;
-    uint8_t degress_f:1;
+    bool fan:1;
+    bool degress_c:1;
+    bool degress_f:1;
     uint8_t ret:5;        //reserved
   }scan5;
   uint8_t pincombine;

@@ -38,7 +38,7 @@ void Task_Main(void)
 {
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x08;
+  const uint8_t test    = 0x09;
   Device_Version = Release*65536 + dev*256 + test;
 
   boot_init();

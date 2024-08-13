@@ -14,6 +14,7 @@
 #include "INC/framework/LED_Driver/Indicator_encode.h"
 
 /* Private defines ----------------------------------------------------------*/
+#define DISPLAY_MAX_DIGITS 999    //此顯示器最大上限值為三位數
 
 /* Private macro ----------------------------------------------------------*/
 const uint8_t _7seg_LookupTable[][8] = {
@@ -64,6 +65,7 @@ const uint8_t _char_LookupTable[][8] = {   //TODO: 未校正
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO r_tmr tmr;
+extern __IO s_Var System;
 
 /* variables -----------------------------------------------------------------*/
 __IO LED_SCAN1 Scan1Led;
@@ -85,14 +87,11 @@ static void main_M3(uint16_t num);
 static void main_M1(uint16_t num, bool flag)
 {
   //M1為最右邊的數字, 但是dp被當作負號使用
-  uint8_t i;
-  uint16_t digi;
-
-  num = (num > 999)? (num-=1000):num;
-  digi = num % 100;
+  uint8_t i, digi;
+  digi = (uint8_t)(num % 10); //只取個位數
 
   //若負號成立則亮燈
-  Scan1Led.scan1.M1_minus = flag? _char_LookupTable[dig_minus][4]:0;
+  Scan1Led.scan1.M1_minus = flag? 1 : 0;
 
   for(i=0; i<7;i++)
   {
@@ -125,12 +124,15 @@ static void main_M1(uint16_t num, bool flag)
 
 static void main_M2(uint16_t num)
 {
-  //M2為中邊的數字
-  uint8_t i;
-  uint16_t digi, value;
-  value = (num > 99)? (value-=100):num;
-  digi = value / 10;
+  //M2為中間的數字
+  uint8_t i, digi;
+  digi = (num / 10) % 10; //只取十位數
+
+  //若為0, 則需判斷是否要顯示0或不顯示
   digi = (num<100 && digi==0)? (digi=10):digi;
+
+  //若數字為2位數則亮燈
+  Scan2Led.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? 1 : 0;
 
   for(i=0; i<7;i++)
   {
@@ -164,10 +166,10 @@ static void main_M2(uint16_t num)
 static void main_M3(uint16_t num)
 {
   //M3為最左邊的數字
-  uint8_t i;
-  uint16_t digi, value;
-  value = (num > 99)? (value-=100):num;
-  digi = value / 10;
+  uint8_t i, digi;
+  digi = (num / 100) % 10; //只取百位數
+  
+  //若為0, 則需判斷是否要顯示0
   digi = (num<100 && digi==0)? (digi=10):digi;
 
   for(i=0; i<7;i++)
@@ -202,13 +204,14 @@ static void main_M3(uint16_t num)
 /* Function definitions ------------------------------------------------------*/
 void TempNumber(int16_t temp)
 {
-  static bool minus_flag;
-  if(temp < 0)
-  {
-    minus_flag = true;
-    temp *= (-1);
-  }
   //收進來的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
+  static bool minus_flag;
+  minus_flag = (temp < 0);
+  temp = (temp < 0) ? -temp : temp;
+  
+  //轉換的數值不能超過最大值, 且恆為正數
+  temp = (temp > DISPLAY_MAX_DIGITS)? DISPLAY_MAX_DIGITS : temp;
+
   main_M1((uint16_t)temp, minus_flag);
   main_M2((uint16_t)temp);
   main_M3((uint16_t)temp);
