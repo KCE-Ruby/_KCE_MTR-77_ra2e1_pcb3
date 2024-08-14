@@ -126,10 +126,10 @@ static void main_M2(uint16_t num)
 {
   //M2為中間的數字
   uint8_t i, digi;
-  digi = (num / 10) % 10; //只取十位數
+  digi = (uint8_t)((num / 10) % 10); //只取十位數
 
   //若為0, 則需判斷是否要顯示0或不顯示
-  digi = (num<100 && digi==0)? (digi=10):digi;
+  digi = (num<100 && digi==0)? (uint8_t)10:digi;
 
   //若數字為2位數則亮燈
   Scan2Led.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? 1 : 0;
@@ -167,10 +167,10 @@ static void main_M3(uint16_t num)
 {
   //M3為最左邊的數字
   uint8_t i, digi;
-  digi = (num / 100) % 10; //只取百位數
-  
+  digi = (uint8_t)((num / 100) % 10); //只取百位數
+
   //若為0, 則需判斷是否要顯示0
-  digi = (num<100 && digi==0)? (digi=10):digi;
+  digi = (num<100 && digi==0)? (uint8_t)10 : digi;
 
   for(i=0; i<7;i++)
   {
@@ -202,13 +202,13 @@ static void main_M3(uint16_t num)
 }
 
 /* Function definitions ------------------------------------------------------*/
-void TempNumber(int16_t temp)
+void NumToDisplay(int16_t temp)
 {
   //收進來的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
   static bool minus_flag;
   minus_flag = (temp < 0);
-  temp = (temp < 0) ? -temp : temp;
-  
+  temp = (temp < 0) ? (int16_t)(-temp) : temp;
+
   //轉換的數值不能超過最大值, 且恆為正數
   temp = (temp > DISPLAY_MAX_DIGITS)? DISPLAY_MAX_DIGITS : temp;
 

@@ -144,6 +144,6 @@ typedef union
 } ICON_SCAN5;
 
 /* Public function protocol -----------------------------------------------*/
-void TempNumber(int16_t temp);
+void NumToDisplay(int16_t temp);
 
 #endif /* INC_INDICATOR_ENCODE_H_ */

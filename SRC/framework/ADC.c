@@ -58,12 +58,13 @@ uint16_t test;
 /*---------------------- Function definitions ----------------------*/
 void ADC_Main(void)
 {
+  //取AD值, (測試用)
   test = getFiltedAD(ADC_CHANNEL_1);
-  TempValue.sensor1 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_1));
-  R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
 
-  TempNumber(-11.2);
-  // TempNumber(TempValue.sensor1);
+  //取完AD值, 將值轉換成NTC的溫度值, 且放大10倍後存在sensor1準備給顯示區處理
+  TempValue.sensor1 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_1));
+  NumToDisplay(-11.2);
+  // NumToDisplay(TempValue.sensor1);
   
   // TempValue.sensor2 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_2));
   // R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
