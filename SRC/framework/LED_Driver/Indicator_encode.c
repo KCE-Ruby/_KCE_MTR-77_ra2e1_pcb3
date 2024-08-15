@@ -18,8 +18,8 @@
 
 /* Private macro ----------------------------------------------------------*/
 static const uint8_t _7seg_LookupTable[][8] = {
-  {1,1,1,1,0,0,1,1},     // diplay number '0'  F3
-  {1,0,0,0,0,0,0,1},     // diplay number '1'  06
+  {0,0,1,1,1,1,1,1},     // diplay number '0'  3F
+  {0,0,0,0,0,1,1,0},     // diplay number '1'  06
   {0,1,0,1,1,0,1,1},     // diplay number '2'  5B
   {0,1,0,0,1,1,1,1},     // diplay number '3'  4F
   {0,1,1,0,0,1,1,0},     // diplay number '4'  66
@@ -171,9 +171,13 @@ __IO LED_SCAN3 Scan3Led;
 __IO ICON_SCAN4 Scan4Icon;
 __IO ICON_SCAN5 Scan5Icon;
 
-__IO LED_SCAN1 Scan1Digi;
-__IO LED_SCAN2 Scan2LedDigi;
-__IO LED_SCAN3 Scan3LedDigi;
+__IO LED_SCAN1 Scan1temp;
+__IO LED_SCAN2 Scan2temp;
+__IO LED_SCAN3 Scan3temp;
+__IO ICON_SCAN4 Scan4temp;
+__IO ICON_SCAN5 Scan5temp;
+
+uint8_t Adigi[3];
 
 /* static private function protocol -----------------------------------------------*/
 static void main_M1(uint16_t num, bool flag);
@@ -189,6 +193,7 @@ static void main_M1(uint16_t num, bool flag)
   //M1為最右邊的數字, 但是dp被當作負號使用
   uint8_t i, digi;
   digi = (uint8_t)(num % 10); //只取個位數
+  Adigi[2] = (uint8_t)(num % 10); //只取個位數
 
   //若負號成立則亮燈
   Scan1Led.scan1.M1_minus = flag? 1 : 0;
@@ -198,25 +203,25 @@ static void main_M1(uint16_t num, bool flag)
     switch (i)
     {
       case 0:
-        Scan1Led.scan1.M1_a = _7seg_LookupTable[digi][i];
+        Scan1temp.scan1.M1_a = _7seg_LookupTable[digi][i];
       break;
       case 1:
-        Scan1Led.scan1.M1_b = _7seg_LookupTable[digi][i];
+        Scan1temp.scan1.M1_b = _7seg_LookupTable[digi][i];
       break;
       case 2:
-        Scan1Led.scan1.M1_c = _7seg_LookupTable[digi][i];
+        Scan1temp.scan1.M1_c = _7seg_LookupTable[digi][i];
       break;
       case 3:
-        Scan1Led.scan1.M1_d = _7seg_LookupTable[digi][i];
+        Scan1temp.scan1.M1_d = _7seg_LookupTable[digi][i];
       break;
       case 4:
-        Scan1Led.scan1.M1_e = _7seg_LookupTable[digi][i];
+        Scan1temp.scan1.M1_e = _7seg_LookupTable[digi][i];
       break;
       case 5:
-        Scan1Led.scan1.M1_f = _7seg_LookupTable[digi][i];
+        Scan1temp.scan1.M1_f = _7seg_LookupTable[digi][i];
       break;
       case 6:
-        Scan1Led.scan1.M1_g = _7seg_LookupTable[digi][i];
+        Scan1temp.scan1.M1_g = _7seg_LookupTable[digi][i];
       break;
     }
   }
@@ -227,37 +232,38 @@ static void main_M2(uint16_t num)
   //M2為中間的數字
   uint8_t i, digi;
   digi = (uint8_t)((num / 10) % 10); //只取十位數
+  Adigi[1] = (uint8_t)((num / 10) % 10); //只取十位數
 
   //若為0, 則需判斷是否要顯示0或不顯示
   digi = (num<100 && digi==0)? (uint8_t)10:digi;
 
   //若數字為2位數則亮燈
-  Scan2Led.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? 1 : 0;
+  Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? 1 : 0;
 
   for(i=0; i<7;i++)
   {
     switch (i)
     {
       case 0:
-        Scan2Led.scan2.M2_a = _7seg_LookupTable[digi][i];
+        Scan2temp.scan2.M2_a = _7seg_LookupTable[digi][i];
       break;
       case 1:
-        Scan2Led.scan2.M2_b = _7seg_LookupTable[digi][i];
+        Scan2temp.scan2.M2_b = _7seg_LookupTable[digi][i];
       break;
       case 2:
-        Scan2Led.scan2.M2_c = _7seg_LookupTable[digi][i];
+        Scan2temp.scan2.M2_c = _7seg_LookupTable[digi][i];
       break;
       case 3:
-        Scan2Led.scan2.M2_d = _7seg_LookupTable[digi][i];
+        Scan2temp.scan2.M2_d = _7seg_LookupTable[digi][i];
       break;
       case 4:
-        Scan2Led.scan2.M2_e = _7seg_LookupTable[digi][i];
+        Scan2temp.scan2.M2_e = _7seg_LookupTable[digi][i];
       break;
       case 5:
-        Scan2Led.scan2.M2_f = _7seg_LookupTable[digi][i];
+        Scan2temp.scan2.M2_f = _7seg_LookupTable[digi][i];
       break;
       case 6:
-        Scan2Led.scan2.M2_g = _7seg_LookupTable[digi][i];
+        Scan2temp.scan2.M2_g = _7seg_LookupTable[digi][i];
       break;
     }
   }
@@ -268,6 +274,7 @@ static void main_M3(uint16_t num)
   //M3為最左邊的數字
   uint8_t i, digi;
   digi = (uint8_t)((num / 100) % 10); //只取百位數
+  Adigi[0] = (uint8_t)((num / 100) % 10); //只取百位數
 
   //若為0, 則需判斷是否要顯示0
   digi = (num<100 && digi==0)? (uint8_t)10 : digi;
@@ -277,25 +284,25 @@ static void main_M3(uint16_t num)
     switch (i)
     {
       case 0:
-        Scan3Led.scan3.M3_a = _7seg_LookupTable[digi][i];
+        Scan3temp.scan3.M3_a = _7seg_LookupTable[digi][i];
       break;
       case 1:
-        Scan3Led.scan3.M3_b = _7seg_LookupTable[digi][i];
+        Scan3temp.scan3.M3_b = _7seg_LookupTable[digi][i];
       break;
       case 2:
-        Scan3Led.scan3.M3_c = _7seg_LookupTable[digi][i];
+        Scan3temp.scan3.M3_c = _7seg_LookupTable[digi][i];
       break;
       case 3:
-        Scan3Led.scan3.M3_d = _7seg_LookupTable[digi][i];
+        Scan3temp.scan3.M3_d = _7seg_LookupTable[digi][i];
       break;
       case 4:
-        Scan3Led.scan3.M3_e = _7seg_LookupTable[digi][i];
+        Scan3temp.scan3.M3_e = _7seg_LookupTable[digi][i];
       break;
       case 5:
-        Scan3Led.scan3.M3_f = _7seg_LookupTable[digi][i];
+        Scan3temp.scan3.M3_f = _7seg_LookupTable[digi][i];
       break;
       case 6:
-        Scan3Led.scan3.M3_g = _7seg_LookupTable[digi][i];
+        Scan3temp.scan3.M3_g = _7seg_LookupTable[digi][i];
       break;
     }
   }
@@ -341,25 +348,25 @@ static void char_M2(uint8_t _char)
     switch (i)
     {
       case 0:
-        Scan2Led.scan2.M2_a = _char_LookupTable[_char][i];
+        Scan2temp.scan2.M2_a = _char_LookupTable[_char][i];
       break;
       case 1:
-        Scan2Led.scan2.M2_b = _char_LookupTable[_char][i];
+        Scan2temp.scan2.M2_b = _char_LookupTable[_char][i];
       break;
       case 2:
-        Scan2Led.scan2.M2_c = _char_LookupTable[_char][i];
+        Scan2temp.scan2.M2_c = _char_LookupTable[_char][i];
       break;
       case 3:
-        Scan2Led.scan2.M2_d = _char_LookupTable[_char][i];
+        Scan2temp.scan2.M2_d = _char_LookupTable[_char][i];
       break;
       case 4:
-        Scan2Led.scan2.M2_e = _char_LookupTable[_char][i];
+        Scan2temp.scan2.M2_e = _char_LookupTable[_char][i];
       break;
       case 5:
-        Scan2Led.scan2.M2_f = _char_LookupTable[_char][i];
+        Scan2temp.scan2.M2_f = _char_LookupTable[_char][i];
       break;
       case 6:
-        Scan2Led.scan2.M2_g = _char_LookupTable[_char][i];
+        Scan2temp.scan2.M2_g = _char_LookupTable[_char][i];
       break;
     }
   }
@@ -373,25 +380,25 @@ static void char_M3(uint8_t _char)
     switch (i)
     {
       case 0:
-        Scan3Led.scan3.M3_a = _char_LookupTable[_char][i];
+        Scan3temp.scan3.M3_a = _char_LookupTable[_char][i];
       break;
       case 1:
-        Scan3Led.scan3.M3_b = _char_LookupTable[_char][i];
+        Scan3temp.scan3.M3_b = _char_LookupTable[_char][i];
       break;
       case 2:
-        Scan3Led.scan3.M3_c = _char_LookupTable[_char][i];
+        Scan3temp.scan3.M3_c = _char_LookupTable[_char][i];
       break;
       case 3:
-        Scan3Led.scan3.M3_d = _char_LookupTable[_char][i];
+        Scan3temp.scan3.M3_d = _char_LookupTable[_char][i];
       break;
       case 4:
-        Scan3Led.scan3.M3_e = _char_LookupTable[_char][i];
+        Scan3temp.scan3.M3_e = _char_LookupTable[_char][i];
       break;
       case 5:
-        Scan3Led.scan3.M3_f = _char_LookupTable[_char][i];
+        Scan3temp.scan3.M3_f = _char_LookupTable[_char][i];
       break;
       case 6:
-        Scan3Led.scan3.M3_g = _char_LookupTable[_char][i];
+        Scan3temp.scan3.M3_g = _char_LookupTable[_char][i];
       break;
     }
   }

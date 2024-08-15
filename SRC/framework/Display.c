@@ -22,9 +22,11 @@ extern __IO LED_SCAN3 Scan3Led;
 extern __IO ICON_SCAN4 Scan4Icon;
 extern __IO ICON_SCAN5 Scan5Icon;
 
-extern __IO LED_SCAN1 Scan1Digi;
-extern __IO LED_SCAN2 Scan2LedDigi;
-extern __IO LED_SCAN3 Scan3LedDigi;
+extern __IO LED_SCAN1 Scan1temp;
+extern __IO LED_SCAN2 Scan2temp;
+extern __IO LED_SCAN3 Scan3temp;
+extern __IO ICON_SCAN4 Scan4temp;
+extern __IO ICON_SCAN5 Scan5temp;
 
 extern __IO bsp_io_level_t KeyPin;
 extern __IO bsp_io_level_t pin_sta[6];
@@ -79,19 +81,19 @@ static void SetValue_COM(uint8_t com)
   switch (com)
   {
     case 0:
-      Scan1Led.pincombine = Scan1Digi.pincombine;
+      Scan1Led.pincombine = Scan1temp.pincombine;
     break;
     case 1:
-      Scan2Led.pincombine = Scan1Digi.pincombine;
+      Scan2Led.pincombine = Scan2temp.pincombine;
     break;
     case 2:
-      Scan3Led.pincombine = Scan1Digi.pincombine;
+      Scan3Led.pincombine = Scan3temp.pincombine;
     break;
     case 3:
-      Scan4Icon.pincombine = Scan1Digi.pincombine;
+      Scan4Icon.pincombine = Scan4temp.pincombine;
     break;
     case 4:
-      Scan5Icon.pincombine = Scan1Digi.pincombine;
+      Scan5Icon.pincombine = Scan5temp.pincombine;
     break;
   }
 }

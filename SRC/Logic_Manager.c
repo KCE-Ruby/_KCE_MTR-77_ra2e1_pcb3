@@ -28,6 +28,7 @@ extern __IO s_Var System;
 
 /* variables -----------------------------------------------------------------*/
 uint32_t Device_Version;
+bool _loop_flag = false;
 
 /* Private function protocol -----------------------------------------------*/
 
@@ -35,8 +36,7 @@ uint32_t Device_Version;
 /* Function definitions ------------------------------------------------------*/
 void Task_Main(void)
 {
-  static bool _loop_flag = false;
-  _loop_flag = tmr.Flag_200ms;
+  // static bool _loop_flag = false;
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
@@ -48,27 +48,30 @@ void Task_Main(void)
   printf("軟體版本: %lu\r\n", Device_Version);
   I2C_EE_Writederase();
   I2C_Test();
+  NumToDisplay(123);
   while(1)
   {
-    if(_loop_flag)
-    {
-      if(System.mode != homeMode)
-      {
-        CharToDisplay(LS);
-      }
-      else
-        ADC_Main();
+    // _loop_flag = tmr.Flag_200ms;
+    // if(_loop_flag)
+    // {
+    //   if(System.mode != homeMode)
+    //   {
+    //     // CharToDisplay(LS);
+    //     NumToDisplay(123);
+    //   }
+    //   else
+    //   {
+    //     NumToDisplay(000);
+    //     // ADC_Main();
+    //   }
 
-      _loop_flag = false;
-    }
-    else
-    {
-      LED_Display();
-      tmr.Cnt_1s = (tmr.Cnt_1s>999)? -999:tmr.Cnt_1s;
-    }
+    //   _loop_flag = false;
+    // }
+    LED_Display();
+    tmr.Cnt_1s = (tmr.Cnt_1s>999)? -999:tmr.Cnt_1s;
 
     WDT_Feed();
-    R_BSP_SoftwareDelay(1,BSP_DELAY_UNITS_MILLISECONDS);
+    R_BSP_SoftwareDelay(100,BSP_DELAY_UNITS_MICROSECONDS);
   }
 }
 
