@@ -9,7 +9,7 @@
  ******************************************************************************
  */
 
-#define INC_BOARD_LAYER_H_ 
+#define INC_BOARD_LAYER_H_
 #ifdef INC_BOARD_LAYER_H_
 
 #include "hal_data.h"
@@ -17,7 +17,12 @@
 #include "eeprom/i2c_ee.h"
 
 /* Enum type definitions -----------------------------------------------------*/
-
+enum
+{
+  menuMode,
+  homeMode,
+  settingMode,
+};
 
 /* typedef definitions -----------------------------------------------------*/
 typedef struct  //different timer flags
@@ -30,6 +35,7 @@ typedef struct  //different timer flags
 
 typedef struct  //different timer flags
 {
+  uint8_t mode;
   uint8_t decimalIndex;
 }s_Var;
 

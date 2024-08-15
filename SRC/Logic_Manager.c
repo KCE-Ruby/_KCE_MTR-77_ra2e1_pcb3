@@ -24,21 +24,23 @@
 extern r_tmr tmr;
 extern volatile uint8_t data;
 extern ADC_TemperatureValue TempValue;
+extern __IO s_Var System;
 
 /* variables -----------------------------------------------------------------*/
 uint32_t Device_Version;
 
 /* Private function protocol -----------------------------------------------*/
-// static void boot_init(void);
-// static void TMR_init(void);
-// static void ADC_init(void);
+
 
 /* Function definitions ------------------------------------------------------*/
 void Task_Main(void)
 {
+  static bool _loop_flag = false;
+  _loop_flag = tmr.Flag_200ms;
+
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x09;
+  const uint8_t test    = 0x0A;
   Device_Version = Release*65536 + dev*256 + test;
 
   boot_init();
@@ -48,10 +50,16 @@ void Task_Main(void)
   I2C_Test();
   while(1)
   {
-    if(tmr.Flag_500ms)
+    if(_loop_flag)
     {
-      ADC_Main();
-      tmr.Flag_200ms = false;
+      if(System.mode != homeMode)
+      {
+        CharToDisplay(LS);
+      }
+      else
+        ADC_Main();
+
+      _loop_flag = false;
     }
     else
     {
