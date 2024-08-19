@@ -18,29 +18,33 @@
 
 /* Private macro ----------------------------------------------------------*/
 static const uint8_t _7seg_LookupTable[][8] = {
-  {0,0,1,1,1,1,1,1},     // diplay number '0'  3F
-  {0,0,0,0,0,1,1,0},     // diplay number '1'  06
-  {0,1,0,1,1,0,1,1},     // diplay number '2'  5B
-  {0,1,0,0,1,1,1,1},     // diplay number '3'  4F
-  {0,1,1,0,0,1,1,0},     // diplay number '4'  66
-  {0,1,1,0,1,1,0,1},     // diplay number '5'  6D
-  {0,1,1,1,1,1,0,0},     // diplay number '6'  FA
-  {0,0,1,0,0,1,1,1},     // diplay number '7'  83
-  {0,1,1,1,1,1,1,1},     // diplay number '8'  7F
-  {0,1,1,0,0,1,1,1},     // diplay number '9'  67
+  //a,b,c,d,e,f,g,dp
+  {1,1,1,1,1,1,0,0},     // diplay number '0'
+  {0,1,1,0,0,0,0,0},     // diplay number '1'
+  {1,1,0,1,1,0,1,0},     // diplay number '2'
+  {1,1,1,1,0,0,1,0},     // diplay number '3'
+  {0,1,1,0,0,1,1,0},     // diplay number '4'
+  {1,0,1,1,0,1,1,0},     // diplay number '5'
+  {0,0,1,1,1,1,1,0},     // diplay number '6'
+  {1,1,1,0,0,1,0,0},     // diplay number '7'
+  {1,1,1,1,1,1,1,0},     // diplay number '8'
+  {1,1,1,1,0,1,1,0},     // diplay number '9'
+  {0,0,0,0,0,0,0,0},     // don't display  'x'
+  {0,0,0,0,0,1,0,0},     // display symbol '-'
+  {1,1,1,1,1,1,1,1},     // diplay all '8.'  FF
 };
 
 static const uint8_t _char_LookupTable[][8] = {
-  {1,1,1,1,0,0,1,1},     // diplay number '0'  F3
-  {1,0,0,0,0,0,0,1},     // diplay number '1'  06
-  {0,1,0,1,1,0,1,1},     // diplay number '2'  5B
-  {0,1,0,0,1,1,1,1},     // diplay number '3'  4F
-  {0,1,1,0,0,1,1,0},     // diplay number '4'  66
-  {0,1,1,0,1,1,0,1},     // diplay number '5'  6D
-  {0,1,1,1,1,1,0,0},     // diplay number '6'  FA
-  {0,0,1,0,0,1,1,1},     // diplay number '7'  83
-  {0,1,1,1,1,1,1,1},     // diplay number '8'  7F
-  {0,1,1,0,0,1,1,1},     // diplay number '9'  67
+  {1,1,1,1,1,1,0,0},     // diplay number '0'
+  {0,1,1,0,0,0,0,0},     // diplay number '1'
+  {1,1,0,1,1,0,1,0},     // diplay number '2'
+  {1,1,1,1,0,0,1,0},     // diplay number '3'
+  {0,1,1,0,0,1,1,0},     // diplay number '4'
+  {1,0,1,1,0,1,1,0},     // diplay number '5'
+  {0,0,1,1,1,1,1,0},     // diplay number '6'
+  {1,1,1,0,0,1,0,0},     // diplay number '7'
+  {1,1,1,1,1,1,1,0},     // diplay number '8'
+  {1,1,1,1,0,1,1,0},     // diplay number '9'
 
   {0,1,1,1,0,1,1,1},     // diplay number 'A'  77
   {0,1,1,1,1,1,0,0},     // diplay number 'b'  7C
@@ -53,14 +57,18 @@ static const uint8_t _char_LookupTable[][8] = {
   {0,1,1,1,0,1,1,0},     // diplay number 'H'  76
   {0,0,0,0,0,1,1,0},     // diplay number 'I'  06
   {0,0,0,0,0,1,0,0},     // diplay number 'i'  04
-  {0,0,1,1,1,0,0,0},     // diplay number 'L'  38
+
+  {0,0,0,1,1,1,0,0},     // diplay number 'L'  38
+
   {0,0,1,1,0,1,1,1},     // diplay number 'M'  37
   {0,1,0,1,0,1,0,0},     // diplay number 'n'  54
   {0,0,1,1,1,1,1,1},     // diplay number 'O'  3F
   {0,1,0,1,1,1,0,0},     // diplay number 'o'  5C
   {0,1,1,1,0,0,1,1},     // diplay number 'P'  73
   {0,1,0,1,0,0,0,0},     // diplay number 'r'  50
-  {0,1,1,0,1,1,0,1},     // diplay number 'S'  6D
+
+  {1,0,1,1,0,1,1,0},     // diplay number 'S'  6D
+
   {0,1,1,1,1,0,0,0},     // diplay number 't'  78
   {0,0,1,1,1,1,1,0},     // diplay number 'U'  3E
   {0,0,0,1,1,1,0,0},     // diplay number 'u'  1C
@@ -177,8 +185,6 @@ __IO LED_SCAN3 Scan3temp;
 __IO ICON_SCAN4 Scan4temp;
 __IO ICON_SCAN5 Scan5temp;
 
-uint8_t Adigi[3];
-
 /* static private function protocol -----------------------------------------------*/
 static void main_M1(uint16_t num, bool flag);
 static void main_M2(uint16_t num);
@@ -193,10 +199,6 @@ static void main_M1(uint16_t num, bool flag)
   //M1為最右邊的數字, 但是dp被當作負號使用
   uint8_t i, digi;
   digi = (uint8_t)(num % 10); //只取個位數
-  Adigi[2] = (uint8_t)(num % 10); //只取個位數
-
-  //若負號成立則亮燈
-  Scan1Led.scan1.M1_minus = flag? 1 : 0;
 
   for(i=0; i<7;i++)
   {
@@ -225,6 +227,8 @@ static void main_M1(uint16_t num, bool flag)
       break;
     }
   }
+  // //若負號成立則亮燈
+  Scan1temp.scan1.M1_minus = flag? true:false;
 }
 
 static void main_M2(uint16_t num)
@@ -232,7 +236,6 @@ static void main_M2(uint16_t num)
   //M2為中間的數字
   uint8_t i, digi;
   digi = (uint8_t)((num / 10) % 10); //只取十位數
-  Adigi[1] = (uint8_t)((num / 10) % 10); //只取十位數
 
   //若為0, 則需判斷是否要顯示0或不顯示
   digi = (num<100 && digi==0)? (uint8_t)10:digi;
@@ -240,7 +243,7 @@ static void main_M2(uint16_t num)
   //若數字為2位數則亮燈
   Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? 1 : 0;
 
-  for(i=0; i<7;i++)
+  for(i=0; i<8;i++)
   {
     switch (i)
     {
@@ -265,6 +268,9 @@ static void main_M2(uint16_t num)
       case 6:
         Scan2temp.scan2.M2_g = _7seg_LookupTable[digi][i];
       break;
+      case 7:
+        Scan2temp.scan2.M2_dp = _7seg_LookupTable[digi][i];
+      break;
     }
   }
 }
@@ -274,12 +280,11 @@ static void main_M3(uint16_t num)
   //M3為最左邊的數字
   uint8_t i, digi;
   digi = (uint8_t)((num / 100) % 10); //只取百位數
-  Adigi[0] = (uint8_t)((num / 100) % 10); //只取百位數
 
   //若為0, 則需判斷是否要顯示0
   digi = (num<100 && digi==0)? (uint8_t)10 : digi;
 
-  for(i=0; i<7;i++)
+  for(i=0; i<8;i++)
   {
     switch (i)
     {
@@ -304,6 +309,9 @@ static void main_M3(uint16_t num)
       case 6:
         Scan3temp.scan3.M3_g = _7seg_LookupTable[digi][i];
       break;
+      case 7:
+        Scan3temp.scan3.M3_dp = _7seg_LookupTable[digi][i];
+      break;
     }
   }
 }
@@ -311,30 +319,33 @@ static void main_M3(uint16_t num)
 static void char_M1(uint8_t _char)
 {
   uint8_t i;
-  for(i=0; i<7;i++)
+  for(i=0; i<8;i++)
   {
     switch (i)
     {
       case 0:
-        Scan1Led.scan1.M1_a = _char_LookupTable[_char][i];
+        Scan1temp.scan1.M1_a = _char_LookupTable[_char][i];
       break;
       case 1:
-        Scan1Led.scan1.M1_b = _char_LookupTable[_char][i];
+        Scan1temp.scan1.M1_b = _char_LookupTable[_char][i];
       break;
       case 2:
-        Scan1Led.scan1.M1_c = _char_LookupTable[_char][i];
+        Scan1temp.scan1.M1_c = _char_LookupTable[_char][i];
       break;
       case 3:
-        Scan1Led.scan1.M1_d = _char_LookupTable[_char][i];
+        Scan1temp.scan1.M1_d = _char_LookupTable[_char][i];
       break;
       case 4:
-        Scan1Led.scan1.M1_e = _char_LookupTable[_char][i];
+        Scan1temp.scan1.M1_e = _char_LookupTable[_char][i];
       break;
       case 5:
-        Scan1Led.scan1.M1_f = _char_LookupTable[_char][i];
+        Scan1temp.scan1.M1_f = _char_LookupTable[_char][i];
       break;
       case 6:
-        Scan1Led.scan1.M1_g = _char_LookupTable[_char][i];
+        Scan1temp.scan1.M1_g = _char_LookupTable[_char][i];
+      break;
+      case 7:
+        Scan1temp.scan1.M1_minus = _char_LookupTable[_char][i];
       break;
     }
   }
@@ -343,7 +354,7 @@ static void char_M1(uint8_t _char)
 static void char_M2(uint8_t _char)
 {
   uint8_t i;
-  for(i=0; i<7;i++)
+  for(i=0; i<8;i++)
   {
     switch (i)
     {
@@ -368,6 +379,9 @@ static void char_M2(uint8_t _char)
       case 6:
         Scan2temp.scan2.M2_g = _char_LookupTable[_char][i];
       break;
+      case 7:
+        Scan2temp.scan2.M2_dp = _char_LookupTable[_char][i];
+      break;
     }
   }
 }
@@ -375,7 +389,7 @@ static void char_M2(uint8_t _char)
 static void char_M3(uint8_t _char)
 {
   uint8_t i;
-  for(i=0; i<7;i++)
+  for(i=0; i<8;i++)
   {
     switch (i)
     {
@@ -400,16 +414,20 @@ static void char_M3(uint8_t _char)
       case 6:
         Scan3temp.scan3.M3_g = _char_LookupTable[_char][i];
       break;
+      case 7:
+        Scan3temp.scan3.M3_dp = _char_LookupTable[_char][i];
+      break;
     }
   }
 }
 
+bool minus_flag;
 /* Function definitions ------------------------------------------------------*/
 void NumToDisplay(int16_t temp)
 {
   //收進來的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
-  static bool minus_flag;
-  minus_flag = (temp < 0);
+  // static bool minus_flag;
+  minus_flag = (temp < 0)? true:false;
   temp = (temp < 0) ? (int16_t)(-temp) : temp;
 
   //轉換的數值不能超過最大值, 且恆為正數
@@ -422,7 +440,7 @@ void NumToDisplay(int16_t temp)
 
 void CharToDisplay(uint8_t _char)
 {
-  char_M1(ByteTable[_char][0]);
+  char_M1(ByteTable[_char][2]);
   char_M2(ByteTable[_char][1]);
-  char_M3(ByteTable[_char][2]);
+  char_M3(ByteTable[_char][0]);
 }

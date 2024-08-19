@@ -40,7 +40,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x0A;
+  const uint8_t test    = 0x09;
   Device_Version = Release*65536 + dev*256 + test;
 
   boot_init();
@@ -48,7 +48,8 @@ void Task_Main(void)
   printf("軟體版本: %lu\r\n", Device_Version);
   I2C_EE_Writederase();
   I2C_Test();
-  NumToDisplay(123);
+  // NumToDisplay(798);
+  CharToDisplay(LS);
   while(1)
   {
     // _loop_flag = tmr.Flag_200ms;

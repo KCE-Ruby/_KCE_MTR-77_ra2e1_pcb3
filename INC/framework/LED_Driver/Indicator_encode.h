@@ -67,14 +67,14 @@ typedef union
 {
   struct
   {
-    bool M1_minus:1;
-    bool M1_g:1;
-    bool M1_f:1;
-    bool M1_e:1;
-    bool M1_d:1;
-    bool M1_c:1;
-    bool M1_b:1;
     bool M1_a:1;
+    bool M1_b:1;
+    bool M1_c:1;
+    bool M1_d:1;
+    bool M1_e:1;
+    bool M1_f:1;
+    bool M1_g:1;
+    bool M1_minus:1;
   }scan1;
   uint8_t pincombine;
 } LED_SCAN1;
@@ -83,14 +83,14 @@ typedef union
 {
   struct
   {
-    bool M2_dp:1;
-    bool M2_g:1;
-    bool M2_f:1;
-    bool M2_e:1;
-    bool M2_d:1;
-    bool M2_c:1;
-    bool M2_b:1;
     bool M2_a:1;
+    bool M2_b:1;
+    bool M2_c:1;
+    bool M2_d:1;
+    bool M2_e:1;
+    bool M2_f:1;
+    bool M2_g:1;
+    bool M2_dp:1;
   }scan2;
   uint8_t pincombine;
 } LED_SCAN2;
@@ -99,14 +99,14 @@ typedef union
 {
   struct
   {
-    bool M3_dp:1;
-    bool M3_g:1;
-    bool M3_f:1;
-    bool M3_e:1;
-    bool M3_d:1;
-    bool M3_c:1;
-    bool M3_b:1;
     bool M3_a:1;
+    bool M3_b:1;
+    bool M3_c:1;
+    bool M3_d:1;
+    bool M3_e:1;
+    bool M3_f:1;
+    bool M3_g:1;
+    bool M3_dp:1;
   }scan3;
   uint8_t pincombine;
 } LED_SCAN3;
