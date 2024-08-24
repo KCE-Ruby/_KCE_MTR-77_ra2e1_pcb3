@@ -20,7 +20,7 @@
 extern __IO r_tmr tmr;
 
 /* variables -----------------------------------------------------------------*/
-__IO bool ALL_LED_FLAG;
+__IO bool ALL_LED_FLAG, CLOSE_LED_FLAG;
 
 /* static private function protocol -----------------------------------------------*/
 static bool Flash_timer_setting(void);
@@ -50,12 +50,14 @@ void ALL_LED_ON(void)
 {
   //TODO: S1~S5掃描全亮, a~dp全開
   ALL_LED_FLAG = true;
+  CLOSE_LED_FLAG = false;
 }
 
 void ALL_LED_OFF(void)
 {
   //TODO: S1~S5掃描全關, a~dp 75HC595掃描全關
-
+  ALL_LED_FLAG = false;
+  CLOSE_LED_FLAG = true;
 }
 
 //製冷icon三種型態, 開; 關; 閃爍中

@@ -15,7 +15,7 @@
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO r_tmr tmr;
-extern __IO bool ALL_LED_FLAG;
+extern __IO bool ALL_LED_FLAG, CLOSE_LED_FLAG;
 extern __IO LED_SCAN1 Scan1Led;
 extern __IO LED_SCAN2 Scan2Led;
 extern __IO LED_SCAN3 Scan3Led;
@@ -78,23 +78,42 @@ static void Disalbe_COM(void)
 
 static void SetValue_COM(uint8_t com)
 {
-  switch (com)
+  if(ALL_LED_FLAG)
   {
-    case 0:
-      Scan1Led.pincombine = Scan1temp.pincombine;
-    break;
-    case 1:
-      Scan2Led.pincombine = Scan2temp.pincombine;
-    break;
-    case 2:
-      Scan3Led.pincombine = Scan3temp.pincombine;
-    break;
-    case 3:
-      Scan4Icon.pincombine = Scan4temp.pincombine;
-    break;
-    case 4:
-      Scan5Icon.pincombine = Scan5temp.pincombine;
-    break;
+    Scan1Led.pincombine = 0xFF;
+    Scan2Led.pincombine = 0xFF;
+    Scan3Led.pincombine = 0xFF;
+    Scan4Icon.pincombine = 0xFF;
+    Scan5Icon.pincombine = 0xFF;
+  }
+  else if(CLOSE_LED_FLAG)
+  {
+    Scan1Led.pincombine = 0x00;
+    Scan2Led.pincombine = 0x00;
+    Scan3Led.pincombine = 0x00;
+    Scan4Icon.pincombine = 0x00;
+    Scan5Icon.pincombine = 0x00;
+  }
+  else
+  {
+    switch (com)
+    {
+      case 0:
+        Scan1Led.pincombine = Scan1temp.pincombine;
+      break;
+      case 1:
+        Scan2Led.pincombine = Scan2temp.pincombine;
+      break;
+      case 2:
+        Scan3Led.pincombine = Scan3temp.pincombine;
+      break;
+      case 3:
+        Scan4Icon.pincombine = Scan4temp.pincombine;
+      break;
+      case 4:
+        Scan5Icon.pincombine = Scan5temp.pincombine;
+      break;
+    }
   }
 }
 

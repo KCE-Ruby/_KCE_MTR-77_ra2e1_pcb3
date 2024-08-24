@@ -46,62 +46,58 @@ static const uint8_t _char_LookupTable[][8] = {
   {1,1,1,1,1,1,1,0},     // diplay number '8'
   {1,1,1,1,0,1,1,0},     // diplay number '9'
 
-  {0,1,1,1,0,1,1,1},     // diplay number 'A'  77
-  {0,1,1,1,1,1,0,0},     // diplay number 'b'  7C
-  {0,0,1,1,1,0,0,1},     // diplay number 'C'  39
-  {0,1,0,1,1,0,0,0},     // diplay number 'c'  58
-  {0,1,0,1,1,1,1,0},     // diplay number 'd'  5E
-  {0,1,1,1,1,0,0,1},     // diplay number 'E'  79
-  {0,1,1,1,0,0,0,1},     // diplay number 'F'  71
-  {0,1,1,1,1,1,0,1},     // diplay number 'G'  7D
-  {0,1,1,1,0,1,1,0},     // diplay number 'H'  76
-  {0,0,0,0,0,1,1,0},     // diplay number 'I'  06
-  {0,0,0,0,0,1,0,0},     // diplay number 'i'  04
-
-  {0,0,0,1,1,1,0,0},     // diplay number 'L'  38
-
-  {0,0,1,1,0,1,1,1},     // diplay number 'M'  37
-  {0,1,0,1,0,1,0,0},     // diplay number 'n'  54
-  {0,0,1,1,1,1,1,1},     // diplay number 'O'  3F
-  {0,1,0,1,1,1,0,0},     // diplay number 'o'  5C
-  {0,1,1,1,0,0,1,1},     // diplay number 'P'  73
-  {0,1,0,1,0,0,0,0},     // diplay number 'r'  50
-
-  {1,0,1,1,0,1,1,0},     // diplay number 'S'  6D
-
-  {0,1,1,1,1,0,0,0},     // diplay number 't'  78
-  {0,0,1,1,1,1,1,0},     // diplay number 'U'  3E
-  {0,0,0,1,1,1,0,0},     // diplay number 'u'  1C
-  {0,1,1,0,1,1,1,0},     // diplay number 'Y'  6E
-
-  {0,0,0,0,0,0,0,0},     // don't display  'x'  00
-  {1,1,1,1,1,1,1,1},     // all   display  '8.' 00
-  {0,1,0,0,0,0,0,0},     // display symbol '-'  08
-  {0,0,0,0,1,0,0,0},     // display symbol '_'  40
+  {1,1,1,0,1,1,1,0},     // diplay number 'A'
+  {0,0,1,1,1,1,1,0},     // diplay number 'b'
+  {1,0,0,1,1,1,0,0},     // diplay number 'C'
+  {0,0,0,1,1,0,1,0},     // diplay number 'c'
+  {0,1,1,1,1,0,1,0},     // diplay number 'd'
+  {1,0,0,1,1,1,1,0},     // diplay number 'E'
+  {1,0,0,0,1,1,1,0},     // diplay number 'F'
+  {1,0,1,1,1,1,1,0},     // diplay number 'G'
+  {0,1,1,0,1,1,1,0},     // diplay number 'H'
+  {0,1,1,0,0,0,0,0},     // diplay number 'I'
+  {0,0,1,0,0,0,0,0},     // diplay number 'i'
+  {0,0,0,1,1,1,0,0},     // diplay number 'L'
+  {1,1,1,0,1,1,0,0},     // diplay number 'M'
+  {0,0,1,0,1,0,1,0},     // diplay number 'n'
+  {1,1,1,1,1,1,0,0},     // diplay number 'O'
+  {0,0,1,1,1,0,1,0},     // diplay number 'o'
+  {1,1,0,0,1,1,1,0},     // diplay number 'P'
+  {0,0,0,0,1,0,1,0},     // diplay number 'r'
+  {1,0,1,1,0,1,1,0},     // diplay number 'S'
+  {0,0,0,1,1,1,1,0},     // diplay number 't'
+  {0,1,1,1,1,1,0,0},     // diplay number 'U'
+  {0,0,1,1,1,0,0,0},     // diplay number 'u'
+  {0,1,1,1,0,1,1,0},     // diplay number 'Y'
+  
+  {0,0,0,0,0,0,0,0},     // don't display  'x'
+  {1,1,1,1,1,1,1,1},     // all   display  '8.'
+  {0,0,0,0,0,0,1,0},     // display symbol '-'
+  {0,0,0,1,0,0,0,0},     // display symbol '_'
 };
 
 static const uint8_t ByteTable[][3] = {
   {dig_off,   dig_off,    dig_off},    // 0 xxx
   //7.1 調節參數
-  {dig_H,     dig_y,      dig_off},    // 1 Hy 
-  {dig_L,     dig_S,      dig_off},    // 2 LS 
-  {dig_U,     dig_S,      dig_off},    // 3 US 
-  {dig_o,     dig_t,      dig_off},    // 4 ot 
+  {dig_H,       dig_y,    dig_off},    // 1 Hy 
+  {dig_L,       dig_S,    dig_off},    // 2 LS 
+  {dig_U,       dig_S,    dig_off},    // 3 US 
+  {dig_o,       dig_t,    dig_off},    // 4 ot 
   {dig_P,       dig_2,      dig_P},    // 5 P2P
-  {dig_o,     dig_E,      dig_off},    // 6 oE 
+  {dig_o,       dig_E,    dig_off},    // 6 oE 
   {dig_P,       dig_3,      dig_P},    // 7 P3P
-  {dig_o,     dig_3,      dig_off},    // 8 o3 
+  {dig_o,       dig_3,    dig_off},    // 8 o3 
   {dig_P,       dig_4,      dig_P},    // 9 P4P
-  {dig_o,     dig_4,      dig_off},    //10 o4 
+  {dig_o,       dig_4,    dig_off},    //10 o4 
   {dig_o,       dig_d,      dig_S},    //11 odS
-  {dig_A,     dig_C,      dig_off},    //12 AC 
+  {dig_A,       dig_C,    dig_off},    //12 AC 
   {dig_r,       dig_t,      dig_r},    //13 rtr
   {dig_C,       dig_C,      dig_t},    //14 CCt
   {dig_C,       dig_C,      dig_S},    //15 CCS
   {dig_C,       dig_o,      dig_n},    //16 Con
   {dig_C,       dig_o,      dig_F},    //17 CoF
   //7.2 顯示參數
-  {dig_C,     dig_F,      dig_off},    // 1 CF 
+  {dig_C,       dig_F,    dig_off},    // 1 CF 
   {dig_r,       dig_E,      dig_S},    // 2 rES
   {dig_L,       dig_o,      dig_d},    // 3 Lod
   {dig_r,       dig_E,      dig_d},    // 4 rEd   --TODO:影片中沒看到
@@ -319,7 +315,7 @@ static void main_M3(uint16_t num)
 static void char_M1(uint8_t _char)
 {
   uint8_t i;
-  for(i=0; i<8;i++)
+  for(i=0; i<7;i++)
   {
     switch (i)
     {
@@ -343,9 +339,6 @@ static void char_M1(uint8_t _char)
       break;
       case 6:
         Scan1temp.scan1.M1_g = _char_LookupTable[_char][i];
-      break;
-      case 7:
-        Scan1temp.scan1.M1_minus = _char_LookupTable[_char][i];
       break;
     }
   }
@@ -421,12 +414,11 @@ static void char_M3(uint8_t _char)
   }
 }
 
-bool minus_flag;
 /* Function definitions ------------------------------------------------------*/
 void NumToDisplay(int16_t temp)
 {
   //收進來的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
-  // static bool minus_flag;
+  static bool minus_flag;
   minus_flag = (temp < 0)? true:false;
   temp = (temp < 0) ? (int16_t)(-temp) : temp;
 
