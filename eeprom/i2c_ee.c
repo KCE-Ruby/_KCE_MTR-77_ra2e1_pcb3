@@ -225,6 +225,7 @@ uint8_t I2C_Test(void)
     unsigned char I2c_Buf_Write[33] = {};
     unsigned char I2c_Buf_Read[33] = {};
 
+    I2C_EE_Writederase();
     //将I2c_Buf_Write中顺序递增的数据写入EERPOM中
     printf("写入的数据\r\n");
     for ( i=0; i<DATA_Size; i++ ) { //填充缓冲

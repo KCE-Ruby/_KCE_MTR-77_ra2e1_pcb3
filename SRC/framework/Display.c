@@ -29,7 +29,6 @@ extern __IO ICON_SCAN4 Scan4temp;
 extern __IO ICON_SCAN5 Scan5temp;
 
 extern __IO bsp_io_level_t KeyPin;
-extern __IO bsp_io_level_t pin_sta[6];
 /* variables -----------------------------------------------------------------*/
 
 
@@ -152,7 +151,6 @@ static void Enable_COM(uint8_t com)
 {
   SMG_OPEN(com+1);
   Key_ReadPin();
-  pin_sta[key] = KeyPin ? false : true;
 }
 
 static void LED_WriteIOState(uint8_t StateBuff)

@@ -19,12 +19,18 @@
 /* Enum type definitions -----------------------------------------------------*/
 enum
 {
-  menuMode,
   homeMode,
+  menuMode,
   settingMode,
 };
 
 /* typedef definitions -----------------------------------------------------*/
+typedef enum {
+  DECIMAL_AT_2 = 2, // 2.34
+  DECIMAL_AT_1 = 1, // 23.4
+  DECIMAL_AT_0 = 0  // 234 (无小数点)
+} decimalIndex;
+
 typedef struct  //different timer flags
 {
   bool Flag_1ms, Flag_5ms,Flag_100ms, Flag_200ms, Flag_500ms, Flag_1s, Flag_2s;
@@ -33,14 +39,21 @@ typedef struct  //different timer flags
   uint32_t Cnt_1ms;
 }r_tmr;
 
+typedef struct
+{
+  uint8_t Max_Pv, Min_Pv;
+}s_EEPROM;
+
 typedef struct  //different timer flags
 {
-  uint8_t mode;
-  uint8_t decimalIndex;
+  uint8_t mode;                 //顯示目前的模式, 首頁/設定模式
+  uint8_t decimalIndex;         //顯示的小數點位
+  s_EEPROM eep;
+  uint8_t history_max, history_min;
 }s_Var;
 
 /* task function protocol -----------------------------------------------*/
-void boot_init(void);
+void System_Init(void);
 void WDT_Feed(void);
 fsp_err_t uart_send(uint8_t *p_data, uint32_t length);
 fsp_err_t uart_receive(uint8_t *p_data, uint32_t length);

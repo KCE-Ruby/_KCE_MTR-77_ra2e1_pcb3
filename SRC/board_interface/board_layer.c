@@ -24,7 +24,7 @@
 /* variables -----------------------------------------------------------------*/
 static bool scan_complete_flag = false;
 __IO r_tmr tmr;
-__IO bsp_io_level_t KeyPin;
+__IO bsp_io_level_t KeyPin, pin_sta[6];
 __IO s_Var System;
 static bool debug=false;
 
@@ -35,7 +35,7 @@ static void WDT_init(void);
 static fsp_err_t uart_init(void);
 
 /* Global Function definitions ------------------------------------------------------*/
-void boot_init(void)
+void System_Init(void)
 {
   WDT_init();   //16384 cycle watchdog
   TMR_init();   //1ms Timer
@@ -45,6 +45,9 @@ void boot_init(void)
     uart_init();
   ADC_init();
   I2C_EE_Init();
+
+  //預設開機為小數點一位數
+  System.decimalIndex = DECIMAL_AT_1;
 }
 
 static void TMR_init(void)
@@ -206,6 +209,7 @@ void Key_ReadPin(void)
 {
   fsp_err_t err;
   err = R_IOPORT_PinRead(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_14, &KeyPin);
+  pin_sta[key] = KeyPin ? false : true;
 }
 
 /* callback Function definitions by code generated ------------------------------------------------------*/

@@ -24,8 +24,8 @@ typedef struct  //different timer flags
 
 typedef struct
 {
-  float temperature;
-  int adValue;
+  int16_t temperature;
+  uint16_t adValue;
 } TemperatureAdTable;
 
 /* task function protocol -----------------------------------------------*/

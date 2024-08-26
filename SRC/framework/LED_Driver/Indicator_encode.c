@@ -17,21 +17,21 @@
 #define DISPLAY_MAX_DIGITS 999    //此顯示器最大上限值為三位數
 
 /* Private macro ----------------------------------------------------------*/
-static const uint8_t _7seg_LookupTable[][8] = {
+static const uint8_t _7seg_LookupTable[][7] = {
   //a,b,c,d,e,f,g,dp
-  {1,1,1,1,1,1,0,0},     // diplay number '0'
-  {0,1,1,0,0,0,0,0},     // diplay number '1'
-  {1,1,0,1,1,0,1,0},     // diplay number '2'
-  {1,1,1,1,0,0,1,0},     // diplay number '3'
-  {0,1,1,0,0,1,1,0},     // diplay number '4'
-  {1,0,1,1,0,1,1,0},     // diplay number '5'
-  {0,0,1,1,1,1,1,0},     // diplay number '6'
-  {1,1,1,0,0,1,0,0},     // diplay number '7'
-  {1,1,1,1,1,1,1,0},     // diplay number '8'
-  {1,1,1,1,0,1,1,0},     // diplay number '9'
-  {0,0,0,0,0,0,0,0},     // don't display  'x'
-  {0,0,0,0,0,1,0,0},     // display symbol '-'
-  {1,1,1,1,1,1,1,1},     // diplay all '8.'  FF
+  {1,1,1,1,1,1,0},     // diplay number '0'
+  {0,1,1,0,0,0,0},     // diplay number '1'
+  {1,1,0,1,1,0,1},     // diplay number '2'
+  {1,1,1,1,0,0,1},     // diplay number '3'
+  {0,1,1,0,0,1,1},     // diplay number '4'
+  {1,0,1,1,0,1,1},     // diplay number '5'
+  {0,0,1,1,1,1,1},     // diplay number '6'
+  {1,1,1,0,0,1,0},     // diplay number '7'
+  {1,1,1,1,1,1,1},     // diplay number '8'
+  {1,1,1,1,0,1,1},     // diplay number '9'
+  {0,0,0,0,0,0,0},     // don't display  'x'
+  {0,0,0,0,0,1,0},     // display symbol '-'
+  {1,1,1,1,1,1,1},     // diplay all '8.'  FF
 };
 
 static const uint8_t _char_LookupTable[][8] = {
@@ -236,10 +236,7 @@ static void main_M2(uint16_t num)
   //若為0, 則需判斷是否要顯示0或不顯示
   digi = (num<100 && digi==0)? (uint8_t)10:digi;
 
-  //若數字為2位數則亮燈
-  Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? 1 : 0;
-
-  for(i=0; i<8;i++)
+  for(i=0; i<7;i++)
   {
     switch (i)
     {
@@ -264,11 +261,10 @@ static void main_M2(uint16_t num)
       case 6:
         Scan2temp.scan2.M2_g = _7seg_LookupTable[digi][i];
       break;
-      case 7:
-        Scan2temp.scan2.M2_dp = _7seg_LookupTable[digi][i];
-      break;
     }
   }
+  //若數字為2位數則亮燈
+  Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? true:false;
 }
 
 static void main_M3(uint16_t num)
@@ -280,7 +276,7 @@ static void main_M3(uint16_t num)
   //若為0, 則需判斷是否要顯示0
   digi = (num<100 && digi==0)? (uint8_t)10 : digi;
 
-  for(i=0; i<8;i++)
+  for(i=0; i<7;i++)
   {
     switch (i)
     {
@@ -305,11 +301,10 @@ static void main_M3(uint16_t num)
       case 6:
         Scan3temp.scan3.M3_g = _7seg_LookupTable[digi][i];
       break;
-      case 7:
-        Scan3temp.scan3.M3_dp = _7seg_LookupTable[digi][i];
-      break;
     }
   }
+  //若數字為1位數則亮燈
+  Scan3temp.scan3.M3_dp = (System.decimalIndex == DECIMAL_AT_2)? true:false;
 }
 
 static void char_M1(uint8_t _char)
@@ -347,7 +342,7 @@ static void char_M1(uint8_t _char)
 static void char_M2(uint8_t _char)
 {
   uint8_t i;
-  for(i=0; i<8;i++)
+  for(i=0; i<7;i++)
   {
     switch (i)
     {
@@ -372,9 +367,6 @@ static void char_M2(uint8_t _char)
       case 6:
         Scan2temp.scan2.M2_g = _char_LookupTable[_char][i];
       break;
-      case 7:
-        Scan2temp.scan2.M2_dp = _char_LookupTable[_char][i];
-      break;
     }
   }
 }
@@ -382,7 +374,7 @@ static void char_M2(uint8_t _char)
 static void char_M3(uint8_t _char)
 {
   uint8_t i;
-  for(i=0; i<8;i++)
+  for(i=0; i<7;i++)
   {
     switch (i)
     {
@@ -406,9 +398,6 @@ static void char_M3(uint8_t _char)
       break;
       case 6:
         Scan3temp.scan3.M3_g = _char_LookupTable[_char][i];
-      break;
-      case 7:
-        Scan3temp.scan3.M3_dp = _char_LookupTable[_char][i];
       break;
     }
   }

@@ -56,12 +56,6 @@ enum digitis
   dig_underscore = 36,
 };
 
-typedef enum {
-  DECIMAL_AT_2 = 2, // 2.34
-  DECIMAL_AT_1 = 1, // 23.4
-  DECIMAL_AT_0 = 0  // 234 (无小数点)
-} decimalIndex;
-
 /* typedef definitions -----------------------------------------------------*/
 typedef union
 {
