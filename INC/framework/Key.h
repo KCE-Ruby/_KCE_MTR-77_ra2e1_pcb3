@@ -14,6 +14,24 @@
 
 #define Key_Read R_IOPORT_PinRead(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_14, &KeyPin)
 /* Enum type definitions -----------------------------------------------------*/
+typedef struct
+{
+  uint8_t shortPressed;
+  uint8_t LongPressed;
+  uint8_t Keep;
+  uint16_t Cnt;
+} Key_Manager;
+
+enum KEY_name
+{
+  keyup,
+  keydown,
+  keystandby,
+  key_limp,
+  key_forst,
+  keyset,
+};
+
 enum DISP_LEVEL
 {
   DSIP_Set,
@@ -94,5 +112,6 @@ enum DISP_LEVEL
 
 /* task function protocol -----------------------------------------------*/
 void Key_main(void);
+void Key_debounce(void);
 
 #endif /* INC_KEY_H_ */

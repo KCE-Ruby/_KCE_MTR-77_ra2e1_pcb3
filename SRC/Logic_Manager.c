@@ -135,5 +135,6 @@ static void loop_100us(void)
 {
   LED_Display();
   // Key_debounce();     //一定要在LED切換後做判斷
+  Key_main();   //按鍵相關邏輯
   WDT_Feed();
 }

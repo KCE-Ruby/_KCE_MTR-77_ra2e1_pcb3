@@ -28,7 +28,7 @@ static bool Flash_timer_setting(void);
 /* static Private Function definitions ------------------------------------------------------*/
 static bool Flash_timer_setting(void)
 {
-  bool flag;  //頻率為1Hz or 2Hz
+  bool flag;  //icon閃爍頻率為1Hz or 2Hz
   switch (ICON_FLASH_FREQUENCY)
   {
     case 1:
