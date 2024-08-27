@@ -27,6 +27,7 @@ extern volatile uint8_t data;
 extern ADC_TemperatureValue TempValue;
 extern __IO s_Var System;
 extern __IO bool CLOSE_LED_FLAG;
+extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyLimp, KeyDefrost, KeySet;
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t Buf_Read_24c02[eeprom_address_size] = {};
@@ -114,7 +115,7 @@ static void loop_200ms(void)
   if(tmr.Flag_200ms)
   {
     ADC_Main();
-    // Key_main();   //按鍵相關邏輯
+    Key_main();   //按鍵相關邏輯
 
     if(System.mode == menuMode)
     {
@@ -124,7 +125,12 @@ static void loop_200ms(void)
     else
     {
       //主頁顯示邏輯, 含最大最小值清除
-      NumToDisplay(TempValue.sensor1);
+      if(System.keymode.Max_flag)
+        NumToDisplay(System.history_max);
+      else if(System.keymode.Min_flag)
+        NumToDisplay(System.history_min);
+      else
+        NumToDisplay(TempValue.sensor1);
     }
 
     tmr.Flag_200ms = false;
@@ -134,7 +140,6 @@ static void loop_200ms(void)
 static void loop_100us(void)
 {
   LED_Display();
-  // Key_debounce();     //一定要在LED切換後做判斷
-  Key_main();   //按鍵相關邏輯
+  Key_debounce();     //一定要在LED切換後做判斷
   WDT_Feed();
 }

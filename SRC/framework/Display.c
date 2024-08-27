@@ -46,12 +46,13 @@ void LED_Display(void)
   bool switch_com = false;
   if(tmr.COM_Port != tmr.COM_Port_pre)
   {
-    if(tmr.COM_Port>5)
-      tmr.COM_Port=0;
+    if(tmr.COM_Port > 5)
+      tmr.COM_Port = 0;
     tmr.COM_Port_pre = tmr.COM_Port;
     switch_com = true;
   }
   COM_lightup(tmr.COM_Port, switch_com);
+  // tmr.COM_Port++;
 }
 
 /* Static Function definitions ------------------------------------------------------*/

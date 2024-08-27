@@ -18,17 +18,16 @@ typedef struct
 {
   uint8_t shortPressed;
   uint8_t LongPressed;
-  uint8_t Keep;
   uint16_t Cnt;
 } Key_Manager;
 
 enum KEY_name
 {
+  keystandby=1,
   keyup,
-  keydown,
-  keystandby,
   key_limp,
   key_forst,
+  keydown,
   keyset,
 };
 
@@ -114,4 +113,6 @@ enum DISP_LEVEL
 void Key_main(void);
 void Key_debounce(void);
 
+void Key_test(void);
+void Key_oneshot(void);
 #endif /* INC_KEY_H_ */

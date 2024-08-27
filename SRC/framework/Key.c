@@ -26,13 +26,12 @@ extern __IO s_Var System;
 extern __IO r_tmr tmr;
 
 /* variables -----------------------------------------------------------------*/
-static bsp_io_level_t key_sta_debounced[6];
-static uint8_t key_mode = 0;
 __IO uint8_t disp_level;
 __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyLimp, KeyDefrost, KeySet;
 
 /* Private function protocol -----------------------------------------------*/
 static Key_Manager key_detect(Key_Manager key);
+static key_up_mode(void);
 
 /* Function definitions ------------------------------------------------------*/
 void Key_main(void)
@@ -66,11 +65,13 @@ void Key_main(void)
   * [設定+上] = 退出Menu回Home
   */
 
+  //[上鍵功能]
+  key_up_mode();
 }
 
 void Key_debounce(void)
 {
-  switch (tmr.COM_Port)
+  switch (tmr.COM_Port+1)
   {
     case keyup:
       KeyUp = key_detect(KeyUp);
@@ -102,27 +103,113 @@ static Key_Manager key_detect(Key_Manager key)
 {
   // Key HW config, Release = High; Pressed = Low
   bool key_sta;
-  key_sta = pin_sta[tmr.COM_Port];
+  key_sta = pin_sta[tmr.COM_Port+1];
 
   //按下時, 計數器++
   if(key_sta)
     key.Cnt++;
-  // else
-  // {
-  //   //放開時, 判斷計數器被按下多久, 分成長按以及短按
-  //   if(key.Cnt>=KEY_DEBOUNCE_300)
-  //     key.LongPressed++;
+  else
+  {
+    //放開時, 判斷計數器被按下多久, 分成長按以及短按
+    if(key.Cnt>=KEY_DEBOUNCE_300)
+      key.LongPressed++;
 
-  //   if(key.Cnt>=KEY_DEBOUNCE_30)
-  //   {
-  //     key.shortPressed++;
-  //     if(key.shortPressed > KEY_cnt_max)
-  //       key.shortPressed = KEY_cnt_min;
-  //   }
-  //   key.Cnt=0;
-  // }
+    if(key.Cnt>=KEY_DEBOUNCE_30)
+    {
+      key.shortPressed++;
+      if(key.shortPressed > KEY_cnt_max)
+        key.shortPressed = KEY_cnt_min;
+    }
+    key.Cnt=0;
+  }
 
   return key;
 }
 
+static key_up_mode(void)
+{
+  /*[上鍵功能]
+  * Home狀態下, 單擊可查看最大值
+  * Menu狀態下, 單擊向下(參數表)瀏覽參數
+  * Setting狀態下, 單擊向下增加參數值
+  */
 
+ if(KeyUp.shortPressed)
+ {
+    System.keymode.Max_flag = false;
+    switch (System.mode)
+    {
+      case homeMode:
+        System.keymode.Max_flag = true;
+      break;
+
+      case menuMode:
+        //TODO:要先帶入現有的數值再++
+        System.value++;
+      break;
+
+      case settingMode:
+        System.keymode.index++;
+      break;
+
+      default:
+        System.keymode.Max_flag = false;
+        System.keymode.Min_flag = false;
+      break;
+    }
+    KeyUp.shortPressed = 0;
+ }
+}
+
+/*--------------------------- for test key funcitons ---------------------------*/
+// uint8_t keyPressed[7];
+// __IO uint16_t key_Cnt[7];
+// void Key_test(void)
+// {
+//   //輪巡按鍵測試
+//   static uint8_t t_key=1;
+//   bool key_sta;
+  
+//   if(t_key > 6) t_key = 1;
+//   SMG_CLOSE(1);
+//   SMG_CLOSE(2);
+//   SMG_CLOSE(3);
+//   SMG_CLOSE(4);
+//   SMG_CLOSE(5);
+//   SMG_CLOSE(6);
+//   SMG_OPEN(t_key);
+
+//   R_IOPORT_PinRead(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_14, &KeyPin);
+//   pin_sta[t_key] = KeyPin ? false : true;
+
+//   key_sta = pin_sta[t_key];
+//   if(key_sta)
+//     key_Cnt[t_key]++;
+//   else
+//   {
+//     //放開時, 判斷計數器是否有被按下
+//     if(key_Cnt[t_key] > 0)
+//     {
+//       keyPressed[t_key]++;
+//       key_Cnt[t_key]=0;
+//     }
+//   }
+//   t_key++;
+// }
+
+// void Key_oneshot(void)
+// {
+//   //單擊測試, KeyPin->HIGH為放開, LOW為按下
+//   // 1->右下(keystandby); 2->右上(keyup); 3->左上(key_limp)
+//   // 4->左中(key_forst); 5->右中(keydown); 6->左下(keyset)
+//   uint8_t t_key=6;
+//   fsp_err_t err;
+//   SMG_OPEN(t_key);
+//   SMG_CLOSE(1);
+//   SMG_CLOSE(2);
+//   SMG_CLOSE(3);
+//   SMG_CLOSE(4);
+//   SMG_CLOSE(5);
+//   err = R_IOPORT_PinRead(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_14, &KeyPin);
+//   pin_sta[t_key] = KeyPin ? false : true;
+// }

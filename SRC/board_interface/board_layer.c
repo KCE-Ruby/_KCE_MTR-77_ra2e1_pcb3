@@ -24,8 +24,7 @@
 /* variables -----------------------------------------------------------------*/
 static bool scan_complete_flag = false;
 __IO r_tmr tmr;
-__IO bsp_io_level_t KeyPin, pin_sta[6];
-__IO uint16_t key_cnt[6];
+__IO bsp_io_level_t KeyPin, pin_sta[7];
 __IO s_Var System;
 static bool debug=false;
 
@@ -210,7 +209,7 @@ void Key_ReadPin(void)
 {
   fsp_err_t err;
   err = R_IOPORT_PinRead(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_14, &KeyPin);
-  pin_sta[key] = KeyPin ? false : true;
+  pin_sta[tmr.COM_Port+1] = KeyPin ? false : true;
 }
 
 /* callback Function definitions by code generated ------------------------------------------------------*/

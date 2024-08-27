@@ -44,12 +44,20 @@ typedef struct
   uint8_t Max_Pv, Min_Pv;
 }s_EEPROM;
 
+typedef struct
+{
+  bool Max_flag, Min_flag;
+  uint16_t index;
+}f_menu;
+
 typedef struct  //different timer flags
 {
   uint8_t mode;                 //顯示目前的模式, 首頁/設定模式
   uint8_t decimalIndex;         //顯示的小數點位
   s_EEPROM eep;
   uint8_t history_max, history_min;
+  uint16_t value;               //各參數內的數值
+  f_menu keymode;                  //按鍵切換旗標用
 }s_Var;
 
 /* task function protocol -----------------------------------------------*/
