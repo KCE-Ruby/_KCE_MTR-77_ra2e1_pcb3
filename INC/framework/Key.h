@@ -25,7 +25,7 @@ enum KEY_name
 {
   keystandby=1,
   keyup,
-  key_limp,
+  key_bulb,
   key_forst,
   keydown,
   keyset,

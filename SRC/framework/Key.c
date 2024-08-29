@@ -27,46 +27,37 @@ extern __IO r_tmr tmr;
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t disp_level;
-__IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyLimp, KeyDefrost, KeySet;
+__IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
 
 /* Private function protocol -----------------------------------------------*/
 static Key_Manager key_detect(Key_Manager key);
-static key_up_mode(void);
+static key_up_function(void);
+static key_down_function(void);
+static key_standby_function(void);
+static key_bulb_function(void);
+static key_defrost_function(void);
+static key_set_function(void);
 
 /* Function definitions ------------------------------------------------------*/
 void Key_main(void)
 {
-  /*
-  * [上鍵功能]
-  * Home狀態下, 單擊可查看最大值
-  * Menu狀態下, 單擊向下(參數表)瀏覽參數或增加參數值
-  * 
-  * [下鍵功能]
-  * Home狀態下, 單擊可查看最小值
-  * Menu狀態下, 單擊向上(參數表)瀏覽參數或減少參數值
-  * 
-  * [待機鍵功能]
-  * 在參數 onF=oFF時, 單擊進入待機功能;
-  * 在參數 onF=ES時, 單擊進入節能運行功能;
-  * 
-  * [燈開關鍵功能]
-  * 此鍵不可用(無作用)
-  * 
-  * [融霜鍵功能]
-  * Home狀態下, 單擊啟動一次手動融霜
-  * Menu狀態下, 無作用
-  * 
-  * [設定鍵功能]
-  * 
-  * 
-  * [組合鍵功能]
-  * [上+下] = 鎖定or解鎖鍵盤
-  * [設定+下] = 進入Menu模式
-  * [設定+上] = 退出Menu回Home
-  */
-
   //[上鍵功能]
-  key_up_mode();
+  key_up_function();
+
+  //[下鍵功能]
+  key_down_function();
+
+  //[待機鍵功能]
+  key_standby_function();
+
+  //[燈開關鍵功能]
+  key_bulb_function();
+
+  //[融霜鍵功能]
+  key_defrost_function();
+
+  //[設定鍵功能]
+  key_set_function();
 }
 
 void Key_debounce(void)
@@ -85,8 +76,8 @@ void Key_debounce(void)
       KeyStandby = key_detect(KeyStandby);
     break;
 
-    case key_limp:
-      KeyLimp = key_detect(KeyLimp);
+    case key_bulb:
+      KeyBulb = key_detect(KeyBulb);
     break;
 
     case key_forst:
@@ -126,12 +117,14 @@ static Key_Manager key_detect(Key_Manager key)
   return key;
 }
 
-static key_up_mode(void)
+static key_up_function(void)
 {
   /*[上鍵功能]
   * Home狀態下, 單擊可查看最大值
   * Menu狀態下, 單擊向下(參數表)瀏覽參數
-  * Setting狀態下, 單擊向下增加參數值
+  * Setting狀態下, 單擊增加參數值
+  * [組合鍵功能]
+  * [上+下] = 鎖定or解鎖鍵盤
   */
 
  if(KeyUp.shortPressed)
@@ -158,6 +151,100 @@ static key_up_mode(void)
       break;
     }
     KeyUp.shortPressed = 0;
+ }
+}
+
+static key_down_function(void)
+{
+  /*[下鍵功能]
+  * Home狀態下, 單擊可查看最小值
+  * Menu狀態下, 單擊向上(參數表)瀏覽參數
+  * Setting狀態下, 單擊減少參數值
+  */
+
+ if(KeyDown.shortPressed)
+ {
+    System.keymode.Min_flag = false;
+    switch (System.mode)
+    {
+      case homeMode:
+        System.keymode.Min_flag = true;
+      break;
+
+      case menuMode:
+        //TODO:要先帶入現有的數值再++
+        System.value++;
+      break;
+
+      case settingMode:
+        System.keymode.index--;
+      break;
+
+      default:
+        System.keymode.Max_flag = false;
+        System.keymode.Min_flag = false;
+      break;
+    }
+    KeyDown.shortPressed = 0;
+ }
+}
+
+static key_standby_function(void)
+{
+  /*[待機鍵功能]
+  * 在參數 onF=oFF時, 單擊進入待機功能;
+  * 在參數 onF=ES時, 單擊進入節能運行功能;
+  */
+
+ if(KeyStandby.shortPressed)
+ {
+    //TODO: 按下按鍵後的功能
+    KeyStandby.shortPressed = 0;
+ }
+}
+
+static key_bulb_function(void)
+{
+  /*[燈開關鍵功能]
+  * 此鍵不可用(無作用)
+  */
+
+ if(KeyBulb.shortPressed)
+ {
+    //TODO: 按下按鍵後的功能
+    KeyBulb.shortPressed = 0;
+ }
+}
+
+static key_defrost_function(void)
+{
+  /*[融霜鍵功能]
+  * Home狀態下, 單擊啟動一次手動融霜
+  * Menu狀態下, 無作用
+  */
+
+ if(KeyDefrost.shortPressed)
+ {
+    //TODO: 按下按鍵後的功能
+    KeyDefrost.shortPressed = 0;
+ }
+}
+
+static key_set_function(void)
+{
+  /*[設定鍵功能]
+  * Home狀態下, 單擊顯示目標設定點(Pv)
+  * Menu狀態下, 無作用
+  * Setting狀態下, 單擊選擇參數或確認操作
+  * [組合鍵功能]
+  * [設定+下] = 進入Menu模式
+  * [設定+上] = 退出Menu回Home
+  */
+
+ if(KeySet.shortPressed)
+ {
+    //TODO: 按下按鍵後的功能
+    KeySet.shortPressed = 0;
  }
 }
 

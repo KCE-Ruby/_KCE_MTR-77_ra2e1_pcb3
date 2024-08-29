@@ -27,7 +27,7 @@ extern volatile uint8_t data;
 extern ADC_TemperatureValue TempValue;
 extern __IO s_Var System;
 extern __IO bool CLOSE_LED_FLAG;
-extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyLimp, KeyDefrost, KeySet;
+extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t Buf_Read_24c02[eeprom_address_size] = {};
