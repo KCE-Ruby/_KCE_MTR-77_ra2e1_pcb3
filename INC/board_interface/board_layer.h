@@ -57,7 +57,21 @@ typedef struct  //different timer flags
   s_EEPROM eep;
   uint8_t history_max, history_min;
   uint16_t value;               //各參數內的數值
-  f_menu keymode;                  //按鍵切換旗標用
+  f_menu keymode;               //按鍵切換旗標用
+  
+  //參數都用10倍放大存取
+  uint16_t set, hy, ls, us, ot, oe, o3, o4;
+  bool p2p, p3p, p4p;
+  uint8_t ods, ac, rtr, cct;
+  uint16_t ccs;
+  uint8_t con, cof, cf, res, lod, red;
+  uint16_t dly, dtr, dfp;
+  uint8_t tdf, dte, idf, mdf, dsd, dfd, dad, fdt, dpo, daf, fnc;
+  uint8_t fnd, fct, fst, fon, fof, fap, alc, alu, all, afh, ald;
+  uint16_t dao;
+  uint8_t ap2, al2, au2, ah2, Ad2, da2, bll, ac2, i1p, i1f, did;
+  uint8_t nps, odc, rrd, hes, adr, pbc, onf, dp1, dp2, dp3, dp4, rse;
+  uint16_t rel, ptb;
 }s_Var;
 
 /* task function protocol -----------------------------------------------*/

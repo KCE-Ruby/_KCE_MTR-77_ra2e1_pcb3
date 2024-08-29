@@ -16,6 +16,7 @@
 enum UserDefineByteTables
 {
   xxx,    // 0: all digits off
+  Set,      //設定點, 範圍LS~US, 非設定層
   //7.1 調節參數
     Hy,     //當量測溫度>=SET+Hy時, 壓縮機運行, 當溫度小於SET時, 壓縮機停止
     LS,     //設定點最小允許值, 範圍:攝氏-50 ~ SET度
