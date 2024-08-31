@@ -136,5 +136,10 @@ typedef struct
   uint8_t Mode;
 } ByteSettingTable;
 
+/* task function protocol -----------------------------------------------*/
+void get_Pv(void);
+void get_HistoryMax(void);
+void get_HistoryMin(void);
+void clear_History_value(void);
 
 #endif /* INC_DATAPOOL_H_ */

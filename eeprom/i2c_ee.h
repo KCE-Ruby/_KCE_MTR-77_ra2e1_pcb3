@@ -11,6 +11,33 @@
 #define EEPROM_PAGESIZE           8
 #define I2C_Register_SR1                ((uint8_t)0x14)
 
+/* Enum type definitions -----------------------------------------------------*/
+enum eeprom_index
+{
+  eep_max_low,
+  eep_max_high,
+  eep_min_low,
+  eep_min_high,
+
+  eep_end,
+};
+
+enum eeprom_datasize
+{
+  eep_size_max = 2,
+  eep_size_min = 2,
+
+  eep_size_end,
+};
+
+/* typedef definitions -----------------------------------------------------*/
+typedef struct
+{
+  
+
+};
+
+/* task function protocol -----------------------------------------------*/
 void i2c_callback (i2c_master_callback_args_t * p_args);
 void I2C_EE_Init();
 void I2C_EE_ByteWrite(unsigned char address, unsigned char byte);

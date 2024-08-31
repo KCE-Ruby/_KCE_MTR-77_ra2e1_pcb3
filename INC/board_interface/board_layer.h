@@ -52,10 +52,10 @@ typedef struct
 
 typedef struct  //different timer flags
 {
+  int16_t sv, pv, history_max, history_min; //3位數值, 含負數
   uint8_t mode;                 //顯示目前的模式, 首頁/設定模式
   uint8_t decimalIndex;         //顯示的小數點位
   s_EEPROM eep;
-  uint8_t history_max, history_min;
   uint16_t value;               //各參數內的數值
   f_menu keymode;               //按鍵切換旗標用
   

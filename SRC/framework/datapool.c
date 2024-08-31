@@ -12,13 +12,19 @@
 
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
-#include "INC/framework/datapool.h"
 #include "INC/framework/LED_Driver/app_menu_ctrl.h"
+#include "INC/framework/ADC.h"
+#include "INC/framework/datapool.h"
+#include <math.h>
+
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var System;
+extern ADC_TemperatureValue TempValue;
+extern __IO uint8_t Buf_Read_24c02[eep_end];
 
 /* variables -----------------------------------------------------------------*/
+static int8_t I2c_Buf_Write[eep_end] = {};
 static ByteSettingTable bytetable[End] = 
 {
   //參數字元,  上限值,        下限值,        預設值,   權限層
@@ -101,3 +107,48 @@ static ByteSettingTable bytetable[End] =
 /* Private function protocol -----------------------------------------------*/
 
 /* Function definitions ------------------------------------------------------*/
+void get_Pv(void)
+{
+  System.pv = TempValue.sensor1;
+}
+
+void get_HistoryMax(void)
+{
+  uint8_t addr = eep_max_low;
+  uint8_t length = eep_size_max;
+
+  if(System.pv > System.history_max)
+  {
+    System.history_max = System.pv;
+    I2c_Buf_Write[addr] = System.history_max & 0xFF;
+    I2c_Buf_Write[addr+1] = System.history_max >> 8;
+    // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
+  }
+}
+
+void get_HistoryMin(void)
+{
+  uint8_t addr = eep_min_low;
+  uint8_t length = eep_size_min;
+
+  if(System.pv < System.history_min)
+  {
+    System.history_min = System.pv;
+    I2c_Buf_Write[addr] = System.history_min & 0xFF;
+    I2c_Buf_Write[addr+1] = System.history_min >> 8;
+    // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
+  }
+}
+
+void clear_History_value(void)
+{
+  System.history_max = 0;
+  System.history_min = 0;
+}
+
+
+
+
+
+
+

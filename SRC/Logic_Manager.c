@@ -12,31 +12,122 @@
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/Display.h"
-#include "INC/framework/ADC.h"
+// #include "INC/framework/ADC.h"
 #include "INC/framework/Key.h"
+#include "eeprom/i2c_ee.h"
 #include "INC/Logic_Manager.h"
 
 /* Private defines ----------------------------------------------------------*/
 #define BOOTonTIME               (20000)      //2s = 100us*10 = 1ms*2000 = 20000次
 #define BOOToffTIME              (25000)      //2s = 100us*10 = 1ms*2000 = 20000次
-#define eeprom_address_size        (100)      //100個位址, 每個位址可放uint8_t size
 
 /* extern variables -----------------------------------------------------------------*/
 extern r_tmr tmr;
 extern volatile uint8_t data;
-extern ADC_TemperatureValue TempValue;
 extern __IO s_Var System;
 extern __IO bool CLOSE_LED_FLAG;
 extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
 
 /* variables -----------------------------------------------------------------*/
-__IO uint8_t Buf_Read_24c02[eeprom_address_size] = {};
+__IO uint8_t I2c_Buf_Read[eep_end] = {};
+
+
+/* Private Logic API funcitons protocol ------------------------------------*/
+static void Update_History_value(void);
 
 /* Private function protocol -----------------------------------------------*/
 static void read_all_eeprom_data(void);
 static void boot_control(void);
 static void loop_200ms(void);
 static void loop_100us(void);
+
+// uint16_t bootled_cnt;
+
+/* static Logic API funcitons ------------------------------------------------------*/
+static void Update_History_value(void)
+{
+  static bool clear_limit_flag=true;
+  //若要清除最大最小值, 需要按下SET鍵3秒以上, 顯示rst再按下SET一次即可
+  if(clear_limit_flag)
+  {
+    clear_History_value();
+    clear_limit_flag = false;
+  }
+
+  //取得目前Pv值的歷史最大最小值
+  get_HistoryMax();
+  get_HistoryMin();
+}
+
+/* Static Function definitions ------------------------------------------------------*/
+static void boot_control(void)
+{
+  static bool bootled_En=true;
+  static uint16_t bootled_cnt;
+
+  if(bootled_En)
+  {
+    if(bootled_cnt < BOOTonTIME)
+      ALL_LED_ON();
+    else if(bootled_cnt > BOOToffTIME)
+    {
+      // read_all_eeprom_data();
+      CLOSE_LED_FLAG = false;
+      bootled_En = false;
+    }
+    else
+      ALL_LED_OFF();
+    bootled_cnt++;
+  }
+}
+
+static void read_all_eeprom_data(void)
+{
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  I2C_EE_BufferRead(I2c_Buf_Read, 0x00 , eep_end);
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  
+  // 讀出eeprom後, 寫入mcu的對應值
+  System.history_max = I2c_Buf_Read[eep_max_low]+I2c_Buf_Read[eep_max_high]<<8;
+  System.history_min = I2c_Buf_Read[eep_min_low]+I2c_Buf_Read[eep_min_high]<<8;
+}
+
+static void loop_200ms(void)
+{
+  if(tmr.Flag_200ms)
+  {
+    ADC_Main();
+    Key_main();   //按鍵相關邏輯
+    Update_History_value();
+    get_Pv();
+
+    if(System.mode == menuMode)
+    {
+      //menu顯示邏輯, 含menu設定的數值轉換
+      CharToDisplay(LS);
+    }
+    else
+    {
+      //主頁顯示邏輯, 含最大最小值清除
+      if(System.keymode.Max_flag)
+        NumToDisplay(System.history_max);
+      else if(System.keymode.Min_flag)
+        NumToDisplay(System.history_min);
+      else
+        NumToDisplay(System.pv);
+    }
+
+    tmr.Flag_200ms = false;
+  }
+}
+
+static void loop_100us(void)
+{
+  LED_Display();
+  Key_debounce();     //一定要在LED切換後做判斷
+  WDT_Feed();
+}
+
 
 /* Function definitions ------------------------------------------------------*/
 void Task_Main(void)
@@ -78,68 +169,4 @@ void Task_Main(void)
     loop_100us();
     R_BSP_SoftwareDelay(100,BSP_DELAY_UNITS_MICROSECONDS);
   }
-}
-
-uint16_t bootled_cnt;
-/* Static Function definitions ------------------------------------------------------*/
-static void boot_control(void)
-{
-  static bool bootled_En=true;
-  // static uint16_t bootled_cnt;
-
-  if(bootled_En)
-  {
-    if(bootled_cnt < BOOTonTIME)
-      ALL_LED_ON();
-    else if(bootled_cnt > BOOToffTIME)
-    {
-      read_all_eeprom_data();
-      CLOSE_LED_FLAG = false;
-      bootled_En = false;
-    }
-    else
-      ALL_LED_OFF();
-    bootled_cnt++;
-  }
-}
-
-static void read_all_eeprom_data(void)
-{
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  I2C_EE_BufferRead(Buf_Read_24c02, 0x00 , eeprom_address_size);
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-}
-
-static void loop_200ms(void)
-{
-  if(tmr.Flag_200ms)
-  {
-    ADC_Main();
-    Key_main();   //按鍵相關邏輯
-
-    if(System.mode == menuMode)
-    {
-      //menu顯示邏輯, 含menu設定的數值轉換
-      CharToDisplay(LS);
-    }
-    else
-    {
-      //主頁顯示邏輯, 含最大最小值清除
-      if(System.keymode.Max_flag)
-        NumToDisplay(System.history_max);
-      else if(System.keymode.Min_flag)
-        NumToDisplay(System.history_min);
-      else
-        NumToDisplay(TempValue.sensor1);
-    }
-
-    tmr.Flag_200ms = false;
-  }
-}
-
-static void loop_100us(void)
-{
-  LED_Display();
-  Key_debounce();     //一定要在LED切換後做判斷
-  WDT_Feed();
 }

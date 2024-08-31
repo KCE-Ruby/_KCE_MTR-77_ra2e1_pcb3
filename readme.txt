@@ -8,6 +8,7 @@
 N. 新增RS485通訊及modbus協議功能				--未完成_v00.0
 N. 新增OUT輸出選項功能							--未完成_v00.0
 
+11. Hardware breakpoint set at address 0x1d48	--程式碼無法執行debug
 10. 新增參數值table						--已完成_v00.0A
 9. 新增Key按鍵控制功能						--已完成_v00.09
 8. 新增AD值轉換成NTC溫度功能				--已完成_v00.08
