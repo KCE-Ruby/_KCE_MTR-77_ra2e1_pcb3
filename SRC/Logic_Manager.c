@@ -12,7 +12,7 @@
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/Display.h"
-// #include "INC/framework/ADC.h"
+#include "INC/framework/ADC.h"
 #include "INC/framework/Key.h"
 #include "eeprom/i2c_ee.h"
 #include "INC/Logic_Manager.h"
@@ -20,6 +20,7 @@
 /* Private defines ----------------------------------------------------------*/
 #define BOOTonTIME               (20000)      //2s = 100us*10 = 1ms*2000 = 20000次
 #define BOOToffTIME              (25000)      //2s = 100us*10 = 1ms*2000 = 20000次
+#define ERROR_AD                 (-999)
 
 /* extern variables -----------------------------------------------------------------*/
 extern r_tmr tmr;
@@ -46,7 +47,8 @@ static void loop_100us(void);
 /* static Logic API funcitons ------------------------------------------------------*/
 static void Update_History_value(void)
 {
-  static bool clear_limit_flag=true;
+  static bool clear_limit_flag=true;    //TODO: 清除極值的API還沒做
+
   //若要清除最大最小值, 需要按下SET鍵3秒以上, 顯示rst再按下SET一次即可
   if(clear_limit_flag)
   {
@@ -98,7 +100,10 @@ static void loop_200ms(void)
   {
     ADC_Main();
     Key_main();   //按鍵相關邏輯
-    Update_History_value();
+
+    if(System.pv != ERROR_AD)
+      Update_History_value();
+
     get_Pv();
 
     if(System.mode == menuMode)
@@ -136,7 +141,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x0A;
+  const uint8_t test    = 0x0B;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

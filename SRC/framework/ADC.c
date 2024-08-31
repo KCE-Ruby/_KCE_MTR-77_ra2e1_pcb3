@@ -16,7 +16,7 @@
 
 /* Private defines ----------------------------------------------------------*/
 #define FILTER_SIZE                 (9)
-#define TABLE_SIZE                  (12)
+#define TABLE_SIZE                  (13)
 #define ERROR_AD                    (-999)
 
 /*---------------------- extern variables ----------------------*/
@@ -27,6 +27,7 @@ uint16_t AD[5];
 ADC_TemperatureValue TempValue;
 static TemperatureAdTable table[TABLE_SIZE] = 
 {
+  { -20, 3864 },
   { -10, 3658 },
   { 0, 3452 },
   { 10, 3189 },
