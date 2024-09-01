@@ -207,13 +207,13 @@ void ICON_Enhanced_Cooling_OFF(void)
 void ICON_Energy_Saving_ON(void)
 {
   //TODO: 節能運行icon, 動作啟動, 長亮
-
+  Scan4temp.scan4.energy_saving = true;
 }
 
 void ICON_Energy_Saving_OFF(void)
 {
   //TODO: 節能運行icon, 動作關閉, 熄滅
-
+  Scan4temp.scan4.energy_saving = false;
 }
 
 
