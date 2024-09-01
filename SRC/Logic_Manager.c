@@ -70,7 +70,8 @@ static void Update_Icon(void)
   // ICON_Defrost_Flashing();
   // ICON_Alarm_ON();
   // ICON_Enhanced_Cooling_ON();
-  ICON_Energy_Saving_ON();
+  // ICON_Energy_Saving_ON();
+  ICON_Bulb_ON();
 }
 
 /* Static Function definitions ------------------------------------------------------*/
@@ -156,7 +157,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x11;
+  const uint8_t test    = 0x12;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
