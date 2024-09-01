@@ -14,6 +14,14 @@
 /* Enum type definitions -----------------------------------------------------*/
 enum eeprom_index
 {
+  //每個參數都有2個byte的儲存位置, 最高位元0x8000用來做正負值得判斷, true則代表負數, false代表正數
+  eep_Set_low,
+  eep_Set_high,
+  eep_Hy_low,
+  eep_Hy_high,
+
+  //以下參數因為沒有預設值, 所以不會被reset, 只能手動清除
+  //若要新增記得要在datapool.c的bytetable陣列內新增數值
   eep_max_low,
   eep_max_high,
   eep_min_low,

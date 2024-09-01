@@ -25,8 +25,9 @@ extern __IO uint8_t Buf_Read_24c02[eep_end];
 
 /* variables -----------------------------------------------------------------*/
 static int8_t I2c_Buf_Write[eep_end] = {};
-static ByteSettingTable bytetable[End] = 
+__IO ByteSettingTable bytetable[End] = 
 {
+  {xxx,             0,             0,            0,     NaN}, //對齊參數用的而已
   //參數字元,  上限值,        下限值,        預設值,   權限層
   {Set,           -50,           110,         -5.0,     NaN},
   { Hy,           0.1,          25.5,          2.0,     Pr1},

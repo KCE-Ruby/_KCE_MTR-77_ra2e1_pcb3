@@ -14,6 +14,7 @@
 #include "INC/framework/Display.h"
 #include "INC/framework/ADC.h"
 #include "INC/framework/Key.h"
+#include "INC/framework/datapool.h"
 #include "eeprom/i2c_ee.h"
 #include "INC/Logic_Manager.h"
 
@@ -28,6 +29,7 @@ extern volatile uint8_t data;
 extern __IO s_Var System;
 extern __IO bool CLOSE_LED_FLAG;
 extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
+extern __IO ByteSettingTable bytetable[End];
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
@@ -37,6 +39,7 @@ __IO uint8_t I2c_Buf_Read[eep_end] = {};
 static void update_history_value(void);
 static void update_icon(void);
 static void check_set_value(void);
+static void reset_eeprom(void);
 
 /* Private function protocol -----------------------------------------------*/
 static void read_all_eeprom_data(void);
@@ -97,6 +100,47 @@ static void check_set_value(void)
   }
 }
 
+int8_t I2c_Buf_Reset[End] = {};
+uint16_t temp_value = 0;
+static void reset_eeprom(void)
+{
+  uint8_t start_addr = 0x00;
+  uint8_t length = End;
+  // int8_t I2c_Buf_Reset[End] = {};
+  uint8_t dataindex = Set;
+  // uint16_t temp_value = 0;
+  
+  while(dataindex < End)
+  {
+    // if(bytetable[dataindex].DefaultValue < 0)
+    // {
+    //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*-10);
+    //   temp_value |= 0x8000;   //舉起eeprom內的負數旗標
+    // }
+    // else
+    // {
+    //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*10);
+    //   temp_value &= 0x7FFF;   //清除eeprom內的負數旗標
+    // }
+
+    switch (dataindex)
+    {
+      case Set:
+        temp_value = 0x8032;
+        I2c_Buf_Reset[eep_Set_low] = temp_value & 0xFF;
+        I2c_Buf_Reset[eep_Set_high] = temp_value >> 8;
+        dataindex++;
+        break;
+      
+      default:
+        dataindex = End;
+        break;
+    }
+  }
+
+  I2C_EE_BufferWrite( I2c_Buf_Reset, start_addr , length);
+}
+
 /* Static Function definitions ------------------------------------------------------*/
 static void boot_control(void)
 {
@@ -109,7 +153,8 @@ static void boot_control(void)
       ALL_LED_ON();
     else if(bootled_cnt > BOOToffTIME)
     {
-      // read_all_eeprom_data();
+      // reset_eeprom();  //平常不開, 用來重置參數的API
+      read_all_eeprom_data();
       CLOSE_LED_FLAG = false;
       bootled_En = false;
     }
@@ -126,8 +171,21 @@ static void read_all_eeprom_data(void)
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   
   // 讀出eeprom後, 寫入mcu的對應值
-  System.history_max = I2c_Buf_Read[eep_max_low]+I2c_Buf_Read[eep_max_high]<<8;
-  System.history_min = I2c_Buf_Read[eep_min_low]+I2c_Buf_Read[eep_min_high]<<8;
+  if((I2c_Buf_Read[eep_Set_high]&0x80) != 0)
+  {
+    I2c_Buf_Read[eep_Set_high] &= 0x7F; //移除負數旗標
+    System.set = I2c_Buf_Read[eep_Set_low]+(I2c_Buf_Read[eep_Set_high]<<8);
+    System.set *= (-1);
+  }
+  else
+  {
+    System.set = I2c_Buf_Read[eep_Set_low]+(I2c_Buf_Read[eep_Set_high]<<8);
+  }
+
+
+  System.hy = I2c_Buf_Read[eep_Hy_low]+(I2c_Buf_Read[eep_Hy_high]<<8);
+  System.history_max = I2c_Buf_Read[eep_max_low]+(I2c_Buf_Read[eep_max_high]<<8);
+  System.history_min = I2c_Buf_Read[eep_min_low]+(I2c_Buf_Read[eep_min_high]<<8);
 }
 
 static void loop_200ms(void)
@@ -142,8 +200,10 @@ static void loop_200ms(void)
 
     get_Pv();
 
+    //主要邏輯控制區
     if(System.mode == checkgMode)
     {
+      //查看設定值專區
       check_set_value();
     }
     else if(System.mode == menuMode)
@@ -184,7 +244,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x14;
+  const uint8_t test    = 0x16;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
