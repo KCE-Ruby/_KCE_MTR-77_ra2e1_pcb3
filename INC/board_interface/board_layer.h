@@ -20,9 +20,10 @@
 enum
 {
   homeMode,
-  menuMode,
-  settingMode,
+  level1Mode,
+  level2Mode,
   checkgMode,
+  settingMode,
 };
 
 /* typedef definitions -----------------------------------------------------*/

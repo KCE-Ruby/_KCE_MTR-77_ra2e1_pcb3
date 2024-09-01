@@ -201,28 +201,44 @@ static void loop_200ms(void)
     get_Pv();
 
     //主要邏輯控制區
-    if(System.mode == checkgMode)
+    switch (System.mode)
     {
-      //查看設定值專區
-      check_set_value();
-    }
-    else if(System.mode == menuMode)
-    {
-      //menu顯示邏輯, 含menu設定的數值轉換
-      CharToDisplay(LS);
-    }
-    else
-    {
-      //主頁顯示邏輯, 含最大最小值清除
-      if(System.keymode.Max_flag)
-        NumToDisplay(System.history_max);
-      else if(System.keymode.Min_flag)
-        NumToDisplay(System.history_min);
-      else
-        NumToDisplay(System.pv);
+      case homeMode:
+        //主頁顯示邏輯, 含最大最小值清除
+        if(System.keymode.Max_flag)
+          NumToDisplay(System.history_max);
+        else if(System.keymode.Min_flag)
+          NumToDisplay(System.history_min);
+        else
+          NumToDisplay(System.pv);
 
-      //更新顯示icon
-      update_icon();
+        //更新顯示icon
+        update_icon();
+      break;
+
+      case level1Mode:
+        //TODO: 第一層
+        CharToDisplay(LS);
+      break;
+
+      case level2Mode:
+        //TODO: 第二層
+        CharToDisplay(LS);
+      break;
+
+      case settingMode:
+        NumToDisplay(System.set);
+        ICON_degrees_Flashing();
+      break;
+
+      case checkgMode:
+        //查看設定值專區
+        check_set_value();
+      break;
+
+      default:
+        //模式錯誤: 理論上可以顯示ERROR
+      break;
     }
 
     tmr.Flag_200ms = false;
@@ -244,7 +260,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x16;
+  const uint8_t test    = 0x17;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

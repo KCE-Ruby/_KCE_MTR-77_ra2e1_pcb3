@@ -127,7 +127,7 @@ static key_up_function(void)
   * [上+下] = 鎖定or解鎖鍵盤
   */
 
- if(KeyUp.shortPressed)
+if(KeyUp.shortPressed != 0)
  {
     System.keymode.Max_flag = false;
     switch (System.mode)
@@ -136,13 +136,20 @@ static key_up_function(void)
         System.keymode.Max_flag = true;
       break;
 
-      case menuMode:
+      case level1Mode:
+        //TODO:要先帶入現有的數值再++
+        System.value++;
+      break;
+
+      case level2Mode:
         //TODO:要先帶入現有的數值再++
         System.value++;
       break;
 
       case settingMode:
-        System.keymode.index++;
+        //TODO: get設定值的最大值API, 不要extern 整個table
+        System.set++;
+        if(System.set > 1100) System.set = 1100;
       break;
 
       default:
@@ -171,13 +178,15 @@ static key_down_function(void)
         System.keymode.Min_flag = true;
       break;
 
-      case menuMode:
+      case level1Mode:
         //TODO:要先帶入現有的數值再++
         System.value++;
       break;
 
       case settingMode:
-        System.keymode.index--;
+        //TODO: get設定值的最小值API, 不要extern 整個table
+        System.set--;
+        if(System.set < -500) System.set = -500;
       break;
 
       default:
@@ -233,16 +242,45 @@ static key_defrost_function(void)
 static key_set_function(void)
 {
   /*<設定鍵功能>
-  * Home狀態下, 單擊顯示目標設定點(Pv)切換成checkgMode, 5s後或者再次單擊跳回Home
-  * Menu狀態下, 無作用
-  * Setting狀態下, 單擊選擇參數或確認操作
+  * homeMode狀態下, 單擊顯示目標設定點(Pv)切換成checkgMode
+  * level1&2Mode狀態下, 單擊選擇參數或確認操作
+  * checkgMode, 5s後或者再次單擊跳回homeMode
+  * settingMode狀態下, 修改參數值
   * 
   * <組合鍵功能>
   * [設定+下] = 進入Menu模式
   * [設定+上] = 退出Menu回Home
   */
 
- if(KeySet.shortPressed)
+ //按鍵當次判斷只允許一種事件發生, 長按優先權大於短按
+ if(KeySet.LongPressed != 0)
+ {
+    switch (System.mode)
+    {
+      case homeMode:
+        System.mode = settingMode;
+      break;
+
+      case level1Mode:
+      
+      break;
+
+      case level2Mode:
+      
+      break;
+
+      case settingMode:
+        System.mode = homeMode; //若再次長按則跳回home模式
+      break;
+
+      default:
+      
+      break;
+    }
+  KeySet.LongPressed = 0;
+  KeySet.shortPressed = 0;
+ }
+ else if(KeySet.shortPressed != 0)
  {
     //TODO: 按下按鍵後的功能
     switch (System.mode)
@@ -252,10 +290,14 @@ static key_set_function(void)
         System.keymode.SET_value_flag = true;
       break;
 
-      case menuMode:
+      case level1Mode:
+      break;
+
+      case level2Mode:
       break;
 
       case settingMode:
+        System.mode = homeMode; //短按一次後回到home模式
       break;
 
       case checkgMode:
