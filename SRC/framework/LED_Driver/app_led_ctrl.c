@@ -67,12 +67,13 @@ void ALL_LED_OFF(void)
 void ICON_Refrigerate_ON(void)
 {
   //TODO: 製冷icon, 動作啟動, 長亮
-
+  Scan4temp.scan4.refrigerate = true;
 }
 
 void ICON_Refrigerate_OFF(void)
 {
   //TODO: 製冷icon, 動作關閉, 熄滅
+  Scan4temp.scan4.refrigerate = false;
 }
 
 void ICON_Refrigerate_Flashing(void)

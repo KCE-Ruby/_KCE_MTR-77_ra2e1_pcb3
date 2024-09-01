@@ -65,7 +65,8 @@ static void Update_History_value(void)
 static void Update_Icon(void)
 {
   // ICON_Fan_Flashing();
-  ICON_degrees_Flashing();
+  // ICON_degrees_Flashing();
+  ICON_Refrigerate_Flashing();
 }
 
 /* Static Function definitions ------------------------------------------------------*/
@@ -151,7 +152,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x0D;
+  const uint8_t test    = 0x0E;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
