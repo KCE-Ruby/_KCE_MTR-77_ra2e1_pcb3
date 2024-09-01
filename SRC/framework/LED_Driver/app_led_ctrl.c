@@ -181,12 +181,13 @@ void ICON_degrees_Flashing(void)
 void ICON_Alarm_ON(void)
 {
   //TODO: 警報icon, 動作啟動, 長亮
-
+  Scan4temp.scan4.alarm = true;
 }
 
 void ICON_Alarm_OFF(void)
 {
   //TODO: 警報icon, 動作關閉, 熄滅
+  Scan4temp.scan4.alarm = false;
 
 }
 
