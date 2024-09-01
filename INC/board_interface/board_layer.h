@@ -33,6 +33,7 @@ typedef enum {
 
 typedef struct  //different timer flags
 {
+  bool FlashFlag_1Hz, FlashFlag_2Hz;
   bool Flag_1ms, Flag_5ms,Flag_100ms, Flag_200ms, Flag_500ms, Flag_1s, Flag_2s;
   uint8_t COM_Port, COM_Port_pre;
   int16_t Cnt_1s;

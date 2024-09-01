@@ -425,3 +425,4 @@ void CharToDisplay(uint8_t _char)
   char_M2(ByteTable[_char][1]);
   char_M3(ByteTable[_char][0]);
 }
+

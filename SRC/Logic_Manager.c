@@ -35,6 +35,7 @@ __IO uint8_t I2c_Buf_Read[eep_end] = {};
 
 /* Private Logic API funcitons protocol ------------------------------------*/
 static void Update_History_value(void);
+static void Update_Icon(void);
 
 /* Private function protocol -----------------------------------------------*/
 static void read_all_eeprom_data(void);
@@ -59,6 +60,12 @@ static void Update_History_value(void)
   //取得目前Pv值的歷史最大最小值
   get_HistoryMax();
   get_HistoryMin();
+}
+
+static void Update_Icon(void)
+{
+  ICON_Fan_Flashing();
+
 }
 
 /* Static Function definitions ------------------------------------------------------*/
@@ -120,6 +127,9 @@ static void loop_200ms(void)
         NumToDisplay(System.history_min);
       else
         NumToDisplay(System.pv);
+
+      //更新顯示icon
+      Update_Icon();
     }
 
     tmr.Flag_200ms = false;
@@ -141,7 +151,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x0B;
+  const uint8_t test    = 0x0C;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

@@ -231,13 +231,16 @@ void timer0_callback(timer_callback_args_t *p_args)
   {
     tmr.Cnt_1ms++;
     tmr.COM_Port++;
-    
-    if((tmr.Cnt_1ms%1)==0) tmr.Flag_5ms = true;
-    if((tmr.Cnt_1ms%100)==0) tmr.Flag_100ms = true;
+
+    if ((tmr.Cnt_1ms % 500) == 0)  tmr.FlashFlag_1Hz = !tmr.FlashFlag_1Hz;
+    if ((tmr.Cnt_1ms % 1000) == 0)  tmr.FlashFlag_2Hz = !tmr.FlashFlag_2Hz;
+
+    // if((tmr.Cnt_1ms%1)==0) tmr.Flag_5ms = true;
+    // if((tmr.Cnt_1ms%100)==0) tmr.Flag_100ms = true;
     if((tmr.Cnt_1ms%200)==0) tmr.Flag_200ms = true;
-    if((tmr.Cnt_1ms%500)==0) tmr.Flag_500ms = true;
-    if((tmr.Cnt_1ms%1000)==0) tmr.Flag_1s = true;
-    if((tmr.Cnt_1ms%2000)==0) tmr.Flag_2s = true;
+    // if((tmr.Cnt_1ms%500)==0) tmr.Flag_500ms = true;
+    // if((tmr.Cnt_1ms%1000)==0) tmr.Flag_1s = true;
+    // if((tmr.Cnt_1ms%2000)==0) tmr.Flag_2s = true;
     if((tmr.Cnt_1ms%1000)==0) tmr.Cnt_1s++;
 
     tmr.Cnt_1ms = (tmr.Cnt_1ms>Timer_Limit_Counter_Max)? 1:tmr.Cnt_1ms;

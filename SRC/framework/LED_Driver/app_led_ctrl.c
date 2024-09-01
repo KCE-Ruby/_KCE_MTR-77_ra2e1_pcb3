@@ -12,12 +12,15 @@
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/LED_Driver/app_led_ctrl.h"
+#include "INC/framework/LED_Driver/Indicator_encode.h"
 
 /* Private defines ----------------------------------------------------------*/
 #define ICON_FLASH_FREQUENCY   1   //default: 1Hz
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO r_tmr tmr;
+extern __IO ICON_SCAN4 Scan4temp;
+extern __IO ICON_SCAN5 Scan5temp;
 
 /* variables -----------------------------------------------------------------*/
 __IO bool ALL_LED_FLAG, CLOSE_LED_FLAG;
@@ -32,10 +35,10 @@ static bool Flash_timer_setting(void)
   switch (ICON_FLASH_FREQUENCY)
   {
     case 1:
-      flag = tmr.Flag_500ms;
+      flag = tmr.FlashFlag_1Hz;
       break;
     case 2:
-      flag = tmr.Flag_1s;
+      flag = tmr.FlashFlag_2Hz;
       break;
     
     default:
@@ -110,21 +113,22 @@ void ICON_Defrost_Flashing(void)
 void ICON_Fan_ON(void)
 {
   //TODO: 風扇icon, 動作啟動, 長亮
-
+  Scan5temp.scan5.fan = true;
 }
 
 void ICON_Fan_OFF(void)
 {
   //TODO: 風扇icon, 動作關閉, 熄滅
-
+  Scan5temp.scan5.fan = false;
 }
 
+bool flag_test;
 void ICON_Fan_Flashing(void)
 {
-  bool flag;  //頻率為1Hz or 2Hz
-  flag = Flash_timer_setting();
+  static bool flag=false;  //頻率為1Hz or 2Hz
+  flag_test = Flash_timer_setting();
   //風扇icon, 融霜後啟動延時, 閃爍中, 預設為:1Hz 500ms亮, 500ms滅
-  if(flag == true)
+  if(flag_test == true)
     ICON_Fan_ON();
   else
     ICON_Fan_OFF();
