@@ -43,4 +43,10 @@ void ICON_Enhanced_Cooling_OFF(void);
 void ICON_Energy_Saving_ON(void);
 void ICON_Energy_Saving_OFF(void);
 
+void ICON_Bulb_ON(void);
+void ICON_Bulb_OFF(void);
+
+void ICON_Aux_ON(void);
+void ICON_Aux_OFF(void);
+
 #endif /* INC_APP_LED_CTRL_H_ */

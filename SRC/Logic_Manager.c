@@ -71,7 +71,8 @@ static void Update_Icon(void)
   // ICON_Alarm_ON();
   // ICON_Enhanced_Cooling_ON();
   // ICON_Energy_Saving_ON();
-  ICON_Bulb_ON();
+  // ICON_Bulb_ON();
+  ICON_Aux_ON();
 }
 
 /* Static Function definitions ------------------------------------------------------*/
