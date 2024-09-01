@@ -217,31 +217,44 @@ void ICON_Energy_Saving_OFF(void)
 }
 
 
-//規格書尚未定義, 但是硬體有, 目前在邏輯上不會亮
+/* 規格書尚未定義, 但是硬體有, 目前在邏輯上不會亮 ------------------------------------------------------*/
 //燈泡燈號
 void ICON_Bulb_ON(void)
 {
-  //TODO: 節能運行icon, 動作啟動, 長亮
+  //燈泡icon, 動作啟動, 長亮
   Scan4temp.scan4.bulb = true;
 }
 
 void ICON_Bulb_OFF(void)
 {
-  //TODO: 節能運行icon, 動作關閉, 熄滅
+  //燈泡icon, 動作關閉, 熄滅
   Scan4temp.scan4.bulb = false;
 }
 
-//燈泡燈號
+//Aux燈號
 void ICON_Aux_ON(void)
 {
-  //TODO: 節能運行icon, 動作啟動, 長亮
+  //Aux icon, 動作啟動, 長亮
   Scan4temp.scan4.aux = true;
 }
 
 void ICON_Aux_OFF(void)
 {
-  //TODO: 節能運行icon, 動作關閉, 熄滅
+  //Aux icon, 動作關閉, 熄滅
   Scan4temp.scan4.aux = false;
+}
+
+//計時器燈號
+void ICON_Clock_ON(void)
+{
+  //計時器icon, 動作啟動, 長亮
+  Scan4temp.scan4.clock = true;
+}
+
+void ICON_Clock_OFF(void)
+{
+  //計時器icon, 動作關閉, 熄滅
+  Scan4temp.scan4.clock = false;
 }
 
 

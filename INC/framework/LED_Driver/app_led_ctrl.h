@@ -49,4 +49,7 @@ void ICON_Bulb_OFF(void);
 void ICON_Aux_ON(void);
 void ICON_Aux_OFF(void);
 
+void ICON_Clock_ON(void);
+void ICON_Clock_OFF(void);
+
 #endif /* INC_APP_LED_CTRL_H_ */
