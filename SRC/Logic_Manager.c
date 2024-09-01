@@ -68,7 +68,8 @@ static void Update_Icon(void)
   // ICON_degrees_Flashing();
   // ICON_Refrigerate_Flashing();
   // ICON_Defrost_Flashing();
-  ICON_Alarm_ON();
+  // ICON_Alarm_ON();
+  ICON_Enhanced_Cooling_ON();
 }
 
 /* Static Function definitions ------------------------------------------------------*/

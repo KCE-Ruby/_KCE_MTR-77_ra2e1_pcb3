@@ -188,20 +188,19 @@ void ICON_Alarm_OFF(void)
 {
   //TODO: 警報icon, 動作關閉, 熄滅
   Scan4temp.scan4.alarm = false;
-
 }
 
 //加強製冷
 void ICON_Enhanced_Cooling_ON(void)
 {
   //TODO: 加強製冷icon, 動作啟動, 長亮
-
+  Scan4temp.scan4.enhanced_cooling = true;
 }
 
 void ICON_Enhanced_Cooling_OFF(void)
 {
   //TODO: 加強製冷icon, 動作關閉, 熄滅
-
+  Scan4temp.scan4.enhanced_cooling = false;
 }
 
 //節能運行
