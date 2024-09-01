@@ -67,6 +67,7 @@ void ALL_LED_OFF(void)
 void ICON_Refrigerate_ON(void)
 {
   //TODO: 製冷icon, 動作啟動, 長亮
+
 }
 
 void ICON_Refrigerate_OFF(void)
@@ -122,13 +123,12 @@ void ICON_Fan_OFF(void)
   Scan5temp.scan5.fan = false;
 }
 
-bool flag_test;
 void ICON_Fan_Flashing(void)
 {
   static bool flag=false;  //頻率為1Hz or 2Hz
-  flag_test = Flash_timer_setting();
+  flag = Flash_timer_setting();
   //風扇icon, 融霜後啟動延時, 閃爍中, 預設為:1Hz 500ms亮, 500ms滅
-  if(flag_test == true)
+  if(flag == true)
     ICON_Fan_ON();
   else
     ICON_Fan_OFF();
@@ -137,26 +137,26 @@ void ICON_Fan_Flashing(void)
 //溫度icon各種型態, 開, 關; 兩個一起閃爍中
 void ICON_degrees_Celsius_ON(void)
 {
-  //TODO: 攝氏溫度icon, 選擇此單位時, 長亮, 並關閉另一個
-
+  //TODO: 攝氏溫度icon, 選擇此單位時, 長亮
+  Scan5temp.scan5.degress_c = true;
 }
 
 void ICON_degrees_Celsius_OFF(void)
 {
   //TODO: 攝氏溫度icon, 關閉
-
+  Scan5temp.scan5.degress_c = false;
 }
 
 void ICON_degrees_Fahrenheit_ON(void)
 {
-  //TODO: 華氏溫度icon, 選擇此單位時, 長亮, 並關閉另一個
-
+  //TODO: 華氏溫度icon, 選擇此單位時, 長亮
+  Scan5temp.scan5.degress_f = true;
 }
 
 void ICON_degrees_Fahrenheit_OFF(void)
 {
   //TODO: 華氏溫度icon, 關閉
-
+  Scan5temp.scan5.degress_f = false;
 }
 
 void ICON_degrees_Flashing(void)
@@ -214,6 +214,7 @@ void ICON_Energy_Saving_OFF(void)
   //TODO: 節能運行icon, 動作關閉, 熄滅
 
 }
+
 
 
 

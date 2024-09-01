@@ -126,9 +126,10 @@ typedef union
   struct
   {
     bool fan:1;
+    bool ret_1:1;        //reserved
     bool degress_c:1;
     bool degress_f:1;
-    uint8_t ret:5;        //reserved
+    uint8_t ret:4;        //reserved
   }scan5;
   uint8_t pincombine;
 } ICON_SCAN5;
