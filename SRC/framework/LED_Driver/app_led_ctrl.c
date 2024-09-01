@@ -91,13 +91,13 @@ void ICON_Refrigerate_Flashing(void)
 void ICON_Defrost_ON(void)
 {
   //TODO: 融霜icon, 動作啟動, 長亮
-
+  Scan4temp.scan4.defrost = true;
 }
 
 void ICON_Defrost_OFF(void)
 {
   //TODO: 融霜icon, 動作關閉, 熄滅
-
+  Scan4temp.scan4.defrost = false;
 }
 
 void ICON_Defrost_Flashing(void)
