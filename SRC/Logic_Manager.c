@@ -34,8 +34,9 @@ __IO uint8_t I2c_Buf_Read[eep_end] = {};
 
 
 /* Private Logic API funcitons protocol ------------------------------------*/
-static void Update_History_value(void);
-static void Update_Icon(void);
+static void update_history_value(void);
+static void update_icon(void);
+static void check_set_value(void);
 
 /* Private function protocol -----------------------------------------------*/
 static void read_all_eeprom_data(void);
@@ -46,7 +47,7 @@ static void loop_100us(void);
 // uint16_t bootled_cnt;
 
 /* static Logic API funcitons ------------------------------------------------------*/
-static void Update_History_value(void)
+static void update_history_value(void)
 {
   static bool clear_limit_flag=true;    //TODO: 清除極值的API還沒做
 
@@ -62,8 +63,9 @@ static void Update_History_value(void)
   get_HistoryMin();
 }
 
-static void Update_Icon(void)
+static void update_icon(void)
 {
+  ICON_degrees_Celsius_ON();    //TODO:應該要有個判斷API, 暫時固定顯示攝氏
   // ICON_Fan_Flashing();
   // ICON_degrees_Flashing();
   // ICON_Refrigerate_Flashing();
@@ -73,7 +75,26 @@ static void Update_Icon(void)
   // ICON_Energy_Saving_ON();
   // ICON_Bulb_ON();
   // ICON_Aux_ON();
-  ICON_Clock_ON();
+  // ICON_Clock_ON();
+}
+
+static void check_set_value(void)
+{
+  static uint32_t check_set_value_cnt=0;
+  if(System.keymode.SET_value_flag)
+  {
+    NumToDisplay(System.set);
+    if(check_set_value_cnt == 0)
+      check_set_value_cnt = tmr.Cnt_1s;
+
+    if(tmr.Cnt_1s >= (check_set_value_cnt+5))
+      System.keymode.SET_value_flag = false;
+  }
+  else
+  {
+    check_set_value_cnt = 0;
+    System.mode = homeMode;
+  }
 }
 
 /* Static Function definitions ------------------------------------------------------*/
@@ -117,11 +138,15 @@ static void loop_200ms(void)
     Key_main();   //按鍵相關邏輯
 
     if(System.pv != ERROR_AD)
-      Update_History_value();
+      update_history_value();
 
     get_Pv();
 
-    if(System.mode == menuMode)
+    if(System.mode == checkgMode)
+    {
+      check_set_value();
+    }
+    else if(System.mode == menuMode)
     {
       //menu顯示邏輯, 含menu設定的數值轉換
       CharToDisplay(LS);
@@ -137,7 +162,7 @@ static void loop_200ms(void)
         NumToDisplay(System.pv);
 
       //更新顯示icon
-      Update_Icon();
+      update_icon();
     }
 
     tmr.Flag_200ms = false;
@@ -155,7 +180,7 @@ static void loop_100us(void)
 /* Function definitions ------------------------------------------------------*/
 void Task_Main(void)
 {
-  static uint32_t Device_Version;
+  uint32_t Device_Version;
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;

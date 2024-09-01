@@ -22,6 +22,7 @@ enum
   homeMode,
   menuMode,
   settingMode,
+  checkgMode,
 };
 
 /* typedef definitions -----------------------------------------------------*/
@@ -43,10 +44,12 @@ typedef struct  //different timer flags
 typedef struct
 {
   uint8_t Max_Pv, Min_Pv;
+  int16_t set;
 }s_EEPROM;
 
 typedef struct
 {
+  bool SET_value_flag;
   bool Max_flag, Min_flag;
   uint16_t index;
 }f_menu;
@@ -56,12 +59,13 @@ typedef struct  //different timer flags
   int16_t sv, pv, history_max, history_min; //3位數值, 含負數
   uint8_t mode;                 //顯示目前的模式, 首頁/設定模式
   uint8_t decimalIndex;         //顯示的小數點位
-  s_EEPROM eep;
+  s_EEPROM eep;                 //有被存入EEPROM的參數們
   uint16_t value;               //各參數內的數值
   f_menu keymode;               //按鍵切換旗標用
   
   //參數都用10倍放大存取
-  uint16_t set, hy, ls, us, ot, oe, o3, o4;
+  int16_t set;
+  uint16_t hy, ls, us, ot, oe, o3, o4;
   bool p2p, p3p, p4p;
   uint8_t ods, ac, rtr, cct;
   uint16_t ccs;

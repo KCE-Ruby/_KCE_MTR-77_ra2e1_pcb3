@@ -232,11 +232,12 @@ static key_defrost_function(void)
 
 static key_set_function(void)
 {
-  /*[設定鍵功能]
-  * Home狀態下, 單擊顯示目標設定點(Pv)
+  /*<設定鍵功能>
+  * Home狀態下, 單擊顯示目標設定點(Pv)切換成checkgMode, 5s後或者再次單擊跳回Home
   * Menu狀態下, 無作用
   * Setting狀態下, 單擊選擇參數或確認操作
-  * [組合鍵功能]
+  * 
+  * <組合鍵功能>
   * [設定+下] = 進入Menu模式
   * [設定+上] = 退出Menu回Home
   */
@@ -244,6 +245,26 @@ static key_set_function(void)
  if(KeySet.shortPressed)
  {
     //TODO: 按下按鍵後的功能
+    switch (System.mode)
+    {
+      case homeMode:
+        System.mode = checkgMode;
+        System.keymode.SET_value_flag = true;
+      break;
+
+      case menuMode:
+      break;
+
+      case settingMode:
+      break;
+
+      case checkgMode:
+        System.keymode.SET_value_flag = false;
+      break;
+
+      default:
+      break;
+    }
     KeySet.shortPressed = 0;
  }
 }
