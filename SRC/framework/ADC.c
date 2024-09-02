@@ -67,12 +67,6 @@ void ADC_Main(void)
   else
     TempValue.sensor2 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_2));
 
-  //AD convert Test API
-    // AD[1] = Read_ADC_Voltage_Value(ADC_CHANNEL_1);
-  // TempValue.sensor1 = (ADCtest(ADC_CHANNEL_1));
-  // R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
-  // TempValue.sensor2 = (ADCtest(ADC_CHANNEL_2));
-  // R_BSP_SoftwareDelay(20,BSP_DELAY_UNITS_MICROSECONDS);
   adcnt++;
 }
 

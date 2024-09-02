@@ -237,7 +237,7 @@ void timer0_callback(timer_callback_args_t *p_args)
 
     // if((tmr.Cnt_1ms%1)==0) tmr.Flag_5ms = true;
     // if((tmr.Cnt_1ms%100)==0) tmr.Flag_100ms = true;
-    if((tmr.Cnt_1ms%200)==0) tmr.Flag_200ms = true;
+    if((tmr.Cnt_1ms%100)==0) tmr.Flag_100ms = true;
     // if((tmr.Cnt_1ms%500)==0) tmr.Flag_500ms = true;
     // if((tmr.Cnt_1ms%1000)==0) tmr.Flag_1s = true;
     // if((tmr.Cnt_1ms%2000)==0) tmr.Flag_2s = true;

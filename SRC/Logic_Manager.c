@@ -19,8 +19,8 @@
 #include "INC/Logic_Manager.h"
 
 /* Private defines ----------------------------------------------------------*/
-#define BOOTonTIME               (2000)      //2s = 1ms*2000 = 2000次
-#define BOOToffTIME              (2500)      //+0.5s = 1ms*500 = 500次
+#define BOOTonTIME               (4500)      //4.5 = 1ms*4500 = 4500次
+#define BOOToffTIME              (5000)      //+0.5s = 1ms*500 = 500次
 #define ERROR_AD                 (-999)
 
 /* extern variables -----------------------------------------------------------------*/
@@ -33,19 +33,19 @@ extern __IO ByteSettingTable bytetable[End];
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
-
+static bool bootled_En=true;
 
 /* Private Logic API funcitons protocol ------------------------------------*/
 static void update_history_value(void);
 static void update_icon(void);
 static void check_set_value(void);
+static void update_display_message(void);
 static void reset_eeprom(void);
-static void logic_main(void);
 
 /* Private function protocol -----------------------------------------------*/
 static void read_all_eeprom_data(void);
 static void boot_control(void);
-static void loop_200ms(void);
+static void loop_100ms(void);
 static void loop_100us(void);
 
 /* static Logic API funcitons ------------------------------------------------------*/
@@ -68,10 +68,9 @@ static void update_history_value(void)
 static void update_icon(void)
 {
   ICON_degrees_API();
-  // ICON_Fan_Flashing();
-  // ICON_degrees_Flashing();
-  // ICON_Refrigerate_Flashing();
-  // ICON_Defrost_Flashing();
+  ICON_Refrigerate_ON();
+  ICON_Fan_Flashing();
+  ICON_Defrost_Flashing();
   // ICON_Alarm_ON();
   // ICON_Enhanced_Cooling_ON();
   // ICON_Energy_Saving_ON();
@@ -96,6 +95,50 @@ static void check_set_value(void)
   {
     check_set_value_cnt = 0;
     System.mode = homeMode;
+  }
+}
+
+static void update_display_message(void)
+{
+  //主要顯示控制區
+  switch (System.mode)
+  {
+    case homeMode:
+      //主頁顯示邏輯, 含最大最小值清除
+      if(System.keymode.Max_flag)
+        NumToDisplay(System.history_max);
+      else if(System.keymode.Min_flag)
+        NumToDisplay(System.history_min);
+      else
+        NumToDisplay(System.pv);
+
+      //更新顯示icon
+      update_icon();
+    break;
+
+    case level1Mode:
+      //TODO: 第一層
+      CharToDisplay(LS);
+    break;
+
+    case level2Mode:
+      //TODO: 第二層
+      CharToDisplay(LS);
+    break;
+
+    case settingMode:
+      NumToDisplay(System.set);
+      ICON_degrees_Flashing();
+    break;
+
+    case checkgMode:
+      //查看設定值專區
+      check_set_value();
+    break;
+
+    default:
+      //模式錯誤: 理論上可以顯示ERROR
+    break;
   }
 }
 
@@ -140,61 +183,17 @@ static void reset_eeprom(void)
   I2C_EE_BufferWrite( I2c_Buf_Reset, start_addr , length);
 }
 
-static void logic_main(void)
-{
-  //主要邏輯控制區
-  switch (System.mode)
-  {
-    case homeMode:
-      //主頁顯示邏輯, 含最大最小值清除
-      if(System.keymode.Max_flag)
-        NumToDisplay(System.history_max);
-      else if(System.keymode.Min_flag)
-        NumToDisplay(System.history_min);
-      else
-        NumToDisplay(System.pv);
-
-      //更新顯示icon
-      update_icon();
-    break;
-
-    case level1Mode:
-      //TODO: 第一層
-      CharToDisplay(LS);
-    break;
-
-    case level2Mode:
-      //TODO: 第二層
-      CharToDisplay(LS);
-    break;
-
-    case settingMode:
-      NumToDisplay(System.set);
-      ICON_degrees_Flashing();
-    break;
-
-    case checkgMode:
-      //查看設定值專區
-      check_set_value();
-    break;
-
-    default:
-      //模式錯誤: 理論上可以顯示ERROR
-    break;
-  }
-}
-
 /* Static Function definitions ------------------------------------------------------*/
 static void boot_control(void)
 {
-  static bool bootled_En=true;
-  static uint16_t bootled_cnt;
+  // static bool bootled_En=true;
+  // static uint16_t bootled_cnt;
 
   if(bootled_En)
   {
-    if(bootled_cnt < BOOTonTIME)
+    if(tmr.Cnt_1ms < BOOTonTIME)
       ALL_LED_ON();
-    else if(bootled_cnt > BOOToffTIME)
+    else if(tmr.Cnt_1ms > BOOToffTIME)
     {
       // reset_eeprom();  //平常不開, 用來重置參數的API
       read_all_eeprom_data();
@@ -203,7 +202,6 @@ static void boot_control(void)
     }
     else
       ALL_LED_OFF();
-    bootled_cnt++;
   }
 }
 
@@ -231,20 +229,20 @@ static void read_all_eeprom_data(void)
   System.history_min = I2c_Buf_Read[eep_min_low]+(I2c_Buf_Read[eep_min_high]<<8);
 }
 
-static void loop_200ms(void)
+static void loop_100ms(void)
 {
-  if(tmr.Flag_200ms)
+  if(tmr.Flag_100ms)
   {
     ADC_Main();
+    get_Pv();
     Key_main();   //按鍵相關邏輯
 
     if(System.pv != ERROR_AD)
       update_history_value();
 
-    get_Pv();
-    logic_main();
+    update_display_message();
 
-    tmr.Flag_200ms = false;
+    tmr.Flag_100ms = false;
   }
 }
 
@@ -263,12 +261,13 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x18;
+  const uint8_t test    = 0x19;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
   printf("初始化完成\r\n");
   printf("軟體版本: %lu\r\n", Device_Version);
+  tmr.Cnt_1ms = 0;
   while(1)
   {
     /*
@@ -291,9 +290,8 @@ void Task_Main(void)
     * 
     */
     boot_control();
-    loop_200ms();
 
+    loop_100ms();
     loop_100us();
-    // R_BSP_SoftwareDelay(1,BSP_DELAY_UNITS_MILLISECONDS);
   }
 }
