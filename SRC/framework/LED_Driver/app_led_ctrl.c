@@ -13,6 +13,7 @@
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/LED_Driver/app_led_ctrl.h"
 #include "INC/framework/LED_Driver/Indicator_encode.h"
+#include "INC/framework/datapool.h"
 
 /* Private defines ----------------------------------------------------------*/
 #define ICON_FLASH_FREQUENCY   1   //default: 1Hz
@@ -21,6 +22,7 @@
 extern __IO r_tmr tmr;
 extern __IO ICON_SCAN4 Scan4temp;
 extern __IO ICON_SCAN5 Scan5temp;
+extern __IO s_Var System;
 
 /* variables -----------------------------------------------------------------*/
 __IO bool ALL_LED_FLAG, CLOSE_LED_FLAG;
@@ -135,7 +137,7 @@ void ICON_Fan_Flashing(void)
     ICON_Fan_OFF();
 }
 
-//溫度icon各種型態, 開, 關; 兩個一起閃爍中
+//溫度單位icon各種型態, 開, 關; 兩個一起閃爍中
 void ICON_degrees_Celsius_ON(void)
 {
   //TODO: 攝氏溫度icon, 選擇此單位時, 長亮
@@ -174,6 +176,20 @@ void ICON_degrees_Flashing(void)
   {
     ICON_degrees_Celsius_OFF();
     ICON_degrees_Fahrenheit_OFF();
+  }
+}
+
+void ICON_degrees_API(void)
+{
+  if(System.cf == degree_C)
+  {
+    ICON_degrees_Celsius_ON();
+    ICON_degrees_Fahrenheit_OFF();
+  }
+  else if(System.cf == degree_F)
+  {
+    ICON_degrees_Fahrenheit_ON();
+    ICON_degrees_Celsius_OFF();
   }
 }
 

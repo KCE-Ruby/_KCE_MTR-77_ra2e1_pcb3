@@ -33,6 +33,7 @@ void ICON_degrees_Celsius_OFF(void);
 void ICON_degrees_Fahrenheit_ON(void);
 void ICON_degrees_Fahrenheit_OFF(void);
 void ICON_degrees_Flashing(void);
+void ICON_degrees_API(void);
 
 void ICON_Alarm_ON(void);
 void ICON_Alarm_OFF(void);

@@ -19,8 +19,8 @@
 #include "INC/Logic_Manager.h"
 
 /* Private defines ----------------------------------------------------------*/
-#define BOOTonTIME               (20000)      //2s = 100us*10 = 1ms*2000 = 20000次
-#define BOOToffTIME              (25000)      //2s = 100us*10 = 1ms*2000 = 20000次
+#define BOOTonTIME               (2000)      //2s = 1ms*2000 = 2000次
+#define BOOToffTIME              (2500)      //+0.5s = 1ms*500 = 500次
 #define ERROR_AD                 (-999)
 
 /* extern variables -----------------------------------------------------------------*/
@@ -40,14 +40,13 @@ static void update_history_value(void);
 static void update_icon(void);
 static void check_set_value(void);
 static void reset_eeprom(void);
+static void logic_main(void);
 
 /* Private function protocol -----------------------------------------------*/
 static void read_all_eeprom_data(void);
 static void boot_control(void);
 static void loop_200ms(void);
 static void loop_100us(void);
-
-// uint16_t bootled_cnt;
 
 /* static Logic API funcitons ------------------------------------------------------*/
 static void update_history_value(void)
@@ -68,7 +67,7 @@ static void update_history_value(void)
 
 static void update_icon(void)
 {
-  ICON_degrees_Celsius_ON();    //TODO:應該要有個判斷API, 暫時固定顯示攝氏
+  ICON_degrees_API();
   // ICON_Fan_Flashing();
   // ICON_degrees_Flashing();
   // ICON_Refrigerate_Flashing();
@@ -141,6 +140,50 @@ static void reset_eeprom(void)
   I2C_EE_BufferWrite( I2c_Buf_Reset, start_addr , length);
 }
 
+static void logic_main(void)
+{
+  //主要邏輯控制區
+  switch (System.mode)
+  {
+    case homeMode:
+      //主頁顯示邏輯, 含最大最小值清除
+      if(System.keymode.Max_flag)
+        NumToDisplay(System.history_max);
+      else if(System.keymode.Min_flag)
+        NumToDisplay(System.history_min);
+      else
+        NumToDisplay(System.pv);
+
+      //更新顯示icon
+      update_icon();
+    break;
+
+    case level1Mode:
+      //TODO: 第一層
+      CharToDisplay(LS);
+    break;
+
+    case level2Mode:
+      //TODO: 第二層
+      CharToDisplay(LS);
+    break;
+
+    case settingMode:
+      NumToDisplay(System.set);
+      ICON_degrees_Flashing();
+    break;
+
+    case checkgMode:
+      //查看設定值專區
+      check_set_value();
+    break;
+
+    default:
+      //模式錯誤: 理論上可以顯示ERROR
+    break;
+  }
+}
+
 /* Static Function definitions ------------------------------------------------------*/
 static void boot_control(void)
 {
@@ -199,47 +242,7 @@ static void loop_200ms(void)
       update_history_value();
 
     get_Pv();
-
-    //主要邏輯控制區
-    switch (System.mode)
-    {
-      case homeMode:
-        //主頁顯示邏輯, 含最大最小值清除
-        if(System.keymode.Max_flag)
-          NumToDisplay(System.history_max);
-        else if(System.keymode.Min_flag)
-          NumToDisplay(System.history_min);
-        else
-          NumToDisplay(System.pv);
-
-        //更新顯示icon
-        update_icon();
-      break;
-
-      case level1Mode:
-        //TODO: 第一層
-        CharToDisplay(LS);
-      break;
-
-      case level2Mode:
-        //TODO: 第二層
-        CharToDisplay(LS);
-      break;
-
-      case settingMode:
-        NumToDisplay(System.set);
-        ICON_degrees_Flashing();
-      break;
-
-      case checkgMode:
-        //查看設定值專區
-        check_set_value();
-      break;
-
-      default:
-        //模式錯誤: 理論上可以顯示ERROR
-      break;
-    }
+    logic_main();
 
     tmr.Flag_200ms = false;
   }
@@ -260,7 +263,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x17;
+  const uint8_t test    = 0x18;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
@@ -291,6 +294,6 @@ void Task_Main(void)
     loop_200ms();
 
     loop_100us();
-    R_BSP_SoftwareDelay(100,BSP_DELAY_UNITS_MICROSECONDS);
+    // R_BSP_SoftwareDelay(1,BSP_DELAY_UNITS_MILLISECONDS);
   }
 }

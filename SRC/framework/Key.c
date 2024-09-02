@@ -15,7 +15,7 @@
 #include "INC/framework/Display.h"
 
 /* Private defines ----------------------------------------------------------*/
-#define KEY_DEBOUNCE_300              (300)      //(單位為:次), 短按
+#define KEY_DEBOUNCE_300              (300)     //(單位為:次), 短按
 #define KEY_DEBOUNCE_30               (30)      //(單位為:次), 長按
 #define KEY_cnt_max                   (300)
 #define KEY_cnt_min                   (1)
