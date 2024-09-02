@@ -68,9 +68,9 @@ static void update_history_value(void)
 static void update_icon(void)
 {
   ICON_degrees_API();
-  ICON_Refrigerate_ON();
-  ICON_Fan_Flashing();
-  ICON_Defrost_Flashing();
+  // ICON_Refrigerate_ON();
+  // ICON_Fan_Flashing();
+  // ICON_Defrost_Flashing();
   // ICON_Alarm_ON();
   // ICON_Enhanced_Cooling_ON();
   // ICON_Energy_Saving_ON();
@@ -261,7 +261,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x19;
+  const uint8_t test    = 0x1A;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

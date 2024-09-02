@@ -15,9 +15,11 @@
 #include "INC/framework/Display.h"
 
 /* Private defines ----------------------------------------------------------*/
-#define KEY_DEBOUNCE_300              (300)     //(單位為:次), 短按
-#define KEY_DEBOUNCE_30               (30)      //(單位為:次), 長按
-#define KEY_cnt_max                   (300)
+#define KEY_DEBOUNCE_long              (150)     //(單位為:ms/次), 長按
+#define KEY_DEBOUNCE_short              (15)      //(單位為:ms/次), 短按
+
+#define KEY_cnt_2s                     (400)
+#define KEY_cnt_max                   (5000)
 #define KEY_cnt_min                   (1)
 
 /* extern variables -----------------------------------------------------------------*/
@@ -62,30 +64,55 @@ void Key_main(void)
 
 void Key_debounce(void)
 {
+  static uint8_t flag;
   switch (tmr.COM_Port+1)
   {
     case keyup:
+    if(flag != keyup)
+    {
       KeyUp = key_detect(KeyUp);
+      flag = keyup;
+    }
     break;
 
     case keydown:
+    if(flag != keydown)
+    {
       KeyDown = key_detect(KeyDown);
+      flag = keydown;
+    }
     break;
 
     case keystandby:
+    if(flag != keystandby)
+    {
       KeyStandby = key_detect(KeyStandby);
+      flag = keystandby;
+    }
     break;
 
     case key_bulb:
+    if(flag != key_bulb)
+    {
       KeyBulb = key_detect(KeyBulb);
+      flag = key_bulb;
+    }
     break;
 
     case key_forst:
+    if(flag != key_forst)
+    {
       KeyDefrost = key_detect(KeyDefrost);
+      flag = key_forst;
+    }
     break;
 
     case keyset:
+    if(flag != keyset)
+    {
       KeySet = key_detect(KeySet);
+      flag = keyset;
+    }
     break;
   }
 }
@@ -102,10 +129,10 @@ static Key_Manager key_detect(Key_Manager key)
   else
   {
     //放開時, 判斷計數器被按下多久, 分成長按以及短按
-    if(key.Cnt>=KEY_DEBOUNCE_300)
+    if(key.Cnt>=KEY_DEBOUNCE_long)
       key.LongPressed++;
 
-    if(key.Cnt>=KEY_DEBOUNCE_30)
+    if(key.Cnt>=KEY_DEBOUNCE_short)
     {
       key.shortPressed++;
       if(key.shortPressed > KEY_cnt_max)
@@ -253,7 +280,7 @@ static key_set_function(void)
   */
 
  //按鍵當次判斷只允許一種事件發生, 長按優先權大於短按
- if(KeySet.LongPressed != 0)
+ if(KeySet.Cnt > KEY_cnt_2s)
  {
     switch (System.mode)
     {
@@ -270,13 +297,16 @@ static key_set_function(void)
       break;
 
       case settingMode:
-        System.mode = homeMode; //若再次長按則跳回home模式
+
       break;
 
       default:
       
       break;
     }
+ }
+ else if(KeySet.LongPressed != 0)
+ {
   KeySet.LongPressed = 0;
   KeySet.shortPressed = 0;
  }
