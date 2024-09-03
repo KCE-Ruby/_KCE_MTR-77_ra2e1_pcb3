@@ -117,6 +117,22 @@ void Key_debounce(void)
   }
 }
 
+bool IsAnyKeyPressed(void)
+{
+  bool ku, kd, ks, kb, kf, kt;
+  ku = (KeyUp.Cnt!=0)? true:false;
+  kd = (KeyDown.Cnt!=0)? true:false;
+  ks = (KeyStandby.Cnt!=0)? true:false;
+  kb = (KeyBulb.Cnt!=0)? true:false;
+  kf = (KeyDefrost.Cnt!=0)? true:false;
+  kt = (KeySet.Cnt!=0)? true:false;
+
+  if(ku || kd || ks || kb || kf || kt)
+    return true;
+  else
+    return false;
+}
+
 static Key_Manager key_detect(Key_Manager key)
 {
   // Key HW config, Release = High; Pressed = Low
@@ -286,6 +302,7 @@ static key_set_function(void)
     {
       case homeMode:
         System.mode = settingMode;
+        System.keymode.SET_value_flag = true;
       break;
 
       case level1Mode:

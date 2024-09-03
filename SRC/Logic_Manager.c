@@ -22,6 +22,8 @@
 #define BOOTonTIME               (4500)      //4.5 = 1ms*4500 = 4500次
 #define BOOToffTIME              (5000)      //+0.5s = 1ms*500 = 500次
 #define ERROR_AD                 (-999)
+#define CHECKSETTIME                (5)      //檢查設定值多久後自動跳出
+#define CHANGESETTIME              (10)      //修改設定值多久後自動跳出
 
 /* extern variables -----------------------------------------------------------------*/
 extern r_tmr tmr;
@@ -39,6 +41,7 @@ static bool bootled_En=true;
 static void update_history_value(void);
 static void update_icon(void);
 static void check_set_value(void);
+static void change_set_value(void);
 static void update_display_message(void);
 static void reset_eeprom(void);
 
@@ -88,12 +91,34 @@ static void check_set_value(void)
     if(check_set_value_cnt == 0)
       check_set_value_cnt = tmr.Cnt_1s;
 
-    if(tmr.Cnt_1s >= (check_set_value_cnt+5))
+    if(tmr.Cnt_1s >= (check_set_value_cnt + CHECKSETTIME))
       System.keymode.SET_value_flag = false;
   }
   else
   {
     check_set_value_cnt = 0;
+    System.mode = homeMode;
+  }
+}
+
+static void change_set_value(void)
+{
+  static uint32_t change_set_value_cnt=0;
+  bool cnt_reset = (IsAnyKeyPressed())? true:false;
+
+  if(System.keymode.SET_value_flag)
+  {
+    NumToDisplay(System.set);
+    ICON_degrees_Flashing();
+    if((change_set_value_cnt == 0) || cnt_reset)
+      change_set_value_cnt = tmr.Cnt_1s;
+
+    if(tmr.Cnt_1s >= (change_set_value_cnt + CHANGESETTIME))
+      System.keymode.SET_value_flag = false;
+  }
+  else 
+  {
+    change_set_value_cnt = 0;
     System.mode = homeMode;
   }
 }
@@ -127,8 +152,9 @@ static void update_display_message(void)
     break;
 
     case settingMode:
-      NumToDisplay(System.set);
-      ICON_degrees_Flashing();
+      change_set_value();
+      // NumToDisplay(System.set);
+      // ICON_degrees_Flashing();
     break;
 
     case checkgMode:
@@ -261,7 +287,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x1A;
+  const uint8_t test    = 0x1B;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

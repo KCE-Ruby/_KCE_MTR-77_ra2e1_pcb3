@@ -112,6 +112,7 @@ enum DISP_LEVEL
 /* task function protocol -----------------------------------------------*/
 void Key_main(void);
 void Key_debounce(void);
+bool IsAnyKeyPressed(void);
 
 void Key_test(void);
 void Key_oneshot(void);
