@@ -14,6 +14,12 @@
 #ifdef INC_DATAPOOL_H_
 
 /* Enum type definitions -----------------------------------------------------*/
+enum Levelflag
+{
+  Vindex,
+  Vvalue,
+};
+
 enum MenuLevel
 {
   NaN,    //not a number

@@ -144,8 +144,12 @@ static void update_display_message(void)
     break;
 
     case level1Mode:
+      ICON_degrees_Flashing();
       //TODO: 第一層
-      CharToDisplay(LS);
+      if(sFlag.Level1_value == Vindex)
+        CharToDisplay(System.level1_index);
+      else if(sFlag.Level1_value == Vvalue)
+        NumToDisplay(System.value[System.level1_index]);
     break;
 
     case level2Mode:
@@ -270,9 +274,11 @@ static void loop_100ms(void)
     if(sFlag.Defrost)
       sFlag.Defrost = manual_defrost(sFlag.Defrost);
 
+    //更新最大最小值
     if(System.pv != ERROR_AD)
       update_history_value();
 
+    //主要顯示控制區, 切換顯示模式等等..
     update_display_message();
 
     tmr.Flag_100ms = false;
@@ -294,7 +300,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x1D;
+  const uint8_t test    = 0x1E;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

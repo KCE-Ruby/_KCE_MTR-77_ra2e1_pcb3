@@ -12,6 +12,7 @@
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/Key.h"
+#include "INC/framework/datapool.h"
 #include "INC/framework/Display.h"
 
 /* Private defines ----------------------------------------------------------*/
@@ -181,13 +182,31 @@ if(KeyUp.shortPressed != 0)
       break;
 
       case level1Mode:
-        //TODO:要先帶入現有的數值再++
-        System.value++;
+      //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
+      if(KeySet.Cnt==0)
+      {
+        //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
+        if(sFlag.Level1_value == Vindex)
+        {
+          System.level1_index--;
+          if(System.level1_index >= End) System.level1_index = Hy;
+          else if(System.level1_index < Hy) System.level1_index = Ptb;
+
+        }
+        else if(sFlag.Level1_value == Vvalue)
+        {
+          System.value[System.level1_index]++;
+          //TODO: 需要加上最大最小值, 應該要是一個API因為要依據每個變數上下限值不同
+        }
+      }
       break;
 
       case level2Mode:
-        //TODO:要先帶入現有的數值再++
-        System.value++;
+        //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
+      if(sFlag.Level2_value == Vindex)
+        System.level2_index--;
+      else if(sFlag.Level2_value == Vvalue)
+        System.value[System.level2_index]++;
       break;
 
       case settingMode:
@@ -223,8 +242,26 @@ static key_down_function(void)
       break;
 
       case level1Mode:
-        //TODO:要先帶入現有的數值再++
-        System.value++;
+      //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
+      if(KeySet.Cnt==0)
+      {
+        //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
+        if(sFlag.Level1_value == Vindex)
+        {
+          System.level1_index++;
+          if(System.level1_index >= End) System.level1_index = Hy;
+          else if(System.level1_index < Hy) System.level1_index = Ptb;
+        }
+        else if(sFlag.Level1_value == Vvalue)
+        {
+          System.value[System.level1_index]++;
+          //TODO: 需要加上最大最小值, 應該要是一個API因為要依據每個變數上下限值不同
+        }
+      }
+      break;
+
+      case level2Mode:
+      
       break;
 
       case settingMode:
@@ -315,6 +352,7 @@ static key_defrost_function(void)
 
 static key_set_function(void)
 {
+  int16_t pre_value[End];
   /*<設定鍵功能>
   * homeMode狀態下, 單擊顯示目標設定點(Pv)切換成checkgMode
   * level1&2Mode狀態下, 單擊選擇參數或確認操作
@@ -332,11 +370,21 @@ static key_set_function(void)
     switch (System.mode)
     {
       case homeMode:
+      if(KeyDown.Cnt==0)
+      {
+        //進入修改設定值功能
         System.mode = settingMode;
         System.keymode.SET_value_flag = true;
+      }
+      else
+      {
+        //進入用戶層第一層
+        System.mode = level1Mode;
+      }
       break;
 
       case level1Mode:
+        //data = 參數數值, index = 參數名稱
       
       break;
 
@@ -369,6 +417,25 @@ static key_set_function(void)
       break;
 
       case level1Mode:
+        if(KeyUp.Cnt!=0)  //離開level1的路徑, 短按SET鍵+下鍵 -> 離開
+        {
+          KeyUp.Cnt = 0;
+          System.mode = homeMode;
+          System.level1_index = 0;
+        }
+        else  //切換參數名稱or參數數值的地方
+        {
+          if(sFlag.Level1_value == Vindex)
+            sFlag.Level1_value = Vvalue;
+          else
+          {
+            sFlag.Level1_value = Vindex;
+            if(pre_value[System.level1_index] != System.value[System.level1_index])
+            {
+              //TODO: 若參數有變動則寫入eeprom內
+            }
+          }
+        }
       break;
 
       case level2Mode:

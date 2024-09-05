@@ -61,28 +61,30 @@ typedef struct  //different timer flags
   uint8_t mode;                 //顯示目前的模式, 首頁/設定模式
   uint8_t decimalIndex;         //顯示的小數點位
   s_EEPROM eep;                 //有被存入EEPROM的參數們
-  uint16_t value;               //各參數內的數值
+  uint8_t level1_index, level2_index; //用戶層的參數名稱指標
+  int16_t value[74];            //大小為[End], 各參數內的數值, 有負數沒有小數, 以整數儲存
   f_menu keymode;               //按鍵切換旗標用
   
   //參數都用10倍放大存取
   int16_t set;
   uint16_t hy, ls, us, ot, oe, o3, o4;
   bool p2p, p3p, p4p;
-  uint8_t ods, ac, rtr, cct;
+  uint8_t ods, ac, v_rtr, cct;
   uint16_t ccs;
   uint8_t con, cof, cf, res, lod, red;
-  uint16_t dly, dtr, dfp;
+  uint16_t dly, v_dtr, dfp;
   uint8_t tdf, dte, idf, mdf, dsd, dfd, dad, fdt, dpo, daf, fnc;
   uint8_t fnd, fct, fst, fon, fof, fap, alc, alu, all, afh, ald;
   uint16_t dao;
-  uint8_t ap2, al2, au2, ah2, Ad2, da2, bll, ac2, i1p, i1f, did;
-  uint8_t nps, odc, rrd, hes, adr, pbc, onf, dp1, dp2, dp3, dp4, rse;
+  uint8_t ap2, al2, au2, ah2, Ad2, da2, bll, ac2, i1p, i1f, v_did;
+  uint8_t nps, v_odc, v_rrd, hes, adr, pbc, onf, v_dp1, v_dp2, v_dp3, v_dp4, rse;
   uint16_t rel, ptb;
 }s_Var;
 
 typedef struct  //different timer flags
 {
   bool Defrost;
+  bool Level1_value, Level2_value;
 }s_Flag;
 
 /* task function protocol -----------------------------------------------*/
