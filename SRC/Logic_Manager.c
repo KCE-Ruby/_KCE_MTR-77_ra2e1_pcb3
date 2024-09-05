@@ -29,6 +29,8 @@
 extern r_tmr tmr;
 extern volatile uint8_t data;
 extern __IO s_Var System;
+extern __IO s_Flag sFlag;
+
 extern __IO bool CLOSE_LED_FLAG;
 extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
 extern __IO ByteSettingTable bytetable[End];
@@ -253,6 +255,7 @@ static void read_all_eeprom_data(void)
   System.hy = I2c_Buf_Read[eep_Hy_low]+(I2c_Buf_Read[eep_Hy_high]<<8);
   System.history_max = I2c_Buf_Read[eep_max_low]+(I2c_Buf_Read[eep_max_high]<<8);
   System.history_min = I2c_Buf_Read[eep_min_low]+(I2c_Buf_Read[eep_min_high]<<8);
+  System.dte = 8;
 }
 
 static void loop_100ms(void)
@@ -262,6 +265,10 @@ static void loop_100ms(void)
     ADC_Main();
     get_Pv();
     Key_main();   //按鍵相關邏輯
+    
+    //啟動融霜功能
+    if(sFlag.Defrost)
+      sFlag.Defrost = manual_defrost(sFlag.Defrost);
 
     if(System.pv != ERROR_AD)
       update_history_value();

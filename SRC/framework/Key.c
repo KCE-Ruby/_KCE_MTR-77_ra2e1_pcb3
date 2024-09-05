@@ -25,6 +25,7 @@
 /* extern variables -----------------------------------------------------------------*/
 extern __IO bsp_io_level_t KeyPin, pin_sta[6];
 extern __IO s_Var System;
+extern __IO s_Flag sFlag;
 extern __IO r_tmr tmr;
 
 /* variables -----------------------------------------------------------------*/
@@ -275,12 +276,12 @@ static key_defrost_function(void)
   * Menu狀態下, 無作用
   */
 
- if(KeySet.Cnt > KEY_cnt_2s)
+ if(KeyDefrost.Cnt > KEY_cnt_2s)
  {
     switch (System.mode)
     {
       case homeMode:
-        manual_defrost();
+        sFlag.Defrost = true;
       break;
 
       case level1Mode:
@@ -300,9 +301,10 @@ static key_defrost_function(void)
       break;
     }
  }
- else if(KeySet.LongPressed != 0)
+ else if(KeyDefrost.LongPressed != 0)
  {
-
+    KeyDefrost.LongPressed = 0;
+    KeyDefrost.shortPressed = 0;
  }
  else if(KeyDefrost.shortPressed)
  {

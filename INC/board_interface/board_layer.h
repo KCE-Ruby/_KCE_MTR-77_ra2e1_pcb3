@@ -80,6 +80,11 @@ typedef struct  //different timer flags
   uint16_t rel, ptb;
 }s_Var;
 
+typedef struct  //different timer flags
+{
+  bool Defrost;
+}s_Flag;
+
 /* task function protocol -----------------------------------------------*/
 void System_Init(void);
 void WDT_Feed(void);

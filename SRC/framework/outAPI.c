@@ -29,12 +29,16 @@
 extern __IO s_Var System;
 
 
-void manual_defrost(void)
+bool manual_defrost(bool flag)
 {
   if(System.pv < System.dte)
-  {
     out3_Defrost_on();
+  else
+  {
+    flag = false;
+    out3_Defrost_off();
   }
+  return flag;
 }
 
 /* Function definitions ------------------------------------------------------*/

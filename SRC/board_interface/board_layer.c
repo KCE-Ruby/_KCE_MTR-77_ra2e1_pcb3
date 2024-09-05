@@ -26,6 +26,7 @@ static bool scan_complete_flag = false;
 __IO r_tmr tmr;
 __IO bsp_io_level_t KeyPin, pin_sta[7];
 __IO s_Var System;
+__IO s_Flag sFlag;
 static bool debug=false;
 
 /* task function protocol -----------------------------------------------*/
