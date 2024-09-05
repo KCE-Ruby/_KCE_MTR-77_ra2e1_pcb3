@@ -28,6 +28,15 @@
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var System;
 
+
+void manual_defrost(void)
+{
+  if(System.pv < System.dte)
+  {
+    out3_Defrost_on();
+  }
+}
+
 /* Function definitions ------------------------------------------------------*/
 void out1_FAN_on(void)
 {

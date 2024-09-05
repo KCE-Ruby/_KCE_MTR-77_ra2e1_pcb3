@@ -275,7 +275,36 @@ static key_defrost_function(void)
   * Menu狀態下, 無作用
   */
 
- if(KeyDefrost.shortPressed)
+ if(KeySet.Cnt > KEY_cnt_2s)
+ {
+    switch (System.mode)
+    {
+      case homeMode:
+        manual_defrost();
+      break;
+
+      case level1Mode:
+      
+      break;
+
+      case level2Mode:
+      
+      break;
+
+      case settingMode:
+
+      break;
+
+      default:
+      
+      break;
+    }
+ }
+ else if(KeySet.LongPressed != 0)
+ {
+
+ }
+ else if(KeyDefrost.shortPressed)
  {
     //TODO: 按下按鍵後的功能
     KeyDefrost.shortPressed = 0;
