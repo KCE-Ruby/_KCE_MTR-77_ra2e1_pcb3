@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    app_led_ctrl.h
+ * @file    app_icon_ctrl.h
  * @author  KCE R&D Team
  * @date    2024-06-26
  * @author  Ruby

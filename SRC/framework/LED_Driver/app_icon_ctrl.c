@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    app_led_ctrl.c
+ * @file    app_icon_ctrl.c
  * @author  KCE R&D Team
  * @date    2024-07-09
  * @author  Ruby
@@ -11,7 +11,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
-#include "INC/framework/LED_Driver/app_led_ctrl.h"
+#include "INC/framework/LED_Driver/app_icon_ctrl.h"
 #include "INC/framework/LED_Driver/Indicator_encode.h"
 #include "INC/framework/datapool.h"
 
