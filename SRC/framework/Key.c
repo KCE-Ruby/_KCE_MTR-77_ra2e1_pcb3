@@ -442,7 +442,7 @@ static key_set_function(void)
       break;
 
       case settingMode:
-        System.mode = homeMode; //短按一次後回到home模式
+        sFlag.leaveSet = true; //短按一次後離開set模式
       break;
 
       case checkgMode:

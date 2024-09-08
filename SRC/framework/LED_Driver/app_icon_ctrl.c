@@ -65,6 +65,35 @@ void ALL_LED_OFF(void)
   CLOSE_LED_FLAG = true;
 }
 
+//離開設定層需先閃爍三次
+void ICON_LeaveSet_Flashing(void)
+{
+  bool flag;  //頻率為1Hz or 2Hz
+  flag = Flash_timer_setting();
+  //溫度icon, 系統處於設定模式中, 閃爍中, 預設為:1Hz 500ms亮, 500ms滅
+  if(flag == true)
+  {
+    //離開設定層時, 數字&依據溫度單位閃爍燈號3次
+    NumToDisplay(System.set);
+    if(System.cf == degree_C)
+    {
+      ICON_degrees_Celsius_ON();
+      ICON_degrees_Fahrenheit_OFF();
+    }
+    else if(System.cf == degree_F)
+    {
+      ICON_degrees_Fahrenheit_ON();
+      ICON_degrees_Celsius_OFF();
+    }
+  }
+  else
+  {
+    NumToDisplay(CLEARALL);
+    ICON_degrees_Celsius_OFF();
+    ICON_degrees_Fahrenheit_OFF();
+  }
+}
+
 //製冷icon三種型態, 開; 關; 閃爍中
 void ICON_Refrigerate_ON(void)
 {
@@ -171,7 +200,7 @@ void ICON_degrees_Flashing(void)
   {
     if((System.mode == level1Mode) || (System.mode == settingMode))
     {
-      //在level1內, 依據溫度單位閃爍燈號
+      //在用戶層及設定層內, 依據溫度單位閃爍燈號
       if(System.cf == degree_C)
       {
         ICON_degrees_Celsius_ON();

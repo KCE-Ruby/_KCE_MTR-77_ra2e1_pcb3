@@ -17,6 +17,12 @@
 #include "eeprom/i2c_ee.h"
 
 /* Enum type definitions -----------------------------------------------------*/
+enum DISPLAY_SPECIAL
+{
+  notshow = 10,
+  CLEARALL=9999, //清除所有數字區顯示
+};
+
 enum
 {
   homeMode,
@@ -85,6 +91,7 @@ typedef struct  //different timer flags
 {
   bool Defrost;
   bool Level1_value, Level2_value;
+  bool leaveSet;
 }s_Flag;
 
 /* task function protocol -----------------------------------------------*/

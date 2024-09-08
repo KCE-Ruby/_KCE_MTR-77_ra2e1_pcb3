@@ -22,6 +22,7 @@
 #define BOOTonTIME               (4500)      //4.5 = 1ms*4500 = 4500次
 #define BOOToffTIME              (5000)      //+0.5s = 1ms*500 = 500次
 #define ERROR_AD                 (-999)
+#define LEAVESETTIME                (3)      //離開設定層閃爍時間, 單位:秒
 #define CHECKSETTIME               (12)      //檢查設定值多久後自動跳出, 單位:秒
 #define CHANGESETTIME              (10)      //修改設定值多久後自動跳出, 單位:秒
 
@@ -44,6 +45,7 @@ static void update_history_value(void);
 static void update_icon(void);
 static void check_set_value(void);
 static void change_set_value(void);
+static void leave_settingMode(void);
 static void update_display_message(void);
 static void reset_eeprom(void);
 
@@ -125,6 +127,23 @@ static void change_set_value(void)
   }
 }
 
+static void leave_settingMode(void)
+{
+  static uint32_t leave_set_cnt=0;
+  //閃爍三次畫面
+  ICON_LeaveSet_Flashing();
+  if(leave_set_cnt == 0)
+    leave_set_cnt = tmr.Cnt_1s;
+
+  //離開set回到home
+  if(tmr.Cnt_1s >= (leave_set_cnt + LEAVESETTIME))
+  {
+    System.mode = homeMode; //短按一次後回到home模式
+    sFlag.leaveSet = false;
+    leave_set_cnt = 0;
+  }
+}
+
 static void update_display_message(void)
 {
   //主要顯示控制區
@@ -158,9 +177,10 @@ static void update_display_message(void)
     break;
 
     case settingMode:
-      change_set_value();
-      // NumToDisplay(System.set);
-      // ICON_degrees_Flashing();
+      if(sFlag.leaveSet)
+        leave_settingMode();
+      else
+        change_set_value();
     break;
 
     case checkgMode:
@@ -300,7 +320,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x20;
+  const uint8_t test    = 0x21;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

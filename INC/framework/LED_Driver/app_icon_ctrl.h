@@ -16,6 +16,8 @@
 void ALL_LED_ON(void);
 void ALL_LED_OFF(void);
 
+void ICON_LeaveSet_Flashing(void);
+
 void ICON_Refrigerate_ON(void);
 void ICON_Refrigerate_OFF(void);
 void ICON_Refrigerate_Flashing(void);
