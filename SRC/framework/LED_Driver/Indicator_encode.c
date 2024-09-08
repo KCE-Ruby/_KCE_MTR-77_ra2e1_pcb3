@@ -275,7 +275,7 @@ static void main_M2(uint16_t num)
     }
   }
 
-  if((num == CLEARALL) || (System.mode == level1Mode))
+  if(num == CLEARALL)
   {
     //若在設定層或離開時需閃爍則不顯示小數點
     Scan2temp.scan2.M2_dp = false;
@@ -328,7 +328,7 @@ static void main_M3(uint16_t num)
     }
   }
   
-  if((num == CLEARALL) || (System.mode == level1Mode))
+  if(num == CLEARALL)
   {
     //若在設定層或離開時需閃爍則不顯示小數點
     Scan3temp.scan3.M3_dp = false;
@@ -402,6 +402,16 @@ static void char_M2(uint8_t _char)
       break;
     }
   }
+  if(System.mode == level1Mode)
+  {
+    //若在設定層或離開時需閃爍則不顯示小數點
+    Scan2temp.scan2.M2_dp = false;
+  }
+  else if(System.mode == level2Mode)
+  {
+    //TODO:要在第一層也有的才會有小數點
+    Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_2)? true:false;
+  }
 }
 
 static void char_M3(uint8_t _char)
@@ -433,6 +443,17 @@ static void char_M3(uint8_t _char)
         Scan3temp.scan3.M3_g = _char_LookupTable[_char][i];
       break;
     }
+  }
+
+  if(System.mode == level1Mode)
+  {
+    //若在設定層或離開時需閃爍則不顯示小數點
+    Scan3temp.scan3.M3_dp = false;
+  }
+  else if(System.mode == level2Mode)
+  {
+    //要在第一層有的才會有點
+    Scan3temp.scan3.M3_dp = (System.decimalIndex == DECIMAL_AT_2)? true:false;
   }
 }
 

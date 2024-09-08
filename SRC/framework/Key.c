@@ -380,6 +380,7 @@ static key_set_function(void)
       {
         //進入用戶層第一層
         System.mode = level1Mode;
+        System.level1_index = Hy; //從HY開始顯示
       }
       break;
 
