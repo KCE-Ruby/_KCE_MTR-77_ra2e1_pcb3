@@ -169,7 +169,7 @@ void ICON_degrees_Flashing(void)
   //溫度icon, 系統處於設定模式中, 閃爍中, 預設為:1Hz 500ms亮, 500ms滅
   if(flag == true)
   {
-    if(System.mode == level1Mode)
+    if((System.mode == level1Mode) || (System.mode == settingMode))
     {
       //在level1內, 依據溫度單位閃爍燈號
       if(System.cf == degree_C)
