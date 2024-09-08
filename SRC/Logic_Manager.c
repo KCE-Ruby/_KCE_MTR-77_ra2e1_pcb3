@@ -129,18 +129,16 @@ static void change_set_value(void)
 
 static void leave_settingMode(void)
 {
-  static uint32_t leave_set_cnt=0;
+  static uint8_t flash_cnt=0;
   //閃爍三次畫面
-  ICON_LeaveSet_Flashing();
-  if(leave_set_cnt == 0)
-    leave_set_cnt = tmr.Cnt_1s;
+  flash_cnt = ICON_LeaveSet_Flashing(flash_cnt);
 
   //離開set回到home
-  if(tmr.Cnt_1s >= (leave_set_cnt + LEAVESETTIME))
+  if(flash_cnt > (LEAVESETTIME*2-1))
   {
     System.mode = homeMode; //短按一次後回到home模式
     sFlag.leaveSet = false;
-    leave_set_cnt = 0;
+    flash_cnt = 0;
   }
 }
 
@@ -320,7 +318,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x21;
+  const uint8_t test    = 0x22;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

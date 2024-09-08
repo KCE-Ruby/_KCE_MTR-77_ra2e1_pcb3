@@ -47,7 +47,7 @@ void System_Init(void)
   ADC_init();
   I2C_EE_Init();
 
-  //預設開機為小數點一位數
+  //預設開機為小數點一位數, TODO:讀取eeprom後這行要拿掉
   System.decimalIndex = DECIMAL_AT_1;
 }
 

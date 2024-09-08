@@ -66,9 +66,10 @@ void ALL_LED_OFF(void)
 }
 
 //離開設定層需先閃爍三次
-void ICON_LeaveSet_Flashing(void)
+uint8_t ICON_LeaveSet_Flashing(uint8_t flash_cnt)
 {
-  bool flag;  //頻率為1Hz or 2Hz
+  static bool flag_pre=false;
+  bool flag=false;  //頻率為1Hz or 2Hz
   flag = Flash_timer_setting();
   //溫度icon, 系統處於設定模式中, 閃爍中, 預設為:1Hz 500ms亮, 500ms滅
   if(flag == true)
@@ -92,6 +93,13 @@ void ICON_LeaveSet_Flashing(void)
     ICON_degrees_Celsius_OFF();
     ICON_degrees_Fahrenheit_OFF();
   }
+  
+  if(flag_pre != flag)
+  {
+    flash_cnt++;
+    flag_pre = flag;
+  }
+  return flash_cnt;
 }
 
 //製冷icon三種型態, 開; 關; 閃爍中

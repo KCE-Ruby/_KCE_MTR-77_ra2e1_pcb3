@@ -274,8 +274,17 @@ static void main_M2(uint16_t num)
       break;
     }
   }
-  //若數字為2位數則亮燈
-  Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? true:false;
+
+  if((num == CLEARALL) || (System.mode == level1Mode))
+  {
+    //若在設定層或離開時需閃爍則不顯示小數點
+    Scan2temp.scan2.M2_dp = false;
+  }
+  else
+  {
+    //若數字為2位數則亮燈
+    Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? true:false;
+  }
 }
 
 static void main_M3(uint16_t num)
@@ -318,9 +327,17 @@ static void main_M3(uint16_t num)
       break;
     }
   }
-  //若數字為1位數則亮燈, 若全滅則不顯示小數點
-  if(num != CLEARALL)
+  
+  if((num == CLEARALL) || (System.mode == level1Mode))
+  {
+    //若在設定層或離開時需閃爍則不顯示小數點
+    Scan3temp.scan3.M3_dp = false;
+  }
+  else
+  {
+    //若數字為1位數則亮燈
     Scan3temp.scan3.M3_dp = (System.decimalIndex == DECIMAL_AT_2)? true:false;
+  }
 }
 
 static void char_M1(uint8_t _char)
