@@ -189,9 +189,7 @@ if(KeyUp.shortPressed != 0)
         if(sFlag.Level1_value == Vindex)
         {
           System.level1_index++;
-          if(System.level1_index >= End) System.level1_index = Hy;
-          else if(System.level1_index < Hy) System.level1_index = Ptb;
-
+          if(System.level1_index >= Pr1_size) System.level1_index = 0;
         }
         else if(sFlag.Level1_value == Vvalue)
         {
@@ -249,8 +247,7 @@ static key_down_function(void)
         if(sFlag.Level1_value == Vindex)
         {
           System.level1_index--;
-          if(System.level1_index >= End) System.level1_index = Hy;
-          else if(System.level1_index < Hy) System.level1_index = Ptb;
+          if(System.level1_index < 0) System.level1_index = (Pr1_size-1);
         }
         else if(sFlag.Level1_value == Vvalue)
         {
@@ -385,7 +382,7 @@ static key_set_function(void)
       {
         //進入用戶層第一層
         System.mode = level1Mode;
-        System.level1_index = Hy; //從HY開始顯示
+        System.level1_index = 0;
       }
       break;
 
@@ -427,7 +424,7 @@ static key_set_function(void)
         {
           KeyUp.Cnt = 0;
           System.mode = homeMode;
-          System.level1_index = 0;
+          // System.level1_index = 0;
         }
         else  //切換參數名稱or參數數值的地方
         {

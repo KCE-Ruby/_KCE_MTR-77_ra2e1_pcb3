@@ -46,7 +46,7 @@ void System_Init(void)
     uart_init();
   ADC_init();
   I2C_EE_Init();
-
+  get_bytetable_pr1();  //開機時取得當次的用戶層參數table
   //預設開機為小數點一位數, TODO:讀取eeprom後這行要拿掉
   System.decimalIndex = DECIMAL_AT_1;
 }

@@ -34,7 +34,8 @@ extern __IO s_Flag sFlag;
 
 extern __IO bool CLOSE_LED_FLAG;
 extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
-extern __IO ByteSettingTable bytetable[End];
+// extern __IO ByteSettingTable bytetable[End];
+extern __IO uint8_t bytetable_pr1[Pr1_size];
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
@@ -144,6 +145,7 @@ static void leave_settingMode(void)
 
 static void update_display_message(void)
 {
+  uint8_t table = 0;
   //主要顯示控制區
   switch (System.mode)
   {
@@ -163,10 +165,11 @@ static void update_display_message(void)
     case level1Mode:
       ICON_degrees_Flashing();
       //TODO: 第一層
+      table = bytetable_pr1[System.level1_index];
       if(sFlag.Level1_value == Vindex)
-        CharToDisplay(System.level1_index);
+        CharToDisplay(table);
       else if(sFlag.Level1_value == Vvalue)
-        NumToDisplay(System.value[System.level1_index]);
+        NumToDisplay(System.value[table]);
     break;
 
     case level2Mode:
@@ -318,7 +321,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x24;
+  const uint8_t test    = 0x25;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
