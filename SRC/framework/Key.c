@@ -188,7 +188,7 @@ if(KeyUp.shortPressed != 0)
         //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
         if(sFlag.Level1_value == Vindex)
         {
-          System.level1_index--;
+          System.level1_index++;
           if(System.level1_index >= End) System.level1_index = Hy;
           else if(System.level1_index < Hy) System.level1_index = Ptb;
 
@@ -203,10 +203,10 @@ if(KeyUp.shortPressed != 0)
 
       case level2Mode:
         //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
-      if(sFlag.Level2_value == Vindex)
-        System.level2_index--;
-      else if(sFlag.Level2_value == Vvalue)
-        System.value[System.level2_index]++;
+        if(sFlag.Level2_value == Vindex)
+          System.level2_index++;
+        else if(sFlag.Level2_value == Vvalue)
+          System.value[System.level2_index]++;
       break;
 
       case settingMode:
@@ -248,19 +248,24 @@ static key_down_function(void)
         //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
         if(sFlag.Level1_value == Vindex)
         {
-          System.level1_index++;
+          System.level1_index--;
           if(System.level1_index >= End) System.level1_index = Hy;
           else if(System.level1_index < Hy) System.level1_index = Ptb;
         }
         else if(sFlag.Level1_value == Vvalue)
         {
-          System.value[System.level1_index]++;
+          System.value[System.level1_index]--;
           //TODO: 需要加上最大最小值, 應該要是一個API因為要依據每個變數上下限值不同
         }
       }
       break;
 
       case level2Mode:
+        //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
+        if(sFlag.Level2_value == Vindex)
+          System.level2_index--;
+        else if(sFlag.Level2_value == Vvalue)
+          System.value[System.level2_index]--;
       
       break;
 
