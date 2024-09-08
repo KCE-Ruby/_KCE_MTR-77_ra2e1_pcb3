@@ -22,8 +22,8 @@
 #define BOOTonTIME               (4500)      //4.5 = 1ms*4500 = 4500次
 #define BOOToffTIME              (5000)      //+0.5s = 1ms*500 = 500次
 #define ERROR_AD                 (-999)
-#define CHECKSETTIME                (5)      //檢查設定值多久後自動跳出
-#define CHANGESETTIME              (10)      //修改設定值多久後自動跳出
+#define CHECKSETTIME               (12)      //檢查設定值多久後自動跳出, 單位:秒
+#define CHANGESETTIME              (10)      //修改設定值多久後自動跳出, 單位:秒
 
 /* extern variables -----------------------------------------------------------------*/
 extern r_tmr tmr;
@@ -300,7 +300,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x1E;
+  const uint8_t test    = 0x1F;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
