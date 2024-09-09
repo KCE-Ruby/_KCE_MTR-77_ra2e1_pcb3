@@ -50,6 +50,7 @@ typedef struct  //different timer flags
 
 typedef struct
 {
+  bool IsEEPROMWrited;
   uint8_t Max_Pv, Min_Pv;
   int16_t set;
 }s_EEPROM;
