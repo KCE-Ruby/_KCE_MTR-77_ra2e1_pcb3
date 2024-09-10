@@ -321,10 +321,12 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x26;
+  const uint8_t test    = 0x27;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
+  IsMCUneedRST();
+  EEP_Read_PWRON();
   printf("初始化完成\r\n");
   printf("軟體版本: %lu\r\n", Device_Version);
   tmr.Cnt_1ms = 0;

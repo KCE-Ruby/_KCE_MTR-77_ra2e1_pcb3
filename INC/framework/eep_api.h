@@ -20,7 +20,7 @@ enum SPIAddr
   SPIAddr_Set_L,
   SPIAddr_Set_H,
 
-  SPIAddr_Hy_H,
+  SPIAddr_Hy,
 
   SPIAddr_LS_L,
   SPIAddr_LS_H,
@@ -201,11 +201,25 @@ enum UserAddr
 };
 
 /* typedef definitions -----------------------------------------------------*/
-
+typedef enum
+{
+  Ot_offset = -120,
+  OE_offset = -120,
+  O3_offset = -120,
+  O4_offset = -120,
+  CCS_offset = -550,
+  dtE_offset = -500,
+  FSt_offset = -500,
+  ALL_offset = -500,
+  AL2_offset = -550,
+  Au2_offset = -550,
+  HES_offset = -300,
+} EEPROM_offset;
 
 /* task function protocol -----------------------------------------------*/
+void EEP_Read_PWRON(void);
+void EEP_Write_PWRON(void);
 void EEP_ResetALL(void);
-uint32_t EEP_Read_API(uint8_t addr);
-void EEP_Write_API(uint8_t addr, uint32_t value);
+void IsMCUneedRST(bool reset);
 
 #endif /* INC_EEP_API_H_ */
