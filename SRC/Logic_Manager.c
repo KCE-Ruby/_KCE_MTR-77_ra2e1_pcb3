@@ -263,19 +263,20 @@ static void read_all_eeprom_data(void)
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   I2C_EE_BufferRead(I2c_Buf_Read, 0x00 , eep_end);
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  
-  // 讀出eeprom後, 寫入mcu的對應值
-  if((I2c_Buf_Read[eep_Set_high]&0x80) != 0)
-  {
-    I2c_Buf_Read[eep_Set_high] &= 0x7F; //移除負數旗標
-    System.set = I2c_Buf_Read[eep_Set_low]+(I2c_Buf_Read[eep_Set_high]<<8);
-    System.set *= (-1);
-  }
-  else
-  {
-    System.set = I2c_Buf_Read[eep_Set_low]+(I2c_Buf_Read[eep_Set_high]<<8);
-  }
 
+  // 讀出eeprom後, 寫入mcu的對應值
+  offset_EEtoSYS();
+
+  // if((I2c_Buf_Read[eep_Set_high]&0x80) != 0)
+  // {
+  //   I2c_Buf_Read[eep_Set_high] &= 0x7F; //移除負數旗標
+  //   System.set = I2c_Buf_Read[eep_Set_low]+(I2c_Buf_Read[eep_Set_high]<<8);
+  //   System.set *= (-1);
+  // }
+  // else
+  // {
+  //   System.set = I2c_Buf_Read[eep_Set_low]+(I2c_Buf_Read[eep_Set_high]<<8);
+  // }
 
   System.hy = I2c_Buf_Read[eep_Hy_low]+(I2c_Buf_Read[eep_Hy_high]<<8);
   System.history_max = I2c_Buf_Read[eep_max_low]+(I2c_Buf_Read[eep_max_high]<<8);
@@ -322,7 +323,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x28;
+  const uint8_t test    = 0x29;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

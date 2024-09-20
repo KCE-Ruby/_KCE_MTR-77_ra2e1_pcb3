@@ -121,11 +121,15 @@ static int16_t offset_EEtoSYS_u16(uint8_t Table, uint8_t SPIaddr);
 /* Parameters from EEPROM to SYSTEM API ------------------------------------------------------*/
 static int16_t offset_EEtoSYS_u8(uint8_t Table, uint8_t SPIaddr)
 {
-  uint8_t EE_Buf_Read[End] = {};
-  int16_t ret;
+  uint8_t EE_Buf_Read[End] = {0};
+  int16_t ret=0, offset=0;
 
-  EE_Buf_Read[SPIaddr] = (uint8_t)((bytetable[Table].DefaultValue-bytetable[Table].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
-  ret = (int16_t)(EE_Buf_Read[SPIaddr]+(bytetable[Table].Range_Low*GAIN_PARAMETER));
+  if(Table <= UserAddr_onF) // TODO:EEPROM的API會取代這整個if判斷式, offset可能要留下來
+  {  
+    offset = (bytetable[Table].Range_Low*GAIN_PARAMETER);
+    EE_Buf_Read[SPIaddr] = (uint8_t)(bytetable[Table].DefaultValue*GAIN_PARAMETER-offset); //TODO:EEPROM的API會取代這行
+  }
+  ret = (int16_t)(EE_Buf_Read[SPIaddr] + offset);
 
   return ret;
 }
@@ -133,15 +137,19 @@ static int16_t offset_EEtoSYS_u8(uint8_t Table, uint8_t SPIaddr)
 static int16_t offset_EEtoSYS_u16(uint8_t Table, uint8_t SPIaddr)
 {
   uint16_t base_u16=0;
-  uint8_t EE_Buf_Read[End] = {};
-  int16_t ret;
+  uint8_t EE_Buf_Read[End] = {0};
+  int16_t ret=0, offset=0;
 
-  base_u16 = (uint16_t)((bytetable[Table].DefaultValue-bytetable[Table].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
-  EE_Buf_Read[SPIaddr+1] = base_u16 >> 8;      //取高位元, TODO:EEPROM的API會取代這行
-  EE_Buf_Read[SPIaddr] = base_u16 & 0xff;    //取低位元, TODO:EEPROM的API會取代這行
+  if(Table <= UserAddr_onF) // TODO:EEPROM的API會取代這整個if判斷式, offset可能要留下來
+  {
+    offset = (bytetable[Table].Range_Low*GAIN_PARAMETER);
+    base_u16 = (uint16_t)(bytetable[Table].DefaultValue*GAIN_PARAMETER-offset); //TODO:EEPROM的API會取代這行
+    EE_Buf_Read[SPIaddr+1] = base_u16 >> 8;      //取高位元, TODO:EEPROM的API會取代這行
+    EE_Buf_Read[SPIaddr] = base_u16 & 0xff;    //取低位元, TODO:EEPROM的API會取代這行
+  }
   base_u16 = (int16_t)(EE_Buf_Read[SPIaddr+1]<<8) + EE_Buf_Read[SPIaddr];  //組合成變數
-  ret = (int16_t)(base_u16+(bytetable[Table].Range_Low*GAIN_PARAMETER));
-  
+  ret = (int16_t)(base_u16 + offset);
+
   return ret;
 }
 
@@ -149,34 +157,104 @@ void offset_EEtoSYS(void)
 {
   //TODO: eeprom做好後要看一下怎麼整合這個API
   //可能跟read_all_eeprom_data同功能
-  //整個系統運算的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
 
-  uint8_t i=Set, addr=0;
-  int16_t EE_Buf_u16[End] = {0}; //這個陣列不會被改變, 拿來存eeprom讀出來的值而已
+  uint8_t i=Set, addr=SPIAddr_Set_L;
+  static int16_t EE_Buf_u16[UserAddr_End] = {0}; //這個陣列不會被改變, 拿來存eeprom讀出來的值而已
 
-  //將所有eeprom的值讀出來到int16_t的陣列內, 
-  while(i <= UserAddr_onF)
+  //將所有eeprom的值讀出來到int16_t的陣列內, 只有非數值型的參數用u8取值 
+  while(i < UserAddr_End)
   {
-    if(addr == SPIAddr_Set_L||SPIAddr_LS_L||SPIAddr_US_L||SPIAddr_CCS_L||SPIAddr_dtE_L||SPIAddr_Fct_L|| \
-               SPIAddr_FSt_L||SPIAddr_ALU_L||SPIAddr_ALL_L||SPIAddr_AL2_L||SPIAddr_Au2_L||SPIAddr_HES_L)
-    {
-      EE_Buf_u16[i] = offset_EEtoSYS_u16(i, addr);
-      addr+=2;
-    }
-    else
+    if((addr==SPIAddr_P2P)||(addr==SPIAddr_P3P)||(addr==SPIAddr_P4P)||(addr==SPIAddr_CF)|| \
+      (addr==SPIAddr_rES)||(addr==SPIAddr_Lod)||(addr==SPIAddr_rEd)||(addr==SPIAddr_tdF)|| \
+      (addr==SPIAddr_dFP)||(addr==SPIAddr_dFd)||(addr==SPIAddr_dPo)||(addr==SPIAddr_FnC)|| \
+      (addr==SPIAddr_Fnd)||(addr==SPIAddr_FAP)||(addr==SPIAddr_ALC)||(addr==SPIAddr_AP2)|| \
+      (addr==SPIAddr_bLL)||(addr==SPIAddr_AC2)||(addr==SPIAddr_i1P)||(addr==SPIAddr_i1F)|| \
+      (addr==SPIAddr_odc)||(addr==SPIAddr_rrd)||(addr==SPIAddr_PbC)||(addr==SPIAddr_onF)
+      )
     {
       EE_Buf_u16[i] = offset_EEtoSYS_u8(i, addr);
       addr++;
     }
+    else
+    {
+      EE_Buf_u16[i] = offset_EEtoSYS_u16(i, addr);
+      addr+=2;
+    }
     i++;
     WDT_Feed();
-
-    if(DEBUG_PRINT)
-      printf("EE_Buf_u16[ %d] = %d \r\n",i, EE_Buf_u16[i]);
   }
 
-  if(DEBUG_PRINT)
-    printf("測試結束10\r\n");
+  //整個系統運算的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
+  System.set = EE_Buf_u16[UserAddr_Set];
+  System.hy = EE_Buf_u16[UserAddr_Hy];
+  System.ls = EE_Buf_u16[UserAddr_LS];
+  System.us = EE_Buf_u16[UserAddr_US];
+  System.ot = EE_Buf_u16[UserAddr_Ot];
+  System.oe = EE_Buf_u16[UserAddr_OE];
+  System.o3 = EE_Buf_u16[UserAddr_O3];
+  System.o4 = EE_Buf_u16[UserAddr_O4];
+  System.p2p = EE_Buf_u16[UserAddr_P2P];
+  System.p3p = EE_Buf_u16[UserAddr_P3P];
+  System.p4p = EE_Buf_u16[UserAddr_P4P];
+  System.ods = EE_Buf_u16[UserAddr_OdS];
+  System.ac = EE_Buf_u16[UserAddr_AC];
+  System.v_rtr = EE_Buf_u16[UserAddr_rtr];
+  System.cct = EE_Buf_u16[UserAddr_CCt];
+  System.ccs = EE_Buf_u16[UserAddr_CCS];
+  System.con = EE_Buf_u16[UserAddr_COn];
+  System.cof = EE_Buf_u16[UserAddr_COF];
+  System.cf = EE_Buf_u16[UserAddr_CF];
+  System.res = EE_Buf_u16[UserAddr_rES];
+  System.lod = EE_Buf_u16[UserAddr_Lod];
+  System.red = EE_Buf_u16[UserAddr_rEd];
+  System.dly = EE_Buf_u16[UserAddr_dLY];
+  System.v_dtr = EE_Buf_u16[UserAddr_dtr];
+  System.dfp = EE_Buf_u16[UserAddr_dFP];
+  System.tdf = EE_Buf_u16[UserAddr_tdF];
+  System.dte = EE_Buf_u16[UserAddr_dtE];
+  System.idf = EE_Buf_u16[UserAddr_IdF];
+  System.mdf = EE_Buf_u16[UserAddr_MdF];
+  System.dsd = EE_Buf_u16[UserAddr_dSd];
+  System.dfd = EE_Buf_u16[UserAddr_dFd];
+  System.dad = EE_Buf_u16[UserAddr_dAd];
+  System.fdt = EE_Buf_u16[UserAddr_Fdt];
+  System.dpo = EE_Buf_u16[UserAddr_dPo];
+  System.daf = EE_Buf_u16[UserAddr_dAF];
+  System.fnc = EE_Buf_u16[UserAddr_FnC];
+  System.fnd = EE_Buf_u16[UserAddr_Fnd];
+  System.fct = EE_Buf_u16[UserAddr_Fct];
+  System.fst = EE_Buf_u16[UserAddr_FSt];
+  System.fon = EE_Buf_u16[UserAddr_Fon];
+  System.fof = EE_Buf_u16[UserAddr_FoF];
+  System.fap = EE_Buf_u16[UserAddr_FAP];
+  System.alc = EE_Buf_u16[UserAddr_ALC];
+  System.alu = EE_Buf_u16[UserAddr_ALU];
+  System.all = EE_Buf_u16[UserAddr_ALL];
+  System.afh = EE_Buf_u16[UserAddr_AFH];
+  System.ald = EE_Buf_u16[UserAddr_ALd];
+  System.dao = EE_Buf_u16[UserAddr_dAO];
+  System.ap2 = EE_Buf_u16[UserAddr_AP2];
+  System.al2 = EE_Buf_u16[UserAddr_AL2];
+  System.au2 = EE_Buf_u16[UserAddr_Au2];
+  System.ah2 = EE_Buf_u16[UserAddr_AH2];
+  System.Ad2 = EE_Buf_u16[UserAddr_Ad2];
+  System.da2 = EE_Buf_u16[UserAddr_dA2];
+  System.bll = EE_Buf_u16[UserAddr_bLL];
+  System.ac2 = EE_Buf_u16[UserAddr_AC2];
+  System.i1p = EE_Buf_u16[UserAddr_i1P];
+  System.i1f = EE_Buf_u16[UserAddr_i1F];
+  System.v_did = EE_Buf_u16[UserAddr_did];
+  System.nps = EE_Buf_u16[UserAddr_nPS];
+  System.v_odc = EE_Buf_u16[UserAddr_odc];
+  System.v_rrd = EE_Buf_u16[UserAddr_rrd];
+  System.hes = EE_Buf_u16[UserAddr_HES];
+  System.adr = EE_Buf_u16[UserAddr_Adr];
+  System.pbc = EE_Buf_u16[UserAddr_PbC];
+  System.onf = EE_Buf_u16[UserAddr_onF];
+
+  System.history_max = 0;    //EE_Buf_u16[UserAddr_history_min]
+  System.history_min = 0;    //EE_Buf_u16[UserAddr_history_max]
+  // printf("測試結束25\r\n");
 }
 
 /* Function definitions ------------------------------------------------------*/
