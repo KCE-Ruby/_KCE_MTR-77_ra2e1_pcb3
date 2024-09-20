@@ -191,72 +191,6 @@ void offset_EEtoSYS(void)
     System.value[i] = EE_Buf_u16[i];
     i++;
   }
-  // System.value[Set] = EE_Buf_u16[UserAddr_Set];
-  // System.hy = EE_Buf_u16[UserAddr_Hy];
-  // System.ls = EE_Buf_u16[UserAddr_LS];
-  // System.us = EE_Buf_u16[UserAddr_US];
-  // System.ot = EE_Buf_u16[UserAddr_Ot];
-  // System.oe = EE_Buf_u16[UserAddr_OE];
-  // System.o3 = EE_Buf_u16[UserAddr_O3];
-  // System.o4 = EE_Buf_u16[UserAddr_O4];
-  // System.p2p = EE_Buf_u16[UserAddr_P2P];
-  // System.p3p = EE_Buf_u16[UserAddr_P3P];
-  // System.p4p = EE_Buf_u16[UserAddr_P4P];
-  // System.ods = EE_Buf_u16[UserAddr_OdS];
-  // System.ac = EE_Buf_u16[UserAddr_AC];
-  // System.v_rtr = EE_Buf_u16[UserAddr_rtr];
-  // System.cct = EE_Buf_u16[UserAddr_CCt];
-  // System.ccs = EE_Buf_u16[UserAddr_CCS];
-  // System.con = EE_Buf_u16[UserAddr_COn];
-  // System.cof = EE_Buf_u16[UserAddr_COF];
-  // System.value[CF] = EE_Buf_u16[UserAddr_CF];
-  // System.res = EE_Buf_u16[UserAddr_rES];
-  // System.lod = EE_Buf_u16[UserAddr_Lod];
-  // System.red = EE_Buf_u16[UserAddr_rEd];
-  // System.dly = EE_Buf_u16[UserAddr_dLY];
-  // System.v_dtr = EE_Buf_u16[UserAddr_dtr];
-  // System.dfp = EE_Buf_u16[UserAddr_dFP];
-  // System.value[tdF] = EE_Buf_u16[UserAddr_tdF];
-  // System.value[dtE] = EE_Buf_u16[UserAddr_dtE];
-  // System.idf = EE_Buf_u16[UserAddr_IdF];
-  // System.mdf = EE_Buf_u16[UserAddr_MdF];
-  // System.dsd = EE_Buf_u16[UserAddr_dSd];
-  // System.dfd = EE_Buf_u16[UserAddr_dFd];
-  // System.dad = EE_Buf_u16[UserAddr_dAd];
-  // System.fdt = EE_Buf_u16[UserAddr_Fdt];
-  // System.dpo = EE_Buf_u16[UserAddr_dPo];
-  // System.daf = EE_Buf_u16[UserAddr_dAF];
-  // System.fnc = EE_Buf_u16[UserAddr_FnC];
-  // System.fnd = EE_Buf_u16[UserAddr_Fnd];
-  // System.fct = EE_Buf_u16[UserAddr_Fct];
-  // System.fst = EE_Buf_u16[UserAddr_FSt];
-  // System.fon = EE_Buf_u16[UserAddr_Fon];
-  // System.fof = EE_Buf_u16[UserAddr_FoF];
-  // System.fap = EE_Buf_u16[UserAddr_FAP];
-  // System.alc = EE_Buf_u16[UserAddr_ALC];
-  // System.alu = EE_Buf_u16[UserAddr_ALU];
-  // System.all = EE_Buf_u16[UserAddr_ALL];
-  // System.afh = EE_Buf_u16[UserAddr_AFH];
-  // System.ald = EE_Buf_u16[UserAddr_ALd];
-  // System.dao = EE_Buf_u16[UserAddr_dAO];
-  // System.ap2 = EE_Buf_u16[UserAddr_AP2];
-  // System.al2 = EE_Buf_u16[UserAddr_AL2];
-  // System.au2 = EE_Buf_u16[UserAddr_Au2];
-  // System.ah2 = EE_Buf_u16[UserAddr_AH2];
-  // System.Ad2 = EE_Buf_u16[UserAddr_Ad2];
-  // System.da2 = EE_Buf_u16[UserAddr_dA2];
-  // System.bll = EE_Buf_u16[UserAddr_bLL];
-  // System.ac2 = EE_Buf_u16[UserAddr_AC2];
-  // System.i1p = EE_Buf_u16[UserAddr_i1P];
-  // System.i1f = EE_Buf_u16[UserAddr_i1F];
-  // System.v_did = EE_Buf_u16[UserAddr_did];
-  // System.nps = EE_Buf_u16[UserAddr_nPS];
-  // System.v_odc = EE_Buf_u16[UserAddr_odc];
-  // System.v_rrd = EE_Buf_u16[UserAddr_rrd];
-  // System.hes = EE_Buf_u16[UserAddr_HES];
-  // System.adr = EE_Buf_u16[UserAddr_Adr];
-  // System.pbc = EE_Buf_u16[UserAddr_PbC];
-  // System.onf = EE_Buf_u16[UserAddr_onF];
 
   System.history_max = 0;    //EE_Buf_u16[UserAddr_history_min]
   System.history_min = 0;    //EE_Buf_u16[UserAddr_history_max]
@@ -319,7 +253,7 @@ uint8_t get_bytetable_pr1(void)
     }
     check_index++;
   }
-  printf("get_bytetable_pr1測試結束3: %d\r\n", index);
+  // printf("get_bytetable_pr1測試結束3: %d\r\n", index);
   return index;
 }
 
@@ -335,7 +269,7 @@ uint8_t get_bytetable_pr2(void)
     }
     check_index++;
   }
-  printf("get_bytetable_pr2測試結束3: %d\r\n", index);
+  // printf("get_bytetable_pr2測試結束3: %d\r\n", index);
   return index;
 }
 

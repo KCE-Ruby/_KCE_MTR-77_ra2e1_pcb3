@@ -370,6 +370,7 @@ static void char_M1(uint8_t _char)
       break;
     }
   }
+  Scan1temp.scan1.M1_minus = 0; //字節的負號恆不亮
 }
 
 static void char_M2(uint8_t _char)

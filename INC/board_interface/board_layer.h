@@ -71,25 +71,6 @@ typedef struct  //different timer flags
   s_EEPROM eep;                 //有被存入EEPROM的參數們
   int8_t level1_index, level2_index; //用戶層的參數名稱指標
   f_menu keymode;               //按鍵切換旗標用
-  
-  //參數都用10倍放大存取, 數值應該要用value來讀寫
-  // int16_t set;
-  // int16_t hy, ls, us, ot, oe, o3, o4;
-  // bool p2p, p3p, p4p;
-  // int16_t ods, ac, v_rtr, cct;
-  // int16_t ccs, con, cof;
-  // int8_t cf, res, lod, red;
-  // int16_t dly, v_dtr;
-  // int16_t tdf, dfp, dte, idf, mdf, dsd;
-  // int8_t dfd, dpo, fnc;
-  // int16_t dad, fdt, daf, fnd, fct, fst, fon, fof;
-  // int8_t fap, alc;
-  // int16_t alu, all, afh, ald, dao;
-  // int8_t ap2, bll, ac2, i1p, i1f;
-  // int16_t al2, au2, ah2, Ad2, da2, v_did, nps;
-  // int8_t v_odc, v_rrd, pbc, onf;
-  // int16_t hes, adr, v_dp1, v_dp2, v_dp3, v_dp4, rse;
-  // int16_t rel, ptb;
 }s_Var;
 
 typedef struct  //different timer flags
