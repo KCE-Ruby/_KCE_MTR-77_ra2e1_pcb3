@@ -19,12 +19,12 @@
 #include "INC/Logic_Manager.h"
 
 /* Private defines ----------------------------------------------------------*/
-#define BOOTonTIME               (4500)      //4.5 = 1ms*4500 = 4500次
-#define BOOToffTIME              (5000)      //+0.5s = 1ms*500 = 500次
-#define ERROR_AD                 (-999)
-#define LEAVESETTIME                (3)      //離開設定層閃爍時間, 單位:秒
-#define CHECKSETTIME               (12)      //檢查設定值多久後自動跳出, 單位:秒
-#define CHANGESETTIME              (10)      //修改設定值多久後自動跳出, 單位:秒
+#define BOOTonTIME                         (4500)      //4.5 = 1ms*4500 = 4500次
+#define BOOToffTIME                        (5000)      //+0.5s = 1ms*500 = 500次
+#define ERROR_AD                           (-999)
+#define KEYLEAVE_SETTIME                      (3)      //按鍵離開設定層的閃爍時間, 單位:秒
+#define AUTOLEAVE_CHECKSETTIME               (12)      //檢查設定值多久後自動跳出, 單位:秒
+#define AUTOLEAVE_CHANGESETTIME              (15)      //修改設定值多久後自動跳出, 單位:秒
 
 /* extern variables -----------------------------------------------------------------*/
 extern r_tmr tmr;
@@ -96,7 +96,7 @@ static void check_set_value(void)
     if(check_set_value_cnt == 0)
       check_set_value_cnt = tmr.Cnt_1s;
 
-    if(tmr.Cnt_1s >= (check_set_value_cnt + CHECKSETTIME))
+    if(tmr.Cnt_1s >= (check_set_value_cnt + AUTOLEAVE_CHECKSETTIME))
       System.keymode.SET_value_flag = false;
   }
   else
@@ -118,7 +118,7 @@ static void change_set_value(void)
     if((change_set_value_cnt == 0) || cnt_reset)
       change_set_value_cnt = tmr.Cnt_1s;
 
-    if(tmr.Cnt_1s >= (change_set_value_cnt + CHANGESETTIME))
+    if(tmr.Cnt_1s >= (change_set_value_cnt + AUTOLEAVE_CHANGESETTIME))
       System.keymode.SET_value_flag = false;
   }
   else 
@@ -135,7 +135,7 @@ static void leave_settingMode(void)
   flash_cnt = ICON_LeaveSet_Flashing(flash_cnt);
 
   //離開set回到home
-  if(flash_cnt > (LEAVESETTIME*2-1))
+  if(flash_cnt > (KEYLEAVE_SETTIME*2-1))
   {
     System.mode = homeMode; //短按一次後回到home模式
     sFlag.leaveSet = false;
@@ -321,7 +321,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x26;
+  const uint8_t test    = 0x27;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
