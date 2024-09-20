@@ -27,23 +27,22 @@ __IO r_tmr tmr;
 __IO bsp_io_level_t KeyPin, pin_sta[7];
 __IO s_Var System;
 __IO s_Flag sFlag;
-static bool debug=false;
 
 /* task function protocol -----------------------------------------------*/
 static void TMR_init(void);
 static void ADC_init(void);
 static void WDT_init(void);
-static fsp_err_t uart_init(void);
+static fsp_err_t Uart_init(void);
 
 /* Global Function definitions ------------------------------------------------------*/
 void System_Init(void)
 {
   WDT_init();   //16384 cycle watchdog
   TMR_init();   //1ms Timer
-  if(debug)
-    Debug_UART1_Init();
-  else
-    uart_init();
+  // if(debug)
+  //   Debug_UART1_Init();
+  // else
+  Uart_init();
   ADC_init();
   I2C_EE_Init();
   get_bytetable_pr1();  //開機時取得當次的用戶層參數table
@@ -100,7 +99,7 @@ void WDT_Feed(void)
 }
 
 //uart
-static fsp_err_t uart_init(void)
+static fsp_err_t Uart_init(void)
 {
   fsp_err_t err;
   err = R_SCI_UART_Open(&g_uart9_ctrl, &g_uart9_cfg);

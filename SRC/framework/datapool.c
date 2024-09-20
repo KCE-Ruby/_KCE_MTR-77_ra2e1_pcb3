@@ -14,25 +14,33 @@
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/LED_Driver/app_menu_ctrl.h"
 #include "INC/framework/ADC.h"
+#include "INC/framework/eep_api.h"
 #include "INC/framework/datapool.h"
 #include <math.h>
 
 
+#define DEBUG_PRINT
+/* Private defines ----------------------------------------------------------*/
+#define GAIN_PARAMETER              (10)     //bytetable參數預設值的增益倍數
+#define LS_OFFSET                   (-500)   //參數的offset值, -50.0
+#define US_OFFSET                   (-500)   //參數的offset值, -50.0
+#define Ot_OFFSET                   (-120)   //參數的offset值, -12.0
+
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var System;
 extern ADC_TemperatureValue TempValue;
-extern __IO uint8_t Buf_Read_24c02[eep_end];
 
 /* variables -----------------------------------------------------------------*/
-static int8_t I2c_Buf_Write[eep_end] = {};
+static int8_t I2c_Buf_Write[eep_end] = {};    //TODO:這是暫時的, 應該要在eepapi才做設定
 __IO uint8_t bytetable_pr1[Pr1_size];
+__IO uint8_t bytetable_pr2[Pr2_size];
 __IO ByteSettingTable bytetable[End] = 
 {
   {xxx,             0,             0,            0,     NaN}, //對齊參數用的而已
   {Set,           -50,           110,         -5.0,     NaN},
-  //參數字元,  上限值,        下限值,        預設值,   權限層
+  //參數字元,  下限值,        上限值,        預設值,   權限層
   { Hy,           0.1,          25.5,          2.0,     Pr1},
-  { LS,         -50.0,           110,         -5.0,     Pr2},
+  { LS,         -50.0,           110,        -50.0,     Pr2},
   { US,         -50.0,           110,          110,     Pr2},
   { Ot,           -12,            12,            0,     Pr1},
   {P2P,       exist_n,       exist_y,      exist_n,     Pr2}, //n=不存在; y=存在
@@ -106,11 +114,105 @@ __IO ByteSettingTable bytetable[End] =
 };
 
 
-/* Private function protocol -----------------------------------------------*/
+/* Static Function protocol -----------------------------------------------*/
+static int16_t offset_EEtoSYS_u8(uint8_t Table, uint8_t SPIaddr);
+static int16_t offset_EEtoSYS_u16(uint8_t Table, uint8_t SPIaddr);
+
+/* Static Function definitions ------------------------------------------------------*/
+static int16_t offset_EEtoSYS_u8(uint8_t Table, uint8_t SPIaddr)
+{
+  uint8_t EE_Buf_Read[End] = {};
+  int16_t ret;
+
+  EE_Buf_Read[SPIaddr] = (uint8_t)((bytetable[Table].DefaultValue-bytetable[Table].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
+  ret = (int16_t)(EE_Buf_Read[SPIaddr]+(bytetable[Table].Range_Low*GAIN_PARAMETER));
+
+  return ret;
+}
+
+static int16_t offset_EEtoSYS_u16(uint8_t Table, uint8_t SPIaddr)
+{
+  uint16_t base_u16=0;
+  uint8_t EE_Buf_Read[End] = {};
+  int16_t ret;
+
+  base_u16 = (uint16_t)((bytetable[Table].DefaultValue-bytetable[Table].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
+  EE_Buf_Read[SPIaddr+1] = base_u16 >> 8;      //取高位元, TODO:EEPROM的API會取代這行
+  EE_Buf_Read[SPIaddr] = base_u16 & 0xff;    //取低位元, TODO:EEPROM的API會取代這行
+  base_u16 = (int16_t)(EE_Buf_Read[SPIaddr+1]<<8) + EE_Buf_Read[SPIaddr];  //組合成變數
+  ret = (int16_t)(base_u16+(bytetable[Table].Range_Low*GAIN_PARAMETER));
+  
+  return ret;
+}
 
 /* Function definitions ------------------------------------------------------*/
+void offset_EEtoSYS(void)
+{
+  //可能跟read_all_eeprom_data同功能
+  //整個系統運算的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
+
+  // uint16_t base_u16=0;
+  // double print_double = 0;
+  // uint8_t EE_Buf_Read[End] = {};
+  int16_t EE_Buf_u16[End] = {};
+
+  //Set
+  EE_Buf_u16[UserAddr_Set] = offset_EEtoSYS_u16(Set, SPIAddr_Set_L);
+  // base_u16 = (uint16_t)((bytetable[Set].DefaultValue-bytetable[Set].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
+  // EE_Buf_Read[SPIAddr_Set_H] = base_u16 >> 8;      //取高位元, TODO:EEPROM的API會取代這行
+  // EE_Buf_Read[SPIAddr_Set_L] = base_u16 & 0xff;    //取低位元, TODO:EEPROM的API會取代這行
+  // base_u16 = (int16_t)(EE_Buf_Read[SPIAddr_Set_H]<<8) + EE_Buf_Read[SPIAddr_Set_L];  //組合成變數
+  // EE_Buf_u16[UserAddr_Set] = (int16_t)(base_u16+(bytetable[Set].Range_Low*GAIN_PARAMETER));
+
+  //Hy
+  EE_Buf_u16[UserAddr_Hy] = offset_EEtoSYS_u8(Hy, SPIAddr_Hy);
+  // EE_Buf_Read[SPIAddr_Hy] = (uint8_t)((bytetable[Hy].DefaultValue-bytetable[Hy].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
+  // EE_Buf_u16[UserAddr_Hy] = (int16_t)(EE_Buf_Read[SPIAddr_Hy]+(bytetable[Hy].Range_Low*GAIN_PARAMETER));
+
+  //LS
+  EE_Buf_u16[UserAddr_LS] = offset_EEtoSYS_u16(LS, SPIAddr_LS_L);
+  // base_u16 = (uint16_t)((bytetable[LS].DefaultValue-bytetable[LS].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
+  // EE_Buf_Read[SPIAddr_LS_H] = base_u16 >> 8;      //取高位元, TODO:EEPROM的API會取代這行
+  // EE_Buf_Read[SPIAddr_LS_L] = base_u16 & 0xff;    //取低位元, TODO:EEPROM的API會取代這行
+  // base_u16 = (int16_t)(EE_Buf_Read[SPIAddr_LS_H]<<8) + EE_Buf_Read[SPIAddr_LS_L];  //組合成變數
+  // EE_Buf_u16[UserAddr_LS] = (int16_t)(base_u16+(bytetable[LS].Range_Low*GAIN_PARAMETER));
+
+  //US
+  EE_Buf_u16[UserAddr_US] = offset_EEtoSYS_u16(US, SPIAddr_US_L);
+  // base_u16 = (uint16_t)((bytetable[US].DefaultValue-bytetable[US].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
+  // EE_Buf_Read[SPIAddr_US_H] = base_u16 >> 8;      //取高位元, TODO:EEPROM的API會取代這行
+  // EE_Buf_Read[SPIAddr_US_L] = base_u16 & 0xff;    //取低位元, TODO:EEPROM的API會取代這行
+  // base_u16 = (int16_t)(EE_Buf_Read[SPIAddr_US_H]<<8) + EE_Buf_Read[SPIAddr_US_L];  //組合成變數
+  // EE_Buf_u16[UserAddr_US] = (int16_t)(base_u16+(bytetable[US].Range_Low*GAIN_PARAMETER));
+
+  //Ot
+  EE_Buf_u16[UserAddr_Ot] = offset_EEtoSYS_u8(Ot, SPIAddr_Ot);
+  // base_u16 = (uint8_t)((bytetable[Ot].DefaultValue-bytetable[Ot].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
+  // EE_Buf_Read[SPIAddr_Ot] = base_u16; //TODO:EEPROM的API會取代這行
+  // EE_Buf_u16[UserAddr_Ot] = (int16_t)(EE_Buf_Read[SPIAddr_Ot]+(bytetable[Ot].Range_Low*GAIN_PARAMETER));
+
+  //P2P
+  EE_Buf_u16[UserAddr_P2P] = offset_EEtoSYS_u8(P2P, SPIAddr_P2P);
+  // base_u16 = (uint8_t)((bytetable[P2P].DefaultValue-bytetable[P2P].Range_Low)*GAIN_PARAMETER); //TODO:EEPROM的API會取代這行
+  // EE_Buf_Read[SPIAddr_P2P] = base_u16; //TODO:EEPROM的API會取代這行
+  // EE_Buf_u16[UserAddr_P2P] = (int16_t)(EE_Buf_Read[SPIAddr_P2P]+(bytetable[P2P].Range_Low*GAIN_PARAMETER));
+
+
+  #ifdef DEBUG_PRINT
+  {
+    printf("EE_Buf_u16[UserAddr_Set] = %d \r\n", EE_Buf_u16[UserAddr_Set]/GAIN_PARAMETER);
+    printf("EE_Buf_u16[UserAddr_Hy]  = %d \r\n", EE_Buf_u16[UserAddr_Hy]/GAIN_PARAMETER);
+    printf("EE_Buf_u16[UserAddr_LS]  = %d \r\n", EE_Buf_u16[UserAddr_LS]/GAIN_PARAMETER);
+    printf("EE_Buf_u16[UserAddr_US]  = %d \r\n", EE_Buf_u16[UserAddr_US]/GAIN_PARAMETER);
+    printf("EE_Buf_u16[UserAddr_Ot]  = %d \r\n", EE_Buf_u16[UserAddr_Ot]/GAIN_PARAMETER);
+    printf("EE_Buf_u16[UserAddr_P2P] = %d \r\n", EE_Buf_u16[UserAddr_P2P]/GAIN_PARAMETER);
+  }
+  #endif
+}
+
 void get_Pv(void)
 {
+  //Pv值來自於sensor1 or 2, TODO:訊號源未新增
   System.pv = TempValue.sensor1;
 }
 

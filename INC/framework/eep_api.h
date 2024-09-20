@@ -20,7 +20,7 @@ enum SPIAddr
   SPIAddr_Set_L,
   SPIAddr_Set_H,
 
-  SPIAddr_Hy_H,
+  SPIAddr_Hy,
 
   SPIAddr_LS_L,
   SPIAddr_LS_H,

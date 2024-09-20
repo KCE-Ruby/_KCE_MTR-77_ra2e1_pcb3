@@ -15,6 +15,7 @@
 
 /* Private defines ----------------------------------------------------------*/
 #define Pr1_size               (17)      //Pr1的參數總量
+#define Pr2_size               (17)      //Pr2的參數總量
 
 /* Enum type definitions -----------------------------------------------------*/
 enum Levelflag
@@ -146,6 +147,7 @@ typedef struct
 } ByteSettingTable;
 
 /* task function protocol -----------------------------------------------*/
+void offset_EEtoSYS(void);
 void get_Pv(void);
 void get_HistoryMax(void);
 void get_HistoryMin(void);

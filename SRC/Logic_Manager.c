@@ -249,7 +249,7 @@ static void boot_control(void)
     else if(tmr.Cnt_1ms > BOOToffTIME)
     {
       // reset_eeprom();  //平常不開, 用來重置參數的API
-      read_all_eeprom_data();
+//      read_all_eeprom_data();
       CLOSE_LED_FLAG = false;
       bootled_En = false;
     }
@@ -317,17 +317,19 @@ static void loop_100us(void)
 /* Function definitions ------------------------------------------------------*/
 void Task_Main(void)
 {
+  //整個系統運算的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
   uint32_t Device_Version;
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x27;
+  const uint8_t test    = 0x28;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
   printf("初始化完成\r\n");
-  printf("軟體版本: %lu\r\n", Device_Version);
+  printf("軟體版本: 0x%02X\r\n", Device_Version);
   tmr.Cnt_1ms = 0;
+  offset_EEtoSYS();
   while(1)
   {
     /*
