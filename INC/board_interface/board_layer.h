@@ -64,32 +64,32 @@ typedef struct
 
 typedef struct  //different timer flags
 {
-  int16_t sv, pv, history_max, history_min; //3位數值, 含負數
+  int16_t value[74];            //大小為[End], 各參數內的數值, 有負數沒有小數, 以整數儲存
+  int16_t pv, history_max, history_min; //3位數值, 含負數
   uint8_t mode;                 //顯示目前的模式, 首頁/設定模式
   uint8_t decimalIndex;         //顯示的小數點位
   s_EEPROM eep;                 //有被存入EEPROM的參數們
   int8_t level1_index, level2_index; //用戶層的參數名稱指標
-  int16_t value[74];            //大小為[End], 各參數內的數值, 有負數沒有小數, 以整數儲存
   f_menu keymode;               //按鍵切換旗標用
   
-  //參數都用10倍放大存取
-  int16_t set;
-  int16_t hy, ls, us, ot, oe, o3, o4;
-  bool p2p, p3p, p4p;
-  int16_t ods, ac, v_rtr, cct;
-  int16_t ccs, con, cof;
-  int8_t cf, res, lod, red;
-  int16_t dly, v_dtr;
-  int16_t tdf, dfp, dte, idf, mdf, dsd;
-  int8_t dfd, dpo, fnc;
-  int16_t dad, fdt, daf, fnd, fct, fst, fon, fof;
-  int8_t fap, alc;
-  int16_t alu, all, afh, ald, dao;
-  int8_t ap2, bll, ac2, i1p, i1f;
-  int16_t al2, au2, ah2, Ad2, da2, v_did, nps;
-  int8_t v_odc, v_rrd, pbc, onf;
-  int16_t hes, adr, v_dp1, v_dp2, v_dp3, v_dp4, rse;
-  int16_t rel, ptb;
+  //參數都用10倍放大存取, 數值應該要用value來讀寫
+  // int16_t set;
+  // int16_t hy, ls, us, ot, oe, o3, o4;
+  // bool p2p, p3p, p4p;
+  // int16_t ods, ac, v_rtr, cct;
+  // int16_t ccs, con, cof;
+  // int8_t cf, res, lod, red;
+  // int16_t dly, v_dtr;
+  // int16_t tdf, dfp, dte, idf, mdf, dsd;
+  // int8_t dfd, dpo, fnc;
+  // int16_t dad, fdt, daf, fnd, fct, fst, fon, fof;
+  // int8_t fap, alc;
+  // int16_t alu, all, afh, ald, dao;
+  // int8_t ap2, bll, ac2, i1p, i1f;
+  // int16_t al2, au2, ah2, Ad2, da2, v_did, nps;
+  // int8_t v_odc, v_rrd, pbc, onf;
+  // int16_t hes, adr, v_dp1, v_dp2, v_dp3, v_dp4, rse;
+  // int16_t rel, ptb;
 }s_Var;
 
 typedef struct  //different timer flags

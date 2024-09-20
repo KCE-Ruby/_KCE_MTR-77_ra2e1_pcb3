@@ -32,9 +32,9 @@ extern ADC_TemperatureValue TempValue;
 
 /* variables -----------------------------------------------------------------*/
 static int8_t I2c_Buf_Write[eep_end] = {};    //TODO:這是暫時的, 應該要在eepapi才做設定
-__IO uint8_t bytetable_pr1[Pr1_size];
-__IO uint8_t bytetable_pr2[Pr2_size];
-__IO ByteSettingTable bytetable[End] = 
+__IO uint8_t bytetable_pr1[End];
+__IO uint8_t bytetable_pr2[End];
+__IO ByteSettingTable bytetable[End] =
 {
   {xxx,             0,             0,            0,     NaN}, //對齊參數用的而已
   {Set,           -50,           110,         -5.0,     NaN},
@@ -42,7 +42,7 @@ __IO ByteSettingTable bytetable[End] =
   { Hy,           0.1,          25.5,          2.0,     Pr1},
   { LS,         -50.0,           110,        -50.0,     Pr2},
   { US,         -50.0,           110,        110.0,     Pr2},
-  { Ot,           -12,            12,            0,     Pr1},
+  { Ot,           -12,            12,            0,     Pr2},
   {P2P,       exist_n,       exist_y,      exist_y,     Pr2}, //n=不存在; y=存在
   { OE,           -12,            12,            0,     Pr2},
   {P3P,       exist_n,       exist_y,      exist_n,     Pr2}, //n=不存在; y=存在
@@ -53,20 +53,20 @@ __IO ByteSettingTable bytetable[End] =
   { AC,             0,            50,            1,     Pr1},
   {rtr,             0,           100,          100,     Pr2}, //P1=100, P2=0
   {CCt,           0.0,          24.0,            0,     Pr2}, //精度為0.1hour = 6min
-  {CCS,         -55.0,         150.0,           -5,     Pr2},
+  {CCS,         -55.0,         150.0,           -5,     Pr1},
   {COn,             0,           255,           15,     Pr1},
   {COF,             0,           255,           30,     Pr1},
-  { CF,      degree_C,      degree_F,     degree_C,     Pr2}, //攝氏=C, 華氏=F
+  { CF,      degree_C,      degree_F,     degree_C,     Pr1}, //攝氏=C, 華氏=F
   {rES,  DECIMAL_AT_1,  DECIMAL_AT_0, DECIMAL_AT_1,     Pr2}, //小數=dE=DECIMAL_AT_1, 整數=in=DECIMAL_AT_0
   {Lod,       disp_P1,      disp_dtr,      disp_P1,     Pr2},
   {rEd,       disp_P1,      disp_dtr,      disp_P1,     NaN},
   {dLY,             0,          20.0,            0,     Pr2}, //單位:0~20.0分鐘, 分辨率10秒
   {dtr,             0,           100,           50,     Pr2}, //P1=100, P2=0
-  {tdF,       type_EL,       type_in,      type_EL,     Pr2},
+  {tdF,       type_EL,       type_in,      type_EL,     Pr1},
   {dFP,    defrost_np,    defrost_p4,   defrost_p2,     Pr2},
   {dtE,           -50,            50,            8,     Pr1},
-  {IdF,             1,           120,            6,     Pr1},
-  {MdF,             0,           255,           30,     Pr1}, //0的時候不融霜
+  {IdF,             1,           120,            6,     Pr2},
+  {MdF,             0,           255,           30,     Pr2}, //0的時候不融霜
   {dSd,             0,            99,            0,     Pr2},
   {dFd,    defrost_rt,   defrost_dEF,   defrost_it,     Pr2},
   {dAd,             0,           255,           30,     Pr2},
@@ -108,7 +108,7 @@ __IO ByteSettingTable bytetable[End] =
   {dp2,             0,             0,            0,     Pr1},
   {dp3,             0,             0,            0,     Pr2},
   {dp4,             0,             0,            0,     Pr2},
-  {rSE,             0,             0,            0,     Pr2},
+  {rSE,             0,             0,            0,     Pr1},
   {rEL,             0,             0,            0,     Pr2},
   {Ptb,             0,             0,            0,     Pr2},
 };
@@ -185,75 +185,84 @@ void offset_EEtoSYS(void)
   }
 
   //整個系統運算的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
-  System.set = EE_Buf_u16[UserAddr_Set];
-  System.hy = EE_Buf_u16[UserAddr_Hy];
-  System.ls = EE_Buf_u16[UserAddr_LS];
-  System.us = EE_Buf_u16[UserAddr_US];
-  System.ot = EE_Buf_u16[UserAddr_Ot];
-  System.oe = EE_Buf_u16[UserAddr_OE];
-  System.o3 = EE_Buf_u16[UserAddr_O3];
-  System.o4 = EE_Buf_u16[UserAddr_O4];
-  System.p2p = EE_Buf_u16[UserAddr_P2P];
-  System.p3p = EE_Buf_u16[UserAddr_P3P];
-  System.p4p = EE_Buf_u16[UserAddr_P4P];
-  System.ods = EE_Buf_u16[UserAddr_OdS];
-  System.ac = EE_Buf_u16[UserAddr_AC];
-  System.v_rtr = EE_Buf_u16[UserAddr_rtr];
-  System.cct = EE_Buf_u16[UserAddr_CCt];
-  System.ccs = EE_Buf_u16[UserAddr_CCS];
-  System.con = EE_Buf_u16[UserAddr_COn];
-  System.cof = EE_Buf_u16[UserAddr_COF];
-  System.cf = EE_Buf_u16[UserAddr_CF];
-  System.res = EE_Buf_u16[UserAddr_rES];
-  System.lod = EE_Buf_u16[UserAddr_Lod];
-  System.red = EE_Buf_u16[UserAddr_rEd];
-  System.dly = EE_Buf_u16[UserAddr_dLY];
-  System.v_dtr = EE_Buf_u16[UserAddr_dtr];
-  System.dfp = EE_Buf_u16[UserAddr_dFP];
-  System.tdf = EE_Buf_u16[UserAddr_tdF];
-  System.dte = EE_Buf_u16[UserAddr_dtE];
-  System.idf = EE_Buf_u16[UserAddr_IdF];
-  System.mdf = EE_Buf_u16[UserAddr_MdF];
-  System.dsd = EE_Buf_u16[UserAddr_dSd];
-  System.dfd = EE_Buf_u16[UserAddr_dFd];
-  System.dad = EE_Buf_u16[UserAddr_dAd];
-  System.fdt = EE_Buf_u16[UserAddr_Fdt];
-  System.dpo = EE_Buf_u16[UserAddr_dPo];
-  System.daf = EE_Buf_u16[UserAddr_dAF];
-  System.fnc = EE_Buf_u16[UserAddr_FnC];
-  System.fnd = EE_Buf_u16[UserAddr_Fnd];
-  System.fct = EE_Buf_u16[UserAddr_Fct];
-  System.fst = EE_Buf_u16[UserAddr_FSt];
-  System.fon = EE_Buf_u16[UserAddr_Fon];
-  System.fof = EE_Buf_u16[UserAddr_FoF];
-  System.fap = EE_Buf_u16[UserAddr_FAP];
-  System.alc = EE_Buf_u16[UserAddr_ALC];
-  System.alu = EE_Buf_u16[UserAddr_ALU];
-  System.all = EE_Buf_u16[UserAddr_ALL];
-  System.afh = EE_Buf_u16[UserAddr_AFH];
-  System.ald = EE_Buf_u16[UserAddr_ALd];
-  System.dao = EE_Buf_u16[UserAddr_dAO];
-  System.ap2 = EE_Buf_u16[UserAddr_AP2];
-  System.al2 = EE_Buf_u16[UserAddr_AL2];
-  System.au2 = EE_Buf_u16[UserAddr_Au2];
-  System.ah2 = EE_Buf_u16[UserAddr_AH2];
-  System.Ad2 = EE_Buf_u16[UserAddr_Ad2];
-  System.da2 = EE_Buf_u16[UserAddr_dA2];
-  System.bll = EE_Buf_u16[UserAddr_bLL];
-  System.ac2 = EE_Buf_u16[UserAddr_AC2];
-  System.i1p = EE_Buf_u16[UserAddr_i1P];
-  System.i1f = EE_Buf_u16[UserAddr_i1F];
-  System.v_did = EE_Buf_u16[UserAddr_did];
-  System.nps = EE_Buf_u16[UserAddr_nPS];
-  System.v_odc = EE_Buf_u16[UserAddr_odc];
-  System.v_rrd = EE_Buf_u16[UserAddr_rrd];
-  System.hes = EE_Buf_u16[UserAddr_HES];
-  System.adr = EE_Buf_u16[UserAddr_Adr];
-  System.pbc = EE_Buf_u16[UserAddr_PbC];
-  System.onf = EE_Buf_u16[UserAddr_onF];
+  i=UserAddr_Set;
+  while(i < UserAddr_End)
+  {
+    System.value[i] = EE_Buf_u16[i];
+    i++;
+  }
+  // System.value[Set] = EE_Buf_u16[UserAddr_Set];
+  // System.hy = EE_Buf_u16[UserAddr_Hy];
+  // System.ls = EE_Buf_u16[UserAddr_LS];
+  // System.us = EE_Buf_u16[UserAddr_US];
+  // System.ot = EE_Buf_u16[UserAddr_Ot];
+  // System.oe = EE_Buf_u16[UserAddr_OE];
+  // System.o3 = EE_Buf_u16[UserAddr_O3];
+  // System.o4 = EE_Buf_u16[UserAddr_O4];
+  // System.p2p = EE_Buf_u16[UserAddr_P2P];
+  // System.p3p = EE_Buf_u16[UserAddr_P3P];
+  // System.p4p = EE_Buf_u16[UserAddr_P4P];
+  // System.ods = EE_Buf_u16[UserAddr_OdS];
+  // System.ac = EE_Buf_u16[UserAddr_AC];
+  // System.v_rtr = EE_Buf_u16[UserAddr_rtr];
+  // System.cct = EE_Buf_u16[UserAddr_CCt];
+  // System.ccs = EE_Buf_u16[UserAddr_CCS];
+  // System.con = EE_Buf_u16[UserAddr_COn];
+  // System.cof = EE_Buf_u16[UserAddr_COF];
+  // System.value[CF] = EE_Buf_u16[UserAddr_CF];
+  // System.res = EE_Buf_u16[UserAddr_rES];
+  // System.lod = EE_Buf_u16[UserAddr_Lod];
+  // System.red = EE_Buf_u16[UserAddr_rEd];
+  // System.dly = EE_Buf_u16[UserAddr_dLY];
+  // System.v_dtr = EE_Buf_u16[UserAddr_dtr];
+  // System.dfp = EE_Buf_u16[UserAddr_dFP];
+  // System.value[tdF] = EE_Buf_u16[UserAddr_tdF];
+  // System.value[dtE] = EE_Buf_u16[UserAddr_dtE];
+  // System.idf = EE_Buf_u16[UserAddr_IdF];
+  // System.mdf = EE_Buf_u16[UserAddr_MdF];
+  // System.dsd = EE_Buf_u16[UserAddr_dSd];
+  // System.dfd = EE_Buf_u16[UserAddr_dFd];
+  // System.dad = EE_Buf_u16[UserAddr_dAd];
+  // System.fdt = EE_Buf_u16[UserAddr_Fdt];
+  // System.dpo = EE_Buf_u16[UserAddr_dPo];
+  // System.daf = EE_Buf_u16[UserAddr_dAF];
+  // System.fnc = EE_Buf_u16[UserAddr_FnC];
+  // System.fnd = EE_Buf_u16[UserAddr_Fnd];
+  // System.fct = EE_Buf_u16[UserAddr_Fct];
+  // System.fst = EE_Buf_u16[UserAddr_FSt];
+  // System.fon = EE_Buf_u16[UserAddr_Fon];
+  // System.fof = EE_Buf_u16[UserAddr_FoF];
+  // System.fap = EE_Buf_u16[UserAddr_FAP];
+  // System.alc = EE_Buf_u16[UserAddr_ALC];
+  // System.alu = EE_Buf_u16[UserAddr_ALU];
+  // System.all = EE_Buf_u16[UserAddr_ALL];
+  // System.afh = EE_Buf_u16[UserAddr_AFH];
+  // System.ald = EE_Buf_u16[UserAddr_ALd];
+  // System.dao = EE_Buf_u16[UserAddr_dAO];
+  // System.ap2 = EE_Buf_u16[UserAddr_AP2];
+  // System.al2 = EE_Buf_u16[UserAddr_AL2];
+  // System.au2 = EE_Buf_u16[UserAddr_Au2];
+  // System.ah2 = EE_Buf_u16[UserAddr_AH2];
+  // System.Ad2 = EE_Buf_u16[UserAddr_Ad2];
+  // System.da2 = EE_Buf_u16[UserAddr_dA2];
+  // System.bll = EE_Buf_u16[UserAddr_bLL];
+  // System.ac2 = EE_Buf_u16[UserAddr_AC2];
+  // System.i1p = EE_Buf_u16[UserAddr_i1P];
+  // System.i1f = EE_Buf_u16[UserAddr_i1F];
+  // System.v_did = EE_Buf_u16[UserAddr_did];
+  // System.nps = EE_Buf_u16[UserAddr_nPS];
+  // System.v_odc = EE_Buf_u16[UserAddr_odc];
+  // System.v_rrd = EE_Buf_u16[UserAddr_rrd];
+  // System.hes = EE_Buf_u16[UserAddr_HES];
+  // System.adr = EE_Buf_u16[UserAddr_Adr];
+  // System.pbc = EE_Buf_u16[UserAddr_PbC];
+  // System.onf = EE_Buf_u16[UserAddr_onF];
 
   System.history_max = 0;    //EE_Buf_u16[UserAddr_history_min]
   System.history_min = 0;    //EE_Buf_u16[UserAddr_history_max]
+  
+  System.value[rSE] = System.value[Set];
+  System.value[rEL] = 10;           //v1.0
   // printf("測試結束25\r\n");
 }
 
@@ -298,10 +307,10 @@ void clear_History_value(void)
   System.history_min = 0;
 }
 
-void get_bytetable_pr1(void)
+uint8_t get_bytetable_pr1(void)
 {
-  static uint8_t index=0, check_index=0;
-  while(check_index <= End)
+  uint8_t index=0, check_index=0;
+  while(check_index < End)
   {
     if(bytetable[check_index].Mode == Pr1)
     {
@@ -310,10 +319,25 @@ void get_bytetable_pr1(void)
     }
     check_index++;
   }
-  index = 0;
-  check_index = 0;
+  printf("get_bytetable_pr1測試結束3: %d\r\n", index);
+  return index;
 }
 
+uint8_t get_bytetable_pr2(void)
+{
+  uint8_t index=0, check_index=0;
+  while(check_index < End)
+  {
+    if((bytetable[check_index].Mode==Pr1) || (bytetable[check_index].Mode==Pr2))
+    {
+      bytetable_pr2[index] = bytetable[check_index].UserByte;
+      index++;
+    }
+    check_index++;
+  }
+  printf("get_bytetable_pr2測試結束3: %d\r\n", index);
+  return index;
+}
 
 
 

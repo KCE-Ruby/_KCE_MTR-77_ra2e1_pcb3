@@ -18,6 +18,7 @@
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/LED_Driver/app_icon_ctrl.h"
+#include "INC/framework/LED_Driver/app_menu_ctrl.h"
 #include "INC/framework/datapool.h"
 #include "INC/framework/outAPI.h"
 
@@ -31,7 +32,7 @@ extern __IO s_Var System;
 
 bool manual_defrost(bool flag)
 {
-  if(System.pv < System.dte)
+  if(System.pv < System.value[dtE])
     out3_Defrost_on();
   else
   {
@@ -65,8 +66,8 @@ void out2_Compressor_off(void)
 void out3_Defrost_on(void)
 {
   bool init_type = false;
-  if(System.tdf == type_EL) init_type = NC_control;
-  else if(System.tdf == type_in) init_type = NO_control;
+  if(System.value[tdF] == type_EL) init_type = NC_control;
+  else if(System.value[tdF] == type_in) init_type = NO_control;
 
   ICON_Defrost_ON();
   if(init_type == NC_control)
@@ -78,8 +79,8 @@ void out3_Defrost_on(void)
 void out3_Defrost_off(void)
 {
   bool init_type = false;
-  if(System.tdf == type_EL) init_type = NC_control;
-  else if(System.tdf == type_in) init_type = NO_control;
+  if(System.value[tdF] == type_EL) init_type = NC_control;
+  else if(System.value[tdF] == type_in) init_type = NO_control;
   
   ICON_Defrost_OFF();
   if(init_type == NC_control)

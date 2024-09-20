@@ -35,7 +35,8 @@ extern __IO s_Flag sFlag;
 extern __IO bool CLOSE_LED_FLAG;
 extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
 // extern __IO ByteSettingTable bytetable[End];
-extern __IO uint8_t bytetable_pr1[Pr1_size];
+extern __IO uint8_t bytetable_pr1[End];
+extern __IO uint8_t bytetable_pr2[End];
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
@@ -92,7 +93,7 @@ static void check_set_value(void)
   static uint32_t check_set_value_cnt=0;
   if(System.keymode.SET_value_flag)
   {
-    NumToDisplay(System.set);
+    NumToDisplay(System.value[Set]);
     if(check_set_value_cnt == 0)
       check_set_value_cnt = tmr.Cnt_1s;
 
@@ -113,7 +114,7 @@ static void change_set_value(void)
 
   if(System.keymode.SET_value_flag)
   {
-    NumToDisplay(System.set);
+    NumToDisplay(System.value[Set]);
     ICON_degrees_Flashing();
     if((change_set_value_cnt == 0) || cnt_reset)
       change_set_value_cnt = tmr.Cnt_1s;
@@ -260,28 +261,12 @@ static void boot_control(void)
 
 static void read_all_eeprom_data(void)
 {
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  I2C_EE_BufferRead(I2c_Buf_Read, 0x00 , eep_end);
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  // I2C_EE_BufferRead(I2c_Buf_Read, 0x00 , eep_end);
+  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
 
   // 讀出eeprom後, 寫入mcu的對應值
   offset_EEtoSYS();
-
-  // if((I2c_Buf_Read[eep_Set_high]&0x80) != 0)
-  // {
-  //   I2c_Buf_Read[eep_Set_high] &= 0x7F; //移除負數旗標
-  //   System.set = I2c_Buf_Read[eep_Set_low]+(I2c_Buf_Read[eep_Set_high]<<8);
-  //   System.set *= (-1);
-  // }
-  // else
-  // {
-  //   System.set = I2c_Buf_Read[eep_Set_low]+(I2c_Buf_Read[eep_Set_high]<<8);
-  // }
-
-  System.hy = I2c_Buf_Read[eep_Hy_low]+(I2c_Buf_Read[eep_Hy_high]<<8);
-  System.history_max = I2c_Buf_Read[eep_max_low]+(I2c_Buf_Read[eep_max_high]<<8);
-  System.history_min = I2c_Buf_Read[eep_min_low]+(I2c_Buf_Read[eep_min_high]<<8);
-  System.dte = 8;
 }
 
 static void loop_100ms(void)
@@ -323,7 +308,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x29;
+  const uint8_t test    = 0x2F;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

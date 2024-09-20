@@ -105,8 +105,8 @@ static const uint8_t ByteTable[][3] = {
   {dig_d,       dig_L,      dig_y},    // dLy
   {dig_d,       dig_t,      dig_r},    // dtr
   //7.3 融霜參數
-  {dig_d,       dig_F,      dig_P},    // dFP   --TODO:影片中與tdF換順序
   {dig_t,       dig_d,      dig_F},    // tdF   --TODO:影片中與dFP換順序
+  {dig_d,       dig_F,      dig_P},    // dFP   --TODO:影片中與tdF換順序
   {dig_d,       dig_t,      dig_E},    // dtE
   {dig_i,       dig_d,      dig_F},    // idF
   // {dig_d,       dig_i,      dig_d},    // 5 did   --TODO:影片中沒看到

@@ -27,6 +27,7 @@ __IO r_tmr tmr;
 __IO bsp_io_level_t KeyPin, pin_sta[7];
 __IO s_Var System;
 __IO s_Flag sFlag;
+__IO uint8_t Pr1_size, Pr2_size;
 
 /* task function protocol -----------------------------------------------*/
 static void TMR_init(void);
@@ -45,7 +46,8 @@ void System_Init(void)
   Uart_init();
   ADC_init();
   I2C_EE_Init();
-  get_bytetable_pr1();  //開機時取得當次的用戶層參數table
+  Pr1_size = get_bytetable_pr1();  //開機時取得當次的用戶層參數table
+  Pr2_size = get_bytetable_pr2();  //開機時取得當次的用戶層參數table
   //預設開機為小數點一位數, TODO:讀取eeprom後這行要拿掉
   System.decimalIndex = DECIMAL_AT_1;
 }

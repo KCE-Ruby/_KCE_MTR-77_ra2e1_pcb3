@@ -13,6 +13,7 @@
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/LED_Driver/app_icon_ctrl.h"
 #include "INC/framework/LED_Driver/Indicator_encode.h"
+#include "INC/framework/LED_Driver/app_menu_ctrl.h"
 #include "INC/framework/datapool.h"
 
 /* Private defines ----------------------------------------------------------*/
@@ -75,13 +76,13 @@ uint8_t ICON_LeaveSet_Flashing(uint8_t flash_cnt)
   if(flag == true)
   {
     //離開設定層時, 數字&依據溫度單位閃爍燈號3次
-    NumToDisplay(System.set);
-    if(System.cf == degree_C)
+    NumToDisplay(System.value[Set]);
+    if(System.value[CF] == degree_C)
     {
       ICON_degrees_Celsius_ON();
       ICON_degrees_Fahrenheit_OFF();
     }
-    else if(System.cf == degree_F)
+    else if(System.value[CF] == degree_F)
     {
       ICON_degrees_Fahrenheit_ON();
       ICON_degrees_Celsius_OFF();
@@ -209,12 +210,12 @@ void ICON_degrees_Flashing(void)
     if((System.mode == level1Mode) || (System.mode == settingMode))
     {
       //在用戶層及設定層內, 依據溫度單位閃爍燈號
-      if(System.cf == degree_C)
+      if(System.value[CF] == degree_C)
       {
         ICON_degrees_Celsius_ON();
         ICON_degrees_Fahrenheit_OFF();
       }
-      else if(System.cf == degree_F)
+      else if(System.value[CF] == degree_F)
       {
         ICON_degrees_Fahrenheit_ON();
         ICON_degrees_Celsius_OFF();
@@ -235,12 +236,12 @@ void ICON_degrees_Flashing(void)
 
 void ICON_degrees_API(void)
 {
-  if(System.cf == degree_C)
+  if(System.value[CF] == degree_C)
   {
     ICON_degrees_Celsius_ON();
     ICON_degrees_Fahrenheit_OFF();
   }
-  else if(System.cf == degree_F)
+  else if(System.value[CF] == degree_F)
   {
     ICON_degrees_Fahrenheit_ON();
     ICON_degrees_Celsius_OFF();

@@ -28,6 +28,7 @@ extern __IO bsp_io_level_t KeyPin, pin_sta[6];
 extern __IO s_Var System;
 extern __IO s_Flag sFlag;
 extern __IO r_tmr tmr;
+extern __IO uint8_t Pr1_size, Pr2_size;
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t disp_level;
@@ -209,8 +210,8 @@ if(KeyUp.shortPressed != 0)
 
       case settingMode:
         //TODO: get設定值的最大值API, 不要extern 整個table
-        System.set++;
-        if(System.set > 1100) System.set = 1100;
+        System.value[Set]++;
+        if(System.value[Set] > 1100) System.value[Set] = 1100;
       break;
 
       default:
@@ -268,8 +269,8 @@ static key_down_function(void)
 
       case settingMode:
         //TODO: get設定值的最小值API, 不要extern 整個table
-        System.set--;
-        if(System.set < -500) System.set = -500;
+        System.value[Set]--;
+        if(System.value[Set] < -500) System.value[Set] = -500;
       break;
 
       default:

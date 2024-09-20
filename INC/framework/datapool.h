@@ -13,10 +13,6 @@
 #define INC_DATAPOOL_H_ 
 #ifdef INC_DATAPOOL_H_
 
-/* Private defines ----------------------------------------------------------*/
-#define Pr1_size               (17)      //Pr1的參數總量
-#define Pr2_size               (17)      //Pr2的參數總量
-
 /* Enum type definitions -----------------------------------------------------*/
 enum Levelflag
 {
@@ -152,6 +148,7 @@ void get_Pv(void);
 void get_HistoryMax(void);
 void get_HistoryMin(void);
 void clear_History_value(void);
-void get_bytetable_pr1(void);
+uint8_t get_bytetable_pr1(void);
+uint8_t get_bytetable_pr2(void);
 
 #endif /* INC_DATAPOOL_H_ */
