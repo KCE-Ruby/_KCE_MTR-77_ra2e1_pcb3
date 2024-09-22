@@ -16,6 +16,7 @@
 /* Enum type definitions -----------------------------------------------------*/
 typedef struct
 {
+  bool conti_pressed;
   uint8_t shortPressed;
   uint8_t LongPressed;
   uint16_t Cnt;

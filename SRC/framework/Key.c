@@ -16,12 +16,14 @@
 #include "INC/framework/Display.h"
 
 /* Private defines ----------------------------------------------------------*/
-#define KEY_DEBOUNCE_long              (150)     //(單位為:ms/次), 長按
+#define KEY_DEBOUNCE_long              (150)      //(單位為:ms/次), 長按
 #define KEY_DEBOUNCE_short              (15)      //(單位為:ms/次), 短按
+#define CONTI_PRESS_THRESHOLD          (150)      //連加的閾值時間, 單位:ms
+#define AUTO_INCREMENT_DELAY            (50)      //連續累加的間隔時間, 單位:ms
 
 #define KEY_cnt_2s                     (400)
 #define KEY_cnt_max                   (5000)
-#define KEY_cnt_min                   (1)
+#define KEY_cnt_min                      (1)
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO bsp_io_level_t KeyPin, pin_sta[6];
@@ -145,11 +147,19 @@ static Key_Manager key_detect(Key_Manager key)
 
   //按下時, 計數器++
   if(key_sta)
+  {
     key.Cnt++;
+    //長按超過一定時間時, 判斷給按鍵數字連按用
+    if(key.Cnt>=CONTI_PRESS_THRESHOLD)
+      key.conti_pressed = true;
+  }
   else
   {
+    //放開時, 清除連按旗標
+    key.conti_pressed = false;
+
     //放開時, 判斷計數器被按下多久, 分成長按以及短按
-    if(key.Cnt>=KEY_DEBOUNCE_long)
+    if(key.Cnt>=KEY_DEBOUNCE_long)    //長按暫時未被使用
       key.LongPressed++;
 
     if(key.Cnt>=KEY_DEBOUNCE_short)
@@ -175,9 +185,10 @@ static key_up_function(void)
   */
   int16_t data_bytetable;
   int8_t value_index, pr1_index;
+  static uint32_t lastIncrementTime_up = 0;
 
-if(KeyUp.shortPressed != 0)
- {
+  if(KeyUp.shortPressed != 0)
+  {
     System.keymode.Max_flag = false;
     switch (System.mode)
     {
@@ -232,7 +243,33 @@ if(KeyUp.shortPressed != 0)
       break;
     }
     KeyUp.shortPressed = 0;
- }
+  }
+  else if(KeyUp.conti_pressed==true)
+  {
+    //檢測是否為連加
+    {
+      //檢測是否到了自動累加的時間間隔
+      if (tmr.Cnt_1ms - lastIncrementTime_up >= AUTO_INCREMENT_DELAY)
+      {
+        lastIncrementTime_up = tmr.Cnt_1ms;  //更新累加時間
+
+        //處理長時間連加數值的動作
+        if(sFlag.Level1_value == Vvalue)
+        {
+          //要被修改的index應該是pr1的table, 而不是System.value的table
+          pr1_index = bytetable_pr1[System.level1_index];
+          System.value[pr1_index]++;
+
+          //檢查最大最小值, index要放pr1的不是總表的
+          data_bytetable = System.value[pr1_index];
+          // printf("-------------連加測試開始-------------\r\n");
+          // printf("data_bytetable = %d\r\n", data_bytetable);
+          System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+          // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+        }
+      }
+    }
+  }
 }
 
 static key_down_function(void)
@@ -244,9 +281,10 @@ static key_down_function(void)
   */
   int16_t data_bytetable;
   int8_t value_index, pr1_index;
+  static uint32_t lastIncrementTime_down = 0;
 
- if(KeyDown.shortPressed)
- {
+  if(KeyDown.shortPressed)
+  {
     System.keymode.Min_flag = false;
     switch (System.mode)
     {
@@ -301,7 +339,33 @@ static key_down_function(void)
       break;
     }
     KeyDown.shortPressed = 0;
- }
+  }
+  else if(KeyDown.conti_pressed==true)
+  {
+    //檢測是否為連減
+    {
+      //檢測是否到了自動累減的時間間隔
+      if (tmr.Cnt_1ms - lastIncrementTime_down >= AUTO_INCREMENT_DELAY)
+      {
+        lastIncrementTime_down = tmr.Cnt_1ms;  //更新累加時間
+
+        //處理長時間連減數值的動作
+        if(sFlag.Level1_value == Vvalue)
+        {
+          //要被修改的index應該是pr1的table, 而不是System.value的table
+          pr1_index = bytetable_pr1[System.level1_index];
+          System.value[pr1_index]--;
+
+          //檢查最大最小值, index要放pr1的不是總表的
+          data_bytetable = System.value[pr1_index];
+          // printf("-------------連加測試開始-------------\r\n");
+          // printf("data_bytetable = %d\r\n", data_bytetable);
+          System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+          // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+        }
+      }
+    }
+  }
 }
 
 static key_standby_function(void)
