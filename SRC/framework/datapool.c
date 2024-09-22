@@ -264,7 +264,7 @@ uint8_t get_bytetable_pr2(void)
   {
     if((bytetable[check_index].Mode==Pr1) || (bytetable[check_index].Mode==Pr2))
     {
-      bytetable_pr2[index] = bytetable[check_index].UserByte;
+      bytetable_pr2[index] = bytetable[check_index].UserByte;             //取得Pr2層的字符table
       index++;
     }
     check_index++;
@@ -273,6 +273,29 @@ uint8_t get_bytetable_pr2(void)
   return index;
 }
 
+int16_t check_Limit_Value(int16_t data, int8_t index)
+{
+  int16_t max_data, min_data;
+  max_data = (int16_t)(bytetable[index].Range_High*10);
+  min_data = (int16_t)(bytetable[index].Range_Low*10);
+  printf("max_data = %d\r\n", max_data);
+  printf("min_data = %d\r\n", min_data);
 
+  if(data > max_data)
+  {
+    data = min_data;
+    printf("數值大於最大值, 取代後 = %d\r\n", data);
+  }
+  else if(data < min_data)
+  {
+    data = max_data;
+    printf("數值小於最小值, 取代後 = %d\r\n", data);
+  }
+  else
+  {
+    printf("數值不須處理\r\n");
+  }
+  return data;
+}
 
 
