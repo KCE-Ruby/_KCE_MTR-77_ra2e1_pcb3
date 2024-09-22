@@ -184,8 +184,8 @@ __IO ICON_SCAN5 Scan5temp;
 
 /* static private function protocol -----------------------------------------------*/
 static void main_M1(uint16_t num, bool flag);
-static void main_M2(uint16_t num);
-static void main_M3(uint16_t num);
+static void main_M2(uint16_t num, bool dot);
+static void main_M3(uint16_t num, bool dot);
 static void char_M1(uint8_t _char);
 static void char_M2(uint8_t _char);
 static void char_M3(uint8_t _char);
@@ -234,7 +234,7 @@ static void main_M1(uint16_t num, bool flag)
   Scan1temp.scan1.M1_minus = flag? true:false;
 }
 
-static void main_M2(uint16_t num)
+static void main_M2(uint16_t num, bool dot)
 {
   //M2為中間的數字
   uint8_t i, digi;
@@ -243,8 +243,9 @@ static void main_M2(uint16_t num)
   else
   {
     digi = (uint8_t)((num / 10) % 10); //只取十位數
-    //若為0, 則需判斷是否要顯示0或不顯示
-    digi = (num<100 && digi==0)? (uint8_t)notshow:digi;
+    //若不顯示小數點, 且num小於10.0, 中間值為0, 則需判斷是否要顯示0或不顯示
+    if(dot==false)
+      digi = (num<100 && digi==0)? (uint8_t)notshow:digi;
   }
 
   for(i=0; i<7;i++)
@@ -275,19 +276,19 @@ static void main_M2(uint16_t num)
     }
   }
 
-  if(num == CLEARALL)
+  if((num==CLEARALL) || (dot==false))
   {
     //若在設定層或離開時需閃爍則不顯示小數點
     Scan2temp.scan2.M2_dp = false;
   }
   else
   {
-    //若數字為2位數則亮燈
+    //若數字為2位數則亮燈 
     Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? true:false;
   }
 }
 
-static void main_M3(uint16_t num)
+static void main_M3(uint16_t num, bool dot)
 {
   //M3為最左邊的數字
   uint8_t i, digi;
@@ -328,7 +329,7 @@ static void main_M3(uint16_t num)
     }
   }
   
-  if(num == CLEARALL)
+  if((num==CLEARALL) || (dot==false))
   {
     //若在設定層或離開時需閃爍則不顯示小數點
     Scan3temp.scan3.M3_dp = false;
@@ -462,17 +463,23 @@ static void char_M3(uint8_t _char)
 void NumToDisplay(int16_t temp)
 {
   //收進來的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
-  static bool minus_flag;
+  bool minus_flag=false, dot=true;
   minus_flag = (temp < 0)? true:false;
   temp = (temp < 0) ? (int16_t)(-temp) : temp;
 
   //轉換的數值不能超過最大值, 且恆為正數
   if(temp!=CLEARALL)
-    temp = (temp > DISPLAY_MAX_DIGITS)? DISPLAY_MAX_DIGITS : temp;
+  {
+    if(temp > DISPLAY_MAX_DIGITS)
+    {
+      dot = false;  //若為三位數則不顯示小數點
+      temp = temp/10;
+    }
+  }
 
   main_M1((uint16_t)temp, minus_flag);
-  main_M2((uint16_t)temp);
-  main_M3((uint16_t)temp);
+  main_M2((uint16_t)temp, dot);
+  main_M3((uint16_t)temp, dot);
 }
 
 void CharToDisplay(uint8_t _char)

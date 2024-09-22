@@ -16,7 +16,7 @@
 
 /* Private defines ----------------------------------------------------------*/
 #define FILTER_SIZE                 (9)
-#define TABLE_SIZE                  (13)
+#define TABLE_SIZE                  (14)
 #define ERROR_AD                    (-999)
 
 /*---------------------- extern variables ----------------------*/
@@ -39,7 +39,8 @@ static TemperatureAdTable table[TABLE_SIZE] =
   { 70, 1246 },
   { 80, 1005 },
   { 90, 794 },
-  { 100, 655 }
+  { 100, 655 },
+  { 110, 516 }
 };
 
 /*---------------------- Private function protocol ----------------------*/

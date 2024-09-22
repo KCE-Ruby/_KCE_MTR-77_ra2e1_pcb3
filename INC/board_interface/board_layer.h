@@ -20,7 +20,7 @@
 enum DISPLAY_SPECIAL
 {
   notshow = 10,
-  CLEARALL=9999, //清除所有數字區顯示
+  CLEARALL=19999, //清除所有數字區顯示
 };
 
 enum
