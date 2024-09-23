@@ -116,6 +116,7 @@ enum UserDefineByteTables
     rSE,    //正常運行時的實際設定點, 只能讀取
     rEL,    //控制器軟體版本, 只能讀取
     Ptb,    //參數表代碼, 只能讀取
+    pr2,    //進入隱藏層時顯示的字符, 只能顯示
 
   End,
 };

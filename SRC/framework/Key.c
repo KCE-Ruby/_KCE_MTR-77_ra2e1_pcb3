@@ -22,6 +22,7 @@
 #define AUTO_INCREMENT_DELAY            (50)      //連續累加的間隔時間, 單位:ms
 
 #define KEY_cnt_2s                     (400)
+#define KEY_cnt_7s                    (1400)
 #define KEY_cnt_max                   (5000)
 #define KEY_cnt_min                      (1)
 
@@ -474,8 +475,11 @@ static key_set_function(void)
       break;
 
       case level1Mode:
-        //data = 參數數值, index = 參數名稱
-      
+      if((KeySet.Cnt>KEY_cnt_7s)&&(KeyDown.Cnt!=0))
+      {
+        //進入隱藏層第二層, 顯示Pr2
+        sFlag.Level1_value = Pr2_symbol;
+      }
       break;
 
       case level2Mode:
@@ -493,6 +497,12 @@ static key_set_function(void)
  }
  else if(KeySet.LongPressed != 0)
  {
+  if(sFlag.Level1_value == Pr2_symbol)
+  {
+    //長按後7秒進入Pr2顯示後, 放開兩鍵則進入隱藏層
+    System.mode = level2Mode;
+    System.level2_index = 0;
+  }
   KeySet.LongPressed = 0;
   KeySet.shortPressed = 0;
  }

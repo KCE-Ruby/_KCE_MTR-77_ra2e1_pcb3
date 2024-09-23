@@ -18,6 +18,7 @@ enum Levelflag
 {
   Vindex,
   Vvalue,
+  Pr2_symbol,
 };
 
 enum MenuLevel

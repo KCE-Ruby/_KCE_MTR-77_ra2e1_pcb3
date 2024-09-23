@@ -76,7 +76,8 @@ typedef struct  //different timer flags
 typedef struct  //different timer flags
 {
   bool Defrost;
-  bool Level1_value, Level2_value;
+  uint8_t Level1_value;
+  bool Level2_value;
   bool leaveSet;
 }s_Flag;
 

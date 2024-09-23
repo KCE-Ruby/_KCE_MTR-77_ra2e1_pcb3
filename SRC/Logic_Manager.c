@@ -163,18 +163,18 @@ static void update_display_message(void)
       update_icon();
     break;
 
-    case level1Mode:
+    case level1Mode:      //用戶層-level 1
       ICON_degrees_Flashing();
-      //TODO: 第一層
       table = bytetable_pr1[System.level1_index];
       if(sFlag.Level1_value == Vindex)
         CharToDisplay(table);
       else if(sFlag.Level1_value == Vvalue)
         NumToDisplay(System.value[table]);
+      else if(sFlag.Level1_value == Pr2_symbol)
+        CharToDisplay(pr2);
     break;
 
-    case level2Mode:
-      //TODO: 第二層
+    case level2Mode:      //隱藏層-level 2
       CharToDisplay(LS);
     break;
 
@@ -308,7 +308,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x31;
+  const uint8_t test    = 0x32;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

@@ -164,6 +164,7 @@ static const uint8_t ByteTable[][3] = {
   {dig_r,       dig_S,      dig_E},    // rSE
   {dig_r,       dig_E,      dig_L},    // rEL
   {dig_P,       dig_t,      dig_b},    // Ptb
+  {dig_P,       dig_r,      dig_2},    // Pr2
 };
 /* extern variables -----------------------------------------------------------------*/
 extern __IO r_tmr tmr;
