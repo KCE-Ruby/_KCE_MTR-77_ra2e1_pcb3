@@ -175,7 +175,12 @@ static void update_display_message(void)
     break;
 
     case level2Mode:      //隱藏層-level 2
-      CharToDisplay(LS);
+      ICON_degrees_Flashing();
+      table = bytetable_pr2[System.level2_index];
+      if(sFlag.Level2_value == Vindex)
+        CharToDisplay(table);
+      else if(sFlag.Level2_value == Vvalue)
+        NumToDisplay(System.value[table]);
     break;
 
     case settingMode:
@@ -308,7 +313,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x32;
+  const uint8_t test    = 0x33;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

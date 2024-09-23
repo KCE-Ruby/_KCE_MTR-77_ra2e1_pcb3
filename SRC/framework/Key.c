@@ -32,6 +32,7 @@ extern __IO s_Var System;
 extern __IO s_Flag sFlag;
 extern __IO r_tmr tmr;
 extern __IO uint8_t bytetable_pr1[End];
+extern __IO uint8_t bytetable_pr2[End];
 extern __IO uint8_t Pr1_size, Pr2_size;
 
 /* variables -----------------------------------------------------------------*/
@@ -185,7 +186,7 @@ static key_up_function(void)
   * [上+下] = 鎖定or解鎖鍵盤
   */
   int16_t data_bytetable;
-  int8_t value_index, pr1_index;
+  int8_t pr1_index, pr2_index;
   static uint32_t lastIncrementTime_up = 0;
 
   if(KeyUp.shortPressed != 0)
@@ -216,20 +217,39 @@ static key_up_function(void)
 
           //檢查最大最小值, index要放pr1的不是總表的
           data_bytetable = System.value[pr1_index];
-          printf("-------------key up測試開始-------------\r\n");
-          printf("data_bytetable = %d\r\n", data_bytetable);
+          // printf("-------------key up測試開始-------------\r\n");
+          // printf("data_bytetable = %d\r\n", data_bytetable);
           System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-          printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+          // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
         }
       }
       break;
 
       case level2Mode:
+      //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
+      if(KeySet.Cnt==0)
+      {
         //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
         if(sFlag.Level2_value == Vindex)
+        {
+          //要被修改的index應該是pr1的table, 而不是System.value的table
           System.level2_index++;
+          if(System.level2_index >= Pr2_size) System.level2_index= 0;
+        }
         else if(sFlag.Level2_value == Vvalue)
-          System.value[System.level2_index]++;
+        {
+          //要被修改的index應該是pr1的table, 而不是System.value的table
+          pr2_index = bytetable_pr2[System.level2_index];
+          System.value[pr2_index]++;
+
+          //檢查最大最小值, index要放pr1的不是總表的
+          data_bytetable = System.value[pr2_index];
+          printf("-------------key up測試開始-------------\r\n");
+          printf("data_bytetable = %d\r\n", data_bytetable);
+          System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+          printf("keyup數值 = %d\r\n", System.value[pr2_index]);
+        }
+      }
       break;
 
       case settingMode:
@@ -253,20 +273,39 @@ static key_up_function(void)
       if (tmr.Cnt_1ms - lastIncrementTime_up >= AUTO_INCREMENT_DELAY)
       {
         lastIncrementTime_up = tmr.Cnt_1ms;  //更新累加時間
-
-        //處理長時間連加數值的動作
-        if(sFlag.Level1_value == Vvalue)
+        if(System.mode == level1Mode)
         {
-          //要被修改的index應該是pr1的table, 而不是System.value的table
-          pr1_index = bytetable_pr1[System.level1_index];
-          System.value[pr1_index]++;
+          //處理長時間連加數值的動作
+          if(sFlag.Level1_value == Vvalue)
+          {
+            //要被修改的index應該是pr1的table, 而不是System.value的table
+            pr1_index = bytetable_pr1[System.level1_index];
+            System.value[pr1_index]++;
 
-          //檢查最大最小值, index要放pr1的不是總表的
-          data_bytetable = System.value[pr1_index];
-          // printf("-------------連加測試開始-------------\r\n");
-          // printf("data_bytetable = %d\r\n", data_bytetable);
-          System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-          // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+            //檢查最大最小值, index要放pr1的不是總表的
+            data_bytetable = System.value[pr1_index];
+            // printf("-------------連加測試開始-------------\r\n");
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+            // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+          }
+        }
+        else if(System.mode == level2Mode)
+        {
+          //處理長時間連加數值的動作
+          if(sFlag.Level2_value == Vvalue)
+          {
+            //要被修改的index應該是pr1的table, 而不是System.value的table
+            pr2_index = bytetable_pr2[System.level2_index];
+            System.value[pr2_index]++;
+
+            //檢查最大最小值, index要放pr1的不是總表的
+            data_bytetable = System.value[pr2_index];
+            // printf("-------------連加測試開始-------------\r\n");
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+            // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+          }
         }
       }
     }
@@ -281,7 +320,7 @@ static key_down_function(void)
   * Setting狀態下, 單擊減少參數值
   */
   int16_t data_bytetable;
-  int8_t value_index, pr1_index;
+  int8_t pr1_index, pr2_index;
   static uint32_t lastIncrementTime_down = 0;
 
   if(KeyDown.shortPressed)
@@ -310,22 +349,39 @@ static key_down_function(void)
           System.value[pr1_index]--;
           
           //檢查最大最小值, index要放pr1的不是總表的
-          printf("-------------key down測試開始-------------\r\n");
+          // printf("-------------key down測試開始-------------\r\n");
           data_bytetable = System.value[pr1_index];
-          printf("data_bytetable = %d\r\n", data_bytetable);
+          // printf("data_bytetable = %d\r\n", data_bytetable);
           System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-          printf("keydown數值 = %d\r\n", System.value[pr1_index]);
+          // printf("keydown數值 = %d\r\n", System.value[pr1_index]);
         }
       }
       break;
 
       case level2Mode:
+      //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
+      if(KeySet.Cnt==0)
+      {
         //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
         if(sFlag.Level2_value == Vindex)
+        {
           System.level2_index--;
+          if(System.level2_index < 0) System.level2_index = (Pr2_size-1);
+        }
         else if(sFlag.Level2_value == Vvalue)
-          System.value[System.level2_index]--;
-      
+        {
+          //要被修改的index應該是pr1的table, 而不是System.value的table
+          pr2_index = bytetable_pr2[System.level2_index];
+          System.value[pr2_index]--;
+          
+          //檢查最大最小值, index要放pr1的不是總表的
+          printf("-------------key down測試開始-------------\r\n");
+          data_bytetable = System.value[pr2_index];
+          printf("data_bytetable = %d\r\n", data_bytetable);
+          System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+          printf("keydown數值 = %d\r\n", System.value[pr2_index]);
+        }
+      }
       break;
 
       case settingMode:
