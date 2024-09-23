@@ -244,10 +244,10 @@ static key_up_function(void)
 
           //檢查最大最小值, index要放pr1的不是總表的
           data_bytetable = System.value[pr2_index];
-          printf("-------------key up測試開始-------------\r\n");
-          printf("data_bytetable = %d\r\n", data_bytetable);
+          // printf("-------------key up測試開始-------------\r\n");
+          // printf("data_bytetable = %d\r\n", data_bytetable);
           System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-          printf("keyup數值 = %d\r\n", System.value[pr2_index]);
+          // printf("keyup數值 = %d\r\n", System.value[pr2_index]);
         }
       }
       break;
@@ -375,11 +375,11 @@ static key_down_function(void)
           System.value[pr2_index]--;
           
           //檢查最大最小值, index要放pr1的不是總表的
-          printf("-------------key down測試開始-------------\r\n");
+          // printf("-------------key down測試開始-------------\r\n");
           data_bytetable = System.value[pr2_index];
-          printf("data_bytetable = %d\r\n", data_bytetable);
+          // printf("data_bytetable = %d\r\n", data_bytetable);
           System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-          printf("keydown數值 = %d\r\n", System.value[pr2_index]);
+          // printf("keydown數值 = %d\r\n", System.value[pr2_index]);
         }
       }
       break;
@@ -405,20 +405,39 @@ static key_down_function(void)
       if (tmr.Cnt_1ms - lastIncrementTime_down >= AUTO_INCREMENT_DELAY)
       {
         lastIncrementTime_down = tmr.Cnt_1ms;  //更新累加時間
-
-        //處理長時間連減數值的動作
-        if(sFlag.Level1_value == Vvalue)
+        if(System.mode == level1Mode)
         {
-          //要被修改的index應該是pr1的table, 而不是System.value的table
-          pr1_index = bytetable_pr1[System.level1_index];
-          System.value[pr1_index]--;
+          //處理長時間連減數值的動作
+          if(sFlag.Level1_value == Vvalue)
+          {
+            //要被修改的index應該是pr1的table, 而不是System.value的table
+            pr1_index = bytetable_pr1[System.level1_index];
+            System.value[pr1_index]--;
 
-          //檢查最大最小值, index要放pr1的不是總表的
-          data_bytetable = System.value[pr1_index];
-          // printf("-------------連加測試開始-------------\r\n");
-          // printf("data_bytetable = %d\r\n", data_bytetable);
-          System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-          // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+            //檢查最大最小值, index要放pr1的不是總表的
+            data_bytetable = System.value[pr1_index];
+            // printf("-------------連加測試開始-------------\r\n");
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+            // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+          }
+        }
+        else if(System.mode == level2Mode)
+        {
+          //處理長時間連加數值的動作
+          if(sFlag.Level2_value == Vvalue)
+          {
+            //要被修改的index應該是pr1的table, 而不是System.value的table
+            pr2_index = bytetable_pr2[System.level2_index];
+            System.value[pr2_index]--;
+
+            //檢查最大最小值, index要放pr1的不是總表的
+            data_bytetable = System.value[pr2_index];
+            // printf("-------------連加測試開始-------------\r\n");
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+            // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+          }
         }
       }
     }
@@ -595,6 +614,25 @@ static key_set_function(void)
       break;
 
       case level2Mode:
+        if(KeyUp.Cnt!=0)  //離開level1的路徑, 短按SET鍵+下鍵 -> 離開
+        {
+          KeyUp.Cnt = 0;
+          System.mode = homeMode;
+          // System.level1_index = 0;
+        }
+        else  //切換參數名稱or參數數值的地方
+        {
+          if(sFlag.Level2_value == Vindex)
+            sFlag.Level2_value = Vvalue;
+          else
+          {
+            sFlag.Level2_value = Vindex;
+            if(pre_value[System.level2_index] != System.value[System.level2_index])
+            {
+              //TODO: 若參數有變動則寫入eeprom內
+            }
+          }
+        }
       break;
 
       case settingMode:

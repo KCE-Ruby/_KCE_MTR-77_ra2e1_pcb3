@@ -11,6 +11,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
+#include "INC/framework/datapool.h"
+#include "INC/framework/LED_Driver/app_menu_ctrl.h"
 #include "INC/framework/LED_Driver/Indicator_encode.h"
 
 /* Private defines ----------------------------------------------------------*/
@@ -169,6 +171,8 @@ static const uint8_t ByteTable[][3] = {
 /* extern variables -----------------------------------------------------------------*/
 extern __IO r_tmr tmr;
 extern __IO s_Var System;
+extern __IO ByteSettingTable bytetable[End];
+extern __IO uint8_t bytetable_pr2[End];
 
 /* variables -----------------------------------------------------------------*/
 __IO LED_SCAN1 Scan1Led;
@@ -378,6 +382,7 @@ static void char_M1(uint8_t _char)
 static void char_M2(uint8_t _char)
 {
   uint8_t i;
+  int8_t pr2_index;
   for(i=0; i<7;i++)
   {
     switch (i)
@@ -413,7 +418,11 @@ static void char_M2(uint8_t _char)
   else if(System.mode == level2Mode)
   {
     //TODO:要在第一層也有的才會有小數點
-    Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_2)? true:false;
+    pr2_index = bytetable_pr2[System.level2_index];
+    if(bytetable[pr2_index].Mode == Pr1)
+      Scan2temp.scan2.M2_dp = true;
+    else
+      Scan2temp.scan2.M2_dp = false;
   }
 }
 
