@@ -223,6 +223,7 @@ void ICON_degrees_Flashing(void)
     }
     else
     {
+      //在隱藏層內, 攝氏跟華氏的單位燈號皆閃爍
       ICON_degrees_Celsius_ON();
       ICON_degrees_Fahrenheit_ON();
     }

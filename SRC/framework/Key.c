@@ -576,6 +576,8 @@ static key_set_function(void)
         //進入隱藏層第二層, 顯示Pr2
         sFlag.Level1_value = Pr2_symbol;
       }
+      else  //否則進過隱藏層後會卡在隱藏層, 清掉才能顯示用戶層
+        sFlag.Level1_value = Vindex;
       break;
 
       case level2Mode:
