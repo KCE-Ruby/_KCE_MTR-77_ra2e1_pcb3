@@ -109,7 +109,7 @@ __IO ByteSettingTable bytetable[End] =
   {dp3,             0,             0,            0,     Pr2},
   {dp4,             0,             0,            0,     Pr2},
   {rSE,             0,             0,            0,     Pr1},
-  {rEL,             0,             0,            0,     Pr2},
+  {rEL,             0,           999,           10,     Pr2},
   {Ptb,             0,             0,            0,     Pr2},
 };
 

@@ -189,6 +189,7 @@ static key_up_function(void)
   int8_t pr1_index, pr2_index;
   static uint32_t lastIncrementTime_up = 0;
 
+  //TODO:看能不能把level1跟level2的code改成API call
   if(KeyUp.shortPressed != 0)
   {
     System.keymode.Max_flag = false;
@@ -213,14 +214,17 @@ static key_up_function(void)
         {
           //要被修改的index應該是pr1的table, 而不是System.value的table
           pr1_index = bytetable_pr1[System.level1_index];
-          System.value[pr1_index]++;
+          if(pr1_index <= onF)
+          {
+            System.value[pr1_index]++;
 
-          //檢查最大最小值, index要放pr1的不是總表的
-          data_bytetable = System.value[pr1_index];
-          // printf("-------------key up測試開始-------------\r\n");
-          // printf("data_bytetable = %d\r\n", data_bytetable);
-          System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-          // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+            //檢查最大最小值, index要放pr1的不是總表的
+            data_bytetable = System.value[pr1_index];
+            // printf("-------------key up測試開始-------------\r\n");
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+            // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+          }
         }
       }
       break;
@@ -240,14 +244,17 @@ static key_up_function(void)
         {
           //要被修改的index應該是pr1的table, 而不是System.value的table
           pr2_index = bytetable_pr2[System.level2_index];
-          System.value[pr2_index]++;
+          if(pr2_index <= onF)
+          {
+            System.value[pr2_index]++;
 
-          //檢查最大最小值, index要放pr1的不是總表的
-          data_bytetable = System.value[pr2_index];
-          // printf("-------------key up測試開始-------------\r\n");
-          // printf("data_bytetable = %d\r\n", data_bytetable);
-          System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-          // printf("keyup數值 = %d\r\n", System.value[pr2_index]);
+            //檢查最大最小值, index要放pr1的不是總表的
+            data_bytetable = System.value[pr2_index];
+            // printf("-------------key up測試開始-------------\r\n");
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+            // printf("keyup數值 = %d\r\n", System.value[pr2_index]);
+          }
         }
       }
       break;
@@ -267,20 +274,21 @@ static key_up_function(void)
   }
   else if(KeyUp.conti_pressed==true)
   {
-    //檢測是否為連加
+    //檢測是否為連加, 數值大於onF的只可讀不可寫
     {
       //檢測是否到了自動累加的時間間隔
       if (tmr.Cnt_1ms - lastIncrementTime_up >= AUTO_INCREMENT_DELAY)
       {
         lastIncrementTime_up = tmr.Cnt_1ms;  //更新累加時間
-        if(System.mode == level1Mode)
+        if((System.mode==level1Mode) && (pr1_index<=onF))
         {
           //處理長時間連加數值的動作
           if(sFlag.Level1_value == Vvalue)
           {
             //要被修改的index應該是pr1的table, 而不是System.value的table
             pr1_index = bytetable_pr1[System.level1_index];
-            System.value[pr1_index]++;
+            if(pr1_index <= onF)
+              System.value[pr1_index]++;    //onF以後的參數只能讀不能改
 
             //檢查最大最小值, index要放pr1的不是總表的
             data_bytetable = System.value[pr1_index];
@@ -290,14 +298,15 @@ static key_up_function(void)
             // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
           }
         }
-        else if(System.mode == level2Mode)
+        else if((System.mode==level2Mode) && (pr2_index<=onF))
         {
           //處理長時間連加數值的動作
           if(sFlag.Level2_value == Vvalue)
           {
             //要被修改的index應該是pr1的table, 而不是System.value的table
             pr2_index = bytetable_pr2[System.level2_index];
-            System.value[pr2_index]++;
+            if(pr2_index <= onF)
+              System.value[pr2_index]--;    //onF以後的參數只能讀不能改
 
             //檢查最大最小值, index要放pr1的不是總表的
             data_bytetable = System.value[pr2_index];
@@ -346,14 +355,17 @@ static key_down_function(void)
         {
           //要被修改的index應該是pr1的table, 而不是System.value的table
           pr1_index = bytetable_pr1[System.level1_index];
-          System.value[pr1_index]--;
+          if(pr1_index <= onF)
+          {
+            System.value[pr1_index]--;    //onF以後的參數只能讀不能改
           
-          //檢查最大最小值, index要放pr1的不是總表的
-          // printf("-------------key down測試開始-------------\r\n");
-          data_bytetable = System.value[pr1_index];
-          // printf("data_bytetable = %d\r\n", data_bytetable);
-          System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-          // printf("keydown數值 = %d\r\n", System.value[pr1_index]);
+            //檢查最大最小值, index要放pr1的不是總表的
+            // printf("-------------key down測試開始-------------\r\n");
+            data_bytetable = System.value[pr1_index];
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+            // printf("keydown數值 = %d\r\n", System.value[pr1_index]);
+          }
         }
       }
       break;
@@ -372,14 +384,17 @@ static key_down_function(void)
         {
           //要被修改的index應該是pr1的table, 而不是System.value的table
           pr2_index = bytetable_pr2[System.level2_index];
-          System.value[pr2_index]--;
-          
-          //檢查最大最小值, index要放pr1的不是總表的
-          // printf("-------------key down測試開始-------------\r\n");
-          data_bytetable = System.value[pr2_index];
-          // printf("data_bytetable = %d\r\n", data_bytetable);
-          System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-          // printf("keydown數值 = %d\r\n", System.value[pr2_index]);
+          if(pr2_index <= onF)
+          {
+            System.value[pr2_index]--;    //onF以後的參數只能讀不能改
+
+            //檢查最大最小值, index要放pr1的不是總表的
+            // printf("-------------key down測試開始-------------\r\n");
+            data_bytetable = System.value[pr2_index];
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+            // printf("keydown數值 = %d\r\n", System.value[pr2_index]);
+          }
         }
       }
       break;
@@ -399,44 +414,50 @@ static key_down_function(void)
   }
   else if(KeyDown.conti_pressed==true)
   {
-    //檢測是否為連減
+    //檢測是否為連減, 數值大於onF的只可讀不可寫
     {
       //檢測是否到了自動累減的時間間隔
       if (tmr.Cnt_1ms - lastIncrementTime_down >= AUTO_INCREMENT_DELAY)
       {
         lastIncrementTime_down = tmr.Cnt_1ms;  //更新累加時間
-        if(System.mode == level1Mode)
+        if(System.mode==level1Mode)
         {
           //處理長時間連減數值的動作
           if(sFlag.Level1_value == Vvalue)
           {
             //要被修改的index應該是pr1的table, 而不是System.value的table
             pr1_index = bytetable_pr1[System.level1_index];
-            System.value[pr1_index]--;
+            if(pr1_index<=onF)
+            {
+              System.value[pr1_index]--;
 
-            //檢查最大最小值, index要放pr1的不是總表的
-            data_bytetable = System.value[pr1_index];
-            // printf("-------------連加測試開始-------------\r\n");
-            // printf("data_bytetable = %d\r\n", data_bytetable);
-            System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-            // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+              //檢查最大最小值, index要放pr1的不是總表的
+              data_bytetable = System.value[pr1_index];
+              // printf("-------------連加測試開始-------------\r\n");
+              // printf("data_bytetable = %d\r\n", data_bytetable);
+              System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+              // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+            }
           }
         }
-        else if(System.mode == level2Mode)
+        else if(System.mode==level2Mode)
         {
           //處理長時間連加數值的動作
           if(sFlag.Level2_value == Vvalue)
           {
             //要被修改的index應該是pr1的table, 而不是System.value的table
             pr2_index = bytetable_pr2[System.level2_index];
-            System.value[pr2_index]--;
+            if(pr2_index<=onF)
+            {
+              System.value[pr2_index]--;
 
-            //檢查最大最小值, index要放pr1的不是總表的
-            data_bytetable = System.value[pr2_index];
-            // printf("-------------連加測試開始-------------\r\n");
-            // printf("data_bytetable = %d\r\n", data_bytetable);
-            System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-            // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+              //檢查最大最小值, index要放pr1的不是總表的
+              data_bytetable = System.value[pr2_index];
+              // printf("-------------連加測試開始-------------\r\n");
+              // printf("data_bytetable = %d\r\n", data_bytetable);
+              System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+              // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+            }
           }
         }
       }
