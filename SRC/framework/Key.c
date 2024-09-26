@@ -17,7 +17,7 @@
 
 /* Private defines ----------------------------------------------------------*/
 #define KEY_DEBOUNCE_long              (150)      //(單位為:ms/次), 長按
-#define KEY_DEBOUNCE_short              (15)      //(單位為:ms/次), 短按
+#define KEY_DEBOUNCE_short               (3)      //(單位為:ms/次), 短按
 #define CONTI_PRESS_THRESHOLD          (150)      //連加的閾值時間, 單位:ms
 #define AUTO_INCREMENT_DELAY            (50)      //連續累加的間隔時間, 單位:ms
 
@@ -157,6 +157,9 @@ static Key_Manager key_detect(Key_Manager key)
   }
   else
   {
+    // if(key.Cnt != 0)   //測試用: 用來查看短按最快是幾次, 3次
+    //   printf("key.cnt = %d\r\n", key.Cnt);
+
     //放開時, 清除連按旗標
     key.conti_pressed = false;
 
