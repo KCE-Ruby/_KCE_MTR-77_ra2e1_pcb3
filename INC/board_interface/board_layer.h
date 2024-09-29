@@ -17,6 +17,17 @@
 #include "eeprom/i2c_ee.h"
 
 /* Enum type definitions -----------------------------------------------------*/
+enum API_STATE
+{
+  //一次只能執行一件事情
+  API_FREE = 0,
+  API_BUSY1 = 1,
+  API_BUSY2 = 2,
+  API_BUSY3 = 3,
+  API_BUSY4 = 4,
+  API_BUSY5 = 5,
+};
+
 enum DISPLAY_SPECIAL
 {
   notshow = 10,
