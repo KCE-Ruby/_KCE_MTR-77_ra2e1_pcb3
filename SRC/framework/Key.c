@@ -682,12 +682,17 @@ static key_set_function(void)
               {
                 //TODO: 若參數有變動則寫入eeprom內
               }
+
+              //從參數值換成顯示字符時, 往後加一組
+              System.level1_index++;
+              if(System.level1_index >= Pr1_size) System.level1_index= 0;
+
             }
           }
         break;
 
         case level2Mode:
-          if(KeyUp.Cnt!=0)  //離開level1的路徑, 短按SET鍵+上鍵 -> 離開
+          if(KeyUp.Cnt!=0)  //離開level2的路徑, 短按SET鍵+上鍵 -> 離開
           {
             KeyUp.Cnt = 0;
             System.mode = homeMode;
@@ -704,6 +709,11 @@ static key_set_function(void)
               {
                 //TODO: 若參數有變動則寫入eeprom內
               }
+
+              //從參數值換成顯示字符時, 往後加一組
+              System.level2_index++;
+              if(System.level2_index >= Pr2_size) System.level2_index= 0;
+
             }
           }
         break;
