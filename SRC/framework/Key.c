@@ -19,7 +19,11 @@
 #define KEY_DEBOUNCE_long              (150)      //(單位為:ms/次), 長按
 #define KEY_DEBOUNCE_short               (3)      //(單位為:ms/次), 短按
 #define CONTI_PRESS_THRESHOLD          (150)      //連加的閾值時間, 單位:ms
-#define AUTO_INCREMENT_DELAY            (50)      //連續累加的間隔時間, 單位:ms
+#define AUTO_INCREMENT_DELAY_L          (60)      //連續累加的間隔時間, 單位:ms
+#define AUTO_INCREMENT_DELAY_M          (50)      //連續累加的間隔時間, 單位:ms
+#define AUTO_INCREMENT_DELAY_H          (15)      //連續累加的間隔時間, 單位:ms
+#define CONTI_PRESS_times_M            (400)      //連續累加的承認次數, 單位:次
+#define CONTI_PRESS_times_H           (1000)      //連續累加的承認次數, 單位:次
 
 #define KEY_cnt_2s                     (400)
 #define KEY_cnt_7s                    (1400)
@@ -193,6 +197,7 @@ static key_up_function(void)
   int16_t data_bytetable;
   int8_t pr1_index, pr2_index;
   static uint32_t lastIncrementTime_up = 0;
+  uint8_t AUTO_INCREMENT_DELAY;
 
   if(api_sta==API_FREE)
   {
@@ -284,6 +289,14 @@ static key_up_function(void)
     {
       //檢測是否為連加, 數值大於onF的只可讀不可寫
       {
+        //依據長按的時間不同, 按越久間隔越短
+        if(KeyUp.Cnt > CONTI_PRESS_times_H)
+          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_H;
+        else if(KeyUp.Cnt > CONTI_PRESS_times_M)
+          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_M;
+        else
+          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_L;
+
         //檢測是否到了自動累加的時間間隔
         if (tmr.Cnt_1ms - lastIncrementTime_up >= AUTO_INCREMENT_DELAY)
         {
@@ -324,6 +337,11 @@ static key_up_function(void)
               // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
             }
           }
+          else if(System.mode==settingMode)
+          {
+            System.value[Set]++;
+            System.value[Set] = check_Limit_Value(System.value[Set], Set);
+          }
         }
       }
     }
@@ -347,6 +365,7 @@ static key_down_function(void)
   int16_t data_bytetable;
   int8_t pr1_index, pr2_index;
   static uint32_t lastIncrementTime_down = 0;
+  uint8_t AUTO_INCREMENT_DELAY;
 
   if(api_sta==API_FREE)
   {
@@ -434,6 +453,19 @@ static key_down_function(void)
     {
       //檢測是否為連減, 數值大於onF的只可讀不可寫
       {
+        //依據長按的時間不同, 按越久間隔越短
+        if(KeyDown.Cnt > CONTI_PRESS_times_H)
+          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_H;
+        else if(KeyDown.Cnt > CONTI_PRESS_times_M)
+        {
+          //主要看一下間隔多久, 發現放在100ms內的話大約是200ms跑一次
+          // printf("tmr.Cnt_1ms: %d\r\n", tmr.Cnt_1ms);
+          // printf("lastIncrementTime_down: %d\r\n", lastIncrementTime_down);
+          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_M;
+        }
+        else
+          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_L;
+
         //檢測是否到了自動累減的時間間隔
         if (tmr.Cnt_1ms - lastIncrementTime_down >= AUTO_INCREMENT_DELAY)
         {
@@ -477,6 +509,11 @@ static key_down_function(void)
                 // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
               }
             }
+          }
+          else if(System.mode==settingMode)
+          {
+            System.value[Set]--;
+            System.value[Set] = check_Limit_Value(System.value[Set], Set);
           }
         }
       }

@@ -237,7 +237,7 @@ void timer0_callback(timer_callback_args_t *p_args)
     if ((tmr.Cnt_1ms % 500) == 0)  tmr.FlashFlag_1Hz = !tmr.FlashFlag_1Hz;
     if ((tmr.Cnt_1ms % 1000) == 0)  tmr.FlashFlag_2Hz = !tmr.FlashFlag_2Hz;
 
-    // if((tmr.Cnt_1ms%1)==0) tmr.Flag_5ms = true;
+    if((tmr.Cnt_1ms%1)==0) tmr.Flag_1ms = true;
     // if((tmr.Cnt_1ms%100)==0) tmr.Flag_100ms = true;
     if((tmr.Cnt_1ms%100)==0) tmr.Flag_100ms = true;
     // if((tmr.Cnt_1ms%500)==0) tmr.Flag_500ms = true;

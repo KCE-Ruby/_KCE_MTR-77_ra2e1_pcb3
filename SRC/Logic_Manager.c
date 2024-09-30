@@ -276,11 +276,16 @@ static void read_all_eeprom_data(void)
 
 static void loop_100ms(void)
 {
+  if(tmr.Flag_1ms)
+  {
+    Key_main();   //按鍵相關邏輯
+    tmr.Flag_1ms = false;
+  }
   if(tmr.Flag_100ms)
   {
     ADC_Main();
     get_Pv();
-    Key_main();   //按鍵相關邏輯
+    // Key_main();   //按鍵相關邏輯
     Out_main();
     
     //啟動融霜功能
@@ -314,7 +319,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x3A;
+  const uint8_t test    = 0x3C;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
