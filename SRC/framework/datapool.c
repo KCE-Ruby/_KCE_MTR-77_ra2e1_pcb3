@@ -276,26 +276,56 @@ uint8_t get_bytetable_pr2(void)
 int16_t check_Limit_Value(int16_t data, int8_t index)
 {
   int16_t max_data, min_data;
-  max_data = (int16_t)(bytetable[index].Range_High*10);
-  min_data = (int16_t)(bytetable[index].Range_Low*10);
+
+  //除了需要特殊處理的部分其它以bytetable陣列的預設值做為標準
+  switch (index)
+  {
+    case Set:
+      //設定值的最大允許值 = US
+      max_data = (int16_t)(System.value[US]);
+      //設定值的最小允許值 = LS
+      min_data = (int16_t)(System.value[LS]);
+      if(data > max_data)
+      {
+        data = max_data;
+        // printf("數值大於最大值, 取代後 = %d\r\n", data);
+      }
+      else if(data < min_data)
+      {
+        data = min_data;
+        // printf("數值小於最小值, 取代後 = %d\r\n", data);
+      }
+      else
+      {
+        // printf("數值不須處理\r\n");
+      }
+      break;
+    
+    default:
+    //for level1&2參數內的數值使用
+      max_data = (int16_t)(bytetable[index].Range_High*10);
+      min_data = (int16_t)(bytetable[index].Range_Low*10);
+      if(data > max_data)
+      {
+        data = min_data;
+        // printf("數值大於最大值, 取代後 = %d\r\n", data);
+      }
+      else if(data < min_data)
+      {
+        data = max_data;
+        // printf("數值小於最小值, 取代後 = %d\r\n", data);
+      }
+      else
+      {
+        // printf("數值不須處理\r\n");
+      }
+      break;
+  }
   // printf("max_data = %d\r\n", max_data);
   // printf("min_data = %d\r\n", min_data);
 
-  if(data > max_data)
-  {
-    data = min_data;
-    // printf("數值大於最大值, 取代後 = %d\r\n", data);
-  }
-  else if(data < min_data)
-  {
-    data = max_data;
-    // printf("數值小於最小值, 取代後 = %d\r\n", data);
-  }
-  else
-  {
-    // printf("數值不須處理\r\n");
-  }
   return data;
 }
+
 
 

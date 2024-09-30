@@ -102,7 +102,7 @@ void out4_buzzer_off(void)
 /* Output Logical Function definitions ------------------------------------------------------*/
 void Out_main(void)
 {
-  int8_t sv = (System.value[Set]+System.value[Set]);
+  int8_t sv = (System.value[Set]+System.value[Hy]);
   if(System.pv < sv)
   {
     out2_Compressor_on();

@@ -269,7 +269,8 @@ static key_up_function(void)
         case settingMode:
           //TODO: get設定值的最大值API, 不要extern 整個table
           System.value[Set]++;
-          if(System.value[Set] > 1100) System.value[Set] = 1100;
+          System.value[Set] = check_Limit_Value(System.value[Set], Set);
+          // if(System.value[Set] > 1100) System.value[Set] = 1100;
         break;
 
         default:
@@ -419,7 +420,7 @@ static key_down_function(void)
         case settingMode:
           //TODO: get設定值的最小值API, 不要extern 整個table
           System.value[Set]--;
-          if(System.value[Set] < -500) System.value[Set] = -500;
+          System.value[Set] = check_Limit_Value(System.value[Set], Set);
         break;
 
         default:
@@ -590,6 +591,7 @@ static key_set_function(void)
           //進入修改設定值功能
           System.mode = settingMode;
           System.keymode.SET_value_flag = true;
+          api_sta = API_BUSY2;
         }
         else
         {
@@ -746,12 +748,19 @@ static key_set_function(void)
         printf("API_BUSY1釋放旗標 = %d\r\n", api_sta);
       }
       break;
+    case API_BUSY2:
+        api_sta = API_FREE;
+        //放開SET鍵進入修改設定值, 故清除長短按計數
+        KeySet.LongPressed = 0;
+        KeySet.shortPressed = 0;
+        printf("檢查KeySet.Cnt = %d\r\n", KeySet.Cnt);
+        printf("API_BUSY1釋放旗標 = %d\r\n", api_sta);
+      break;
     
     default:
       break;
   }
  }
- 
 
 }
 
