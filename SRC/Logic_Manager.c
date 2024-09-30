@@ -281,6 +281,7 @@ static void loop_100ms(void)
     ADC_Main();
     get_Pv();
     Key_main();   //按鍵相關邏輯
+    Out_main();
     
     //啟動融霜功能
     if(sFlag.Defrost)
@@ -313,7 +314,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x39;
+  const uint8_t test    = 0x3A;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

@@ -37,5 +37,6 @@ void out3_Defrost_on(void);
 void out3_Defrost_off(void);
 void out4_buzzer_on(void);
 void out4_buzzer_off(void);
+void Out_main(void);
 
 #endif /* INC_OUTAPI_H_ */

@@ -99,7 +99,19 @@ void out4_buzzer_off(void)
   R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_15, BSP_IO_LEVEL_LOW);
 }
 
-
+/* Output Logical Function definitions ------------------------------------------------------*/
+void Out_main(void)
+{
+  int8_t sv = (System.value[Set]+System.value[Set]);
+  if(System.pv < sv)
+  {
+    out2_Compressor_on();
+  }
+  else if(System.pv <= System.value[Set])
+  {
+    out2_Compressor_off();
+  }
+}
 
 
 

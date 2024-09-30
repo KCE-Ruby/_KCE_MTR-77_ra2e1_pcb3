@@ -310,10 +310,10 @@ static key_up_function(void)
             //處理長時間連加數值的動作
             if(sFlag.Level2_value == Vvalue)
             {
-              //要被修改的index應該是pr1的table, 而不是System.value的table
+              //要被修改的index應該是pr2的table, 而不是System.value的table
               pr2_index = bytetable_pr2[System.level2_index];
               if(pr2_index <= onF)
-                System.value[pr2_index]--;    //onF以後的參數只能讀不能改
+                System.value[pr2_index]++;    //onF以後的參數只能讀不能改
 
               //檢查最大最小值, index要放pr1的不是總表的
               data_bytetable = System.value[pr2_index];
@@ -399,7 +399,7 @@ static key_down_function(void)
           }
           else if(sFlag.Level2_value == Vvalue)
           {
-            //要被修改的index應該是pr1的table, 而不是System.value的table
+            //要被修改的index應該是pr2的table, 而不是System.value的table
             pr2_index = bytetable_pr2[System.level2_index];
             if(pr2_index <= onF)
             {
