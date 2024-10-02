@@ -204,7 +204,10 @@ void offset_EEtoSYS(void)
 void get_Pv(void)
 {
   //Pv值來自於sensor1 or 2, TODO:訊號源未新增
-  System.pv = TempValue.sensor1;
+  if(1)
+    System.pv = TempValue.sensor1 + System.value[Ot];
+  else
+    System.pv = TempValue.sensor2 + System.value[OE];
 }
 
 void get_HistoryMax(void)
@@ -307,12 +310,12 @@ int16_t check_Limit_Value(int16_t data, int8_t index)
       min_data = (int16_t)(bytetable[index].Range_Low*10);
       if(data > max_data)
       {
-        data = min_data;
+        data = max_data;
         // printf("數值大於最大值, 取代後 = %d\r\n", data);
       }
       else if(data < min_data)
       {
-        data = max_data;
+        data = min_data;
         // printf("數值小於最小值, 取代後 = %d\r\n", data);
       }
       else
