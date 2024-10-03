@@ -209,6 +209,12 @@ static key_up_function(void)
       {
         case homeMode:
           System.keymode.Max_flag = true;
+          System.mode = historyMode;
+        break;
+
+        case historyMode:
+          System.keymode.Max_flag = false;
+          System.mode = homeMode;
         break;
 
         case level1Mode:
@@ -376,6 +382,12 @@ static key_down_function(void)
       {
         case homeMode:
           System.keymode.Min_flag = true;
+          System.mode = historyMode;
+        break;
+
+        case historyMode:
+          System.keymode.Min_flag = false;
+          System.mode = homeMode;
         break;
 
         case level1Mode:

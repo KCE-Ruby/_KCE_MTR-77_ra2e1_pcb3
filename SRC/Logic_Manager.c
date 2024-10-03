@@ -151,16 +151,17 @@ static void update_display_message(void)
   switch (System.mode)
   {
     case homeMode:
-      //主頁顯示邏輯, 含最大最小值清除
+      NumToDisplay(System.pv);
+
+      //更新顯示icon
+      update_icon();
+    break;
+
+    case historyMode:
       if(System.keymode.Max_flag)
         NumToDisplay(System.history_max);
       else if(System.keymode.Min_flag)
         NumToDisplay(System.history_min);
-      else
-        NumToDisplay(System.pv);
-
-      //更新顯示icon
-      update_icon();
     break;
 
     case level1Mode:      //用戶層-level 1

@@ -37,6 +37,7 @@ enum DISPLAY_SPECIAL
 enum
 {
   homeMode,
+  historyMode,
   level1Mode,
   level2Mode,
   checkgMode,
