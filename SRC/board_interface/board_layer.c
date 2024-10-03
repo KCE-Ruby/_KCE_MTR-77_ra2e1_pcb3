@@ -28,6 +28,7 @@ __IO bsp_io_level_t KeyPin, pin_sta[7];
 __IO s_Var System;
 __IO s_Flag sFlag;
 __IO uint8_t Pr1_size, Pr2_size;
+__IO uint32_t catch_ms = 0;
 
 /* task function protocol -----------------------------------------------*/
 static void TMR_init(void);
@@ -212,6 +213,28 @@ void Key_ReadPin(void)
   fsp_err_t err;
   err = R_IOPORT_PinRead(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_14, &KeyPin);
   pin_sta[tmr.COM_Port+1] = KeyPin ? false : true;
+}
+
+//timer
+bool Mydelay(uint16_t ms)
+{
+  /*
+  * 用系統值delay ms, 第一次進來的時候catch住當時的時間
+  * 結束之後free掉ms, 給下次用
+  */
+  bool ret=false;
+  if(catch_ms == 0)
+  {
+    catch_ms = tmr.Cnt_1ms; //記住當下值
+  }
+  else if((tmr.Cnt_1ms-catch_ms) >= ms)
+  {
+    //時間到後, 清除catch值以及回傳true代表delay計時結束
+    catch_ms = 0;
+    ret = true;
+    // printf("catch_ms = %d\r\n", catch_ms);
+  }
+  return ret;
 }
 
 /* callback Function definitions by code generated ------------------------------------------------------*/

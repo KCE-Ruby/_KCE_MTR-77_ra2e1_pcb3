@@ -410,9 +410,9 @@ static void char_M2(uint8_t _char)
       break;
     }
   }
-  if(System.mode == level1Mode)
+  if((System.mode==level1Mode) || (System.mode==historyMode))
   {
-    //若在設定層或離開時需閃爍則不顯示小數點
+    //若在設定/歷史值層或離開時需閃爍則不顯示小數點
     Scan2temp.scan2.M2_dp = false;
   }
   else if(System.mode == level2Mode)
@@ -499,3 +499,15 @@ void CharToDisplay(uint8_t _char)
   char_M3(ByteTable[_char][0]);
 }
 
+void HiToDisplay(void)
+{
+  char_M1(dig_i);
+  char_M2(dig_H);
+  char_M3(dig_off);
+}
+void LoToDisplay(void)
+{
+  char_M1(dig_o);
+  char_M2(dig_L);
+  char_M3(dig_off);
+}

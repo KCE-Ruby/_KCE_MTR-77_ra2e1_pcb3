@@ -37,6 +37,7 @@ extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
 // extern __IO ByteSettingTable bytetable[End];
 extern __IO uint8_t bytetable_pr1[End];
 extern __IO uint8_t bytetable_pr2[End];
+extern __IO uint32_t catch_ms;
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
@@ -147,6 +148,7 @@ static void leave_settingMode(void)
 static void update_display_message(void)
 {
   uint8_t table = 0;
+  static bool dly_flag_H=false, dly_flag_L=false, leave_flag=false;
   //主要顯示控制區
   switch (System.mode)
   {
@@ -155,13 +157,52 @@ static void update_display_message(void)
 
       //更新顯示icon
       update_icon();
+      //清除所有歷史極值相關旗標及參數
+      dly_flag_H = false;
+      dly_flag_L = false;
+      leave_flag = false;
+      System.keymode.Max_flag = false;
+      System.keymode.Min_flag = false;
+      catch_ms = 0;
     break;
 
     case historyMode:
       if(System.keymode.Max_flag)
-        NumToDisplay(System.history_max);
+      {
+        dly_flag_L = false; //更換最大最小值模式後清除另一個的顯示字符時間
+        //顯示一秒後, 顯示歷史最大數值
+        HiToDisplay();
+        if(dly_flag_H == false)
+          dly_flag_H = Mydelay(1000);
+        else
+        {
+          //顯示數值, 5秒後離開這層
+          NumToDisplay(System.history_max);
+          if(leave_flag == false)
+            leave_flag = Mydelay(5000);
+          else
+            System.mode = homeMode;
+        }
+        // printf("dly_flag_H = %d\r\n", dly_flag_H);
+      }
       else if(System.keymode.Min_flag)
-        NumToDisplay(System.history_min);
+      {
+        dly_flag_H = false; //更換最大最小值模式後清除另一個的顯示字符時間
+        //顯示一秒後, 顯示歷史最小數值
+        LoToDisplay();
+        if(dly_flag_L == false)
+          dly_flag_L = Mydelay(1000);
+        else
+        {
+          //顯示數值, 5秒後離開這層
+          NumToDisplay(System.history_min);
+          if(leave_flag == false)
+            leave_flag = Mydelay(5000);
+          else
+            System.mode = homeMode;
+        }
+        // printf("dly_flag_L = %d\r\n", dly_flag_L);
+      }
     break;
 
     case level1Mode:      //用戶層-level 1
@@ -320,7 +361,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x3D;
+  const uint8_t test    = 0x3F;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

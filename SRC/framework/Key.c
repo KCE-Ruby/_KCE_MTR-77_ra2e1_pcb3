@@ -205,6 +205,7 @@ static key_up_function(void)
     if(KeyUp.shortPressed != 0)
     {
       System.keymode.Max_flag = false;
+      System.keymode.Min_flag = false;
       switch (System.mode)
       {
         case homeMode:
@@ -377,6 +378,7 @@ static key_down_function(void)
   {
     if(KeyDown.shortPressed)
     {
+      System.keymode.Max_flag = false;
       System.keymode.Min_flag = false;
       switch (System.mode)
       {
@@ -550,6 +552,17 @@ static key_standby_function(void)
  if(KeyStandby.shortPressed)
  {
     //TODO: 按下按鍵後的功能
+    switch (System.mode)
+    {
+      case historyMode:
+        System.keymode.Max_flag = false;
+        System.keymode.Min_flag = false;
+        System.mode = homeMode;
+      break;
+    
+    default:
+      break;
+    }
     KeyStandby.shortPressed = 0;
  }
 }
@@ -563,6 +576,17 @@ static key_bulb_function(void)
  if(KeyBulb.shortPressed)
  {
     //TODO: 按下按鍵後的功能
+    switch (System.mode)
+    {
+      case historyMode:
+        System.keymode.Max_flag = false;
+        System.keymode.Min_flag = false;
+        System.mode = homeMode;
+      break;
+    
+    default:
+      break;
+    }
     KeyBulb.shortPressed = 0;
  }
 }
@@ -580,6 +604,12 @@ static key_defrost_function(void)
     {
       case homeMode:
         sFlag.Defrost = true;
+      break;
+
+      case historyMode:
+        System.keymode.Max_flag = false;
+        System.keymode.Min_flag = false;
+        System.mode = homeMode;
       break;
 
       case level1Mode:
@@ -607,6 +637,17 @@ static key_defrost_function(void)
  else if(KeyDefrost.shortPressed)
  {
     //TODO: 按下按鍵後的功能
+    switch (System.mode)
+    {
+      case historyMode:
+        System.keymode.Max_flag = false;
+        System.keymode.Min_flag = false;
+        System.mode = homeMode;
+      break;
+    
+    default:
+      break;
+    }
     KeyDefrost.shortPressed = 0;
  }
 }
@@ -648,6 +689,10 @@ static key_set_function(void)
           System.mode = level1Mode;
           System.level1_index = 0;
         }
+        break;
+
+        case historyMode:
+        //TODO: 要顯示rSt三秒然後reset歷史極值
         break;
 
         case level1Mode:
@@ -715,6 +760,12 @@ static key_set_function(void)
           System.keymode.SET_value_flag = true;
         break;
 
+        case historyMode:
+          System.keymode.Max_flag = false;
+          System.keymode.Min_flag = false;
+          System.mode = homeMode;
+        break;
+        
         case level1Mode:
           if(KeyUp.Cnt!=0)  //離開level1的路徑, 短按SET鍵+上鍵 -> 離開
           {
