@@ -329,7 +329,36 @@ void ICON_Clock_OFF(void)
   Scan4temp.scan4.clock = false;
 }
 
-
-
-
+//rST重置歷史極值的字符
+bool rStToDisplay_Flashing(void)
+{
+  static uint8_t flash_cnt=0;
+  static bool pre_flag=false;
+  bool ret=false;
+  bool flag;  //頻率為1Hz or 2Hz
+  flag = Flash_timer_setting();
+  //溫度icon, 系統處於設定模式中, 閃爍中, 預設為:1Hz 500ms亮, 500ms滅
+  if(flag == true)
+  {
+    rStToDisplay();
+    pre_flag = flag;
+  }
+  else
+  {
+    CharToDisplay(xxx);
+    if(pre_flag==true)
+    {
+      //計算切換了幾次
+      flash_cnt++;
+      pre_flag = flag;
+    }
+  }
+  if(flash_cnt>3)
+  {
+    flash_cnt = 0;
+    ret = true;
+    pre_flag=false;
+  }
+  return ret;
+}
 

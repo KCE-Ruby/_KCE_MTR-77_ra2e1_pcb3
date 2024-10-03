@@ -139,5 +139,6 @@ void NumToDisplay(int16_t temp);
 void CharToDisplay(uint8_t _char);
 void HiToDisplay(void);
 void LoToDisplay(void);
+void rStToDisplay(void);
 
 #endif /* INC_INDICATOR_ENCODE_H_ */

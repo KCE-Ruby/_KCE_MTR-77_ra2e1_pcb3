@@ -70,7 +70,7 @@ typedef struct
 typedef struct
 {
   bool SET_value_flag;
-  bool Max_flag, Min_flag;
+  bool Max_flag, Min_flag, clear_flag;
   uint16_t index;
 }f_menu;
 

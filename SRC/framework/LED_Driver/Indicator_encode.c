@@ -505,9 +505,17 @@ void HiToDisplay(void)
   char_M2(dig_H);
   char_M3(dig_off);
 }
+
 void LoToDisplay(void)
 {
   char_M1(dig_o);
   char_M2(dig_L);
   char_M3(dig_off);
+}
+
+void rStToDisplay(void)
+{
+  char_M1(dig_t);
+  char_M2(dig_S);
+  char_M3(dig_r);
 }

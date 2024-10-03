@@ -26,6 +26,7 @@
 #define CONTI_PRESS_times_H           (1000)      //連續累加的承認次數, 單位:次
 
 #define KEY_cnt_2s                     (400)
+#define KEY_cnt_3s                     (600)
 #define KEY_cnt_7s                    (1400)
 #define KEY_cnt_max                   (5000)
 #define KEY_cnt_min                      (1)
@@ -39,6 +40,7 @@ extern __IO uint8_t bytetable_pr1[End];
 extern __IO uint8_t bytetable_pr2[End];
 extern __IO uint8_t Pr1_size, Pr2_size;
 extern __IO ByteSettingTable bytetable[End];
+extern __IO bool clear_Max_flag, clear_Min_flag;
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t disp_level;
@@ -693,6 +695,22 @@ static key_set_function(void)
 
         case historyMode:
         //TODO: 要顯示rSt三秒然後reset歷史極值
+        if(KeySet.Cnt > KEY_cnt_2s)
+        {
+          //只要觸發閃爍rSt功能必須閃完三次, 不會被中斷
+          System.keymode.clear_flag = true;
+
+          if(clear_Max_flag)
+          {
+            System.history_max = 0;
+            clear_Max_flag = false;
+          }
+          else if(clear_Min_flag)
+          {
+            System.history_min = 0;
+            clear_Min_flag = false;
+          }
+        }
         break;
 
         case level1Mode:
@@ -718,9 +736,9 @@ static key_set_function(void)
         break;
       }
   }
-  else if((KeySet.Cnt>0) && (System.mode==level2Mode))   //當被按下時
+  else if((KeySet.Cnt>0))   //當被按下時
   {
-    if(KeyDown.Cnt > 0)  //代表要改變Pr1與Pr2的值
+    if((KeyDown.Cnt>0) && (System.mode==level2Mode))  //代表要改變Pr1與Pr2的值
     {
       api_sta = API_BUSY1;
       pr2_index  = bytetable_pr2[System.level2_index];
@@ -737,6 +755,11 @@ static key_set_function(void)
         printf("更改後的mode = Pr1\r\n", Pr1);
       }
       printf("api_sta = %d\r\n", api_sta);
+    }
+    else if(System.mode==historyMode)
+    {
+      System.keymode.Max_flag = false;
+      System.keymode.Min_flag = false;
     }
   }
   else if(KeySet.LongPressed != 0) //放開後判斷為長按時的動作

@@ -41,6 +41,7 @@ extern __IO uint32_t catch_ms;
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
+__IO bool clear_Max_flag=0, clear_Min_flag=0;
 static bool bootled_En=true;
 
 /* Private Logic API funcitons protocol ------------------------------------*/
@@ -163,12 +164,15 @@ static void update_display_message(void)
       leave_flag = false;
       System.keymode.Max_flag = false;
       System.keymode.Min_flag = false;
+      System.keymode.clear_flag = false;
       catch_ms = 0;
     break;
 
     case historyMode:
       if(System.keymode.Max_flag)
       {
+        clear_Max_flag = true;
+        clear_Min_flag = false;
         dly_flag_L = false; //更換最大最小值模式後清除另一個的顯示字符時間
         //顯示一秒後, 顯示歷史最大數值
         HiToDisplay();
@@ -187,6 +191,8 @@ static void update_display_message(void)
       }
       else if(System.keymode.Min_flag)
       {
+        clear_Min_flag = true;
+        clear_Max_flag = false;
         dly_flag_H = false; //更換最大最小值模式後清除另一個的顯示字符時間
         //顯示一秒後, 顯示歷史最小數值
         LoToDisplay();
@@ -202,6 +208,21 @@ static void update_display_message(void)
             System.mode = homeMode;
         }
         // printf("dly_flag_L = %d\r\n", dly_flag_L);
+      }
+      else  //非正在顯示極值時
+      {
+        if(System.keymode.clear_flag)
+        {
+          //代表長按SET超過3秒, 開始閃爍
+          if(rStToDisplay_Flashing()==true)
+          {
+            //閃爍rSt3次後離開
+            System.mode = homeMode;
+            System.keymode.clear_flag = false;
+          }
+        }
+        else  //長按SET的時候長亮rSt鍵
+          rStToDisplay();
       }
     break;
 
@@ -361,7 +382,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x3F;
+  const uint8_t test    = 0x40;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
