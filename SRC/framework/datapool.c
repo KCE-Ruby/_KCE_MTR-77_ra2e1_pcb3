@@ -192,8 +192,8 @@ void offset_EEtoSYS(void)
     i++;
   }
 
-  System.history_max = 0;    //EE_Buf_u16[UserAddr_history_min]
-  System.history_min = 0;    //EE_Buf_u16[UserAddr_history_max]
+  System.history_max = -9990;    //給最大值, 最小值做溫度基準, EE_Buf_u16[UserAddr_history_max]
+  System.history_min = 9990;    //給最小值, 最大值做溫度基準, EE_Buf_u16[UserAddr_history_min]
   
   System.value[rSE] = System.value[Set];
   System.value[rEL] = 10;           //v1.0
@@ -236,12 +236,6 @@ void get_HistoryMin(void)
     I2c_Buf_Write[addr+1] = System.history_min >> 8;
     // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
   }
-}
-
-void clear_History_value(void)
-{
-  System.history_max = 0;
-  System.history_min = 0;
 }
 
 uint8_t get_bytetable_pr1(void)

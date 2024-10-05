@@ -62,15 +62,6 @@ static void loop_100us(void);
 /* static Logic API funcitons ------------------------------------------------------*/
 static void update_history_value(void)
 {
-  static bool clear_limit_flag=true;    //TODO: 清除極值的API還沒做
-
-  //若要清除最大最小值, 需要按下SET鍵3秒以上, 顯示rst再按下SET一次即可
-  if(clear_limit_flag)
-  {
-    clear_History_value();
-    clear_limit_flag = false;
-  }
-
   //取得目前Pv值的歷史最大最小值
   get_HistoryMax();
   get_HistoryMin();
@@ -382,7 +373,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x40;
+  const uint8_t test    = 0x41;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

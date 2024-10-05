@@ -702,12 +702,12 @@ static key_set_function(void)
 
           if(clear_Max_flag)
           {
-            System.history_max = 0;
+            System.history_max = System.pv;
             clear_Max_flag = false;
           }
           else if(clear_Min_flag)
           {
-            System.history_min = 0;
+            System.history_min = System.pv;
             clear_Min_flag = false;
           }
         }
