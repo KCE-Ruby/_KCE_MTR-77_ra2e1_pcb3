@@ -28,12 +28,6 @@ enum MenuLevel
   Pr2,    //第二層中才能看到的參數, 進入第二層可看到所有參數
 };
 
-enum SensorExit
-{
-  exist_n,
-  exist_y,
-};
-
 enum DegreeUnit
 {
   degree_C,

@@ -44,6 +44,13 @@ __IO uint8_t I2c_Buf_Read[eep_end] = {};
 __IO bool clear_Max_flag=0, clear_Min_flag=0;
 static bool bootled_En=true;
 
+/* static update_display_message API Functions -------------------------------*/
+static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave);
+static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave);
+static void level1Modelogic(void);
+static void level2Modelogic(void);
+static void valuetodisplay(uint8_t table);
+
 /* Private Logic API funcitons protocol ------------------------------------*/
 static void update_history_value(void);
 static void update_icon(void);
@@ -59,7 +66,139 @@ static void boot_control(void);
 static void loop_100ms(void);
 static void loop_100us(void);
 
+/* static update_display_message API Functions -------------------------------*/
+static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
+{
+  //顯示目前量測到的溫度
+  NumToDisplay(System.pv);
+  //更新顯示icon
+  update_icon();
+
+  //清除所有歷史極值相關旗標及參數
+  *fHigh = false;
+  *fLow = false;
+  *fLeave = false;
+  System.keymode.Max_flag = false;
+  System.keymode.Min_flag = false;
+  System.keymode.clear_flag = false;
+  catch_ms = 0;
+}
+
+static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
+{
+  if(System.keymode.Max_flag)
+  {
+    clear_Max_flag = true;
+    clear_Min_flag = false;
+    *fLow = false; //更換最大最小值模式後清除另一個的顯示字符時間
+    //顯示一秒後, 顯示歷史最大數值
+    HiToDisplay();
+    if(*fHigh == false)
+      *fHigh = Mydelay(1000);
+    else
+    {
+      //顯示數值, 5秒後離開這層
+      NumToDisplay(System.history_max);
+      if(*fLeave == false)
+        *fLeave = Mydelay(5000);
+      else
+        System.mode = homeMode;
+    }
+    // printf("HIS_dly_f_H = %d\r\n", *fHigh);
+  }
+  else if(System.keymode.Min_flag)
+  {
+    clear_Min_flag = true;
+    clear_Max_flag = false;
+    *fHigh = false; //更換最大最小值模式後清除另一個的顯示字符時間
+    //顯示一秒後, 顯示歷史最小數值
+    LoToDisplay();
+    if(*fLow == false)
+      *fLow = Mydelay(1000);
+    else
+    {
+      //顯示數值, 5秒後離開這層
+      NumToDisplay(System.history_min);
+      if(*fLeave == false)
+        *fLeave = Mydelay(5000);
+      else
+        System.mode = homeMode;
+    }
+    // printf("HIS_dly_f_L = %d\r\n", *fLow);
+  }
+  else  //非正在顯示極值時
+  {
+    if(System.keymode.clear_flag)
+    {
+      //代表長按SET超過3秒, 開始閃爍
+      if(rStToDisplay_Flashing()==true)
+      {
+        //閃爍rSt3次後離開
+        System.mode = homeMode;
+        System.keymode.clear_flag = false;
+      }
+    }
+    else  //長按SET的時候長亮rSt鍵
+      rStToDisplay();
+  }
+}
+
+static void level1Modelogic(void)
+{
+  uint8_t table = 0;
+  ICON_degrees_Flashing();
+  table = bytetable_pr1[System.level1_index];
+  if(sFlag.Level1_value == Vindex)
+    CharToDisplay(table);
+  else if(sFlag.Level1_value == Vvalue)
+    valuetodisplay(table);
+  else if(sFlag.Level1_value == Pr2_symbol)
+    CharToDisplay(pr2);
+}
+
+static void level2Modelogic(void)
+{
+  uint8_t table = 0;
+  ICON_degrees_Flashing();
+  table = bytetable_pr2[System.level2_index];
+  if(sFlag.Level2_value == Vindex)
+    CharToDisplay(table);
+  else if(sFlag.Level2_value == Vvalue)
+    valuetodisplay(table);
+}
+
+static void settingModelogic(void)
+{
+  if(sFlag.leaveSet)
+    leave_settingMode();
+  else
+    change_set_value();
+}
+
+static void checkgModelogic(void)
+{
+  //查看設定值專區
+  check_set_value();
+}
+
 /* static Logic API funcitons ------------------------------------------------------*/
+static void valuetodisplay(uint8_t table)
+{
+  switch (table)
+  {
+    case P2P:
+    case P3P:
+    case P4P:
+      nyToDisplay((bool)System.value[table]);
+      break;
+  
+    default:
+      NumToDisplay(System.value[table]);
+      break;
+  }
+
+}
+
 static void update_history_value(void)
 {
   //取得目前Pv值的歷史最大最小值
@@ -139,114 +278,35 @@ static void leave_settingMode(void)
 
 static void update_display_message(void)
 {
-  uint8_t table = 0;
   static bool dly_flag_H=false, dly_flag_L=false, leave_flag=false;
   //主要顯示控制區
   switch (System.mode)
   {
     case homeMode:
-      NumToDisplay(System.pv);
-
-      //更新顯示icon
-      update_icon();
-      //清除所有歷史極值相關旗標及參數
-      dly_flag_H = false;
-      dly_flag_L = false;
-      leave_flag = false;
-      System.keymode.Max_flag = false;
-      System.keymode.Min_flag = false;
-      System.keymode.clear_flag = false;
-      catch_ms = 0;
+      homeModelogic(&dly_flag_H, &dly_flag_L, &leave_flag);
+      // printf("HOME_dly_f_H = %d, ", dly_flag_H);
+      // printf("HOME_dly_f_L = %d, ", dly_flag_L);
+      // printf("HOME_leave_f = %d\r\n", leave_flag);
     break;
 
     case historyMode:
-      if(System.keymode.Max_flag)
-      {
-        clear_Max_flag = true;
-        clear_Min_flag = false;
-        dly_flag_L = false; //更換最大最小值模式後清除另一個的顯示字符時間
-        //顯示一秒後, 顯示歷史最大數值
-        HiToDisplay();
-        if(dly_flag_H == false)
-          dly_flag_H = Mydelay(1000);
-        else
-        {
-          //顯示數值, 5秒後離開這層
-          NumToDisplay(System.history_max);
-          if(leave_flag == false)
-            leave_flag = Mydelay(5000);
-          else
-            System.mode = homeMode;
-        }
-        // printf("dly_flag_H = %d\r\n", dly_flag_H);
-      }
-      else if(System.keymode.Min_flag)
-      {
-        clear_Min_flag = true;
-        clear_Max_flag = false;
-        dly_flag_H = false; //更換最大最小值模式後清除另一個的顯示字符時間
-        //顯示一秒後, 顯示歷史最小數值
-        LoToDisplay();
-        if(dly_flag_L == false)
-          dly_flag_L = Mydelay(1000);
-        else
-        {
-          //顯示數值, 5秒後離開這層
-          NumToDisplay(System.history_min);
-          if(leave_flag == false)
-            leave_flag = Mydelay(5000);
-          else
-            System.mode = homeMode;
-        }
-        // printf("dly_flag_L = %d\r\n", dly_flag_L);
-      }
-      else  //非正在顯示極值時
-      {
-        if(System.keymode.clear_flag)
-        {
-          //代表長按SET超過3秒, 開始閃爍
-          if(rStToDisplay_Flashing()==true)
-          {
-            //閃爍rSt3次後離開
-            System.mode = homeMode;
-            System.keymode.clear_flag = false;
-          }
-        }
-        else  //長按SET的時候長亮rSt鍵
-          rStToDisplay();
-      }
+      historyModelogic(&dly_flag_H, &dly_flag_L, &leave_flag);
     break;
 
     case level1Mode:      //用戶層-level 1
-      ICON_degrees_Flashing();
-      table = bytetable_pr1[System.level1_index];
-      if(sFlag.Level1_value == Vindex)
-        CharToDisplay(table);
-      else if(sFlag.Level1_value == Vvalue)
-        NumToDisplay(System.value[table]);
-      else if(sFlag.Level1_value == Pr2_symbol)
-        CharToDisplay(pr2);
+      level1Modelogic();
     break;
 
     case level2Mode:      //隱藏層-level 2
-      ICON_degrees_Flashing();
-      table = bytetable_pr2[System.level2_index];
-      if(sFlag.Level2_value == Vindex)
-        CharToDisplay(table);
-      else if(sFlag.Level2_value == Vvalue)
-        NumToDisplay(System.value[table]);
+      level2Modelogic();
     break;
 
     case settingMode:
-      if(sFlag.leaveSet)
-        leave_settingMode();
-      else
-        change_set_value();
+      settingModelogic();
     break;
 
     case checkgMode:
-      //查看設定值專區
-      check_set_value();
+      checkgModelogic();
     break;
 
     default:
@@ -373,7 +433,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x41;
+  const uint8_t test    = 0x42;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

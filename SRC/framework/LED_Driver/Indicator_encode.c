@@ -519,3 +519,19 @@ void rStToDisplay(void)
   char_M2(dig_S);
   char_M3(dig_r);
 }
+
+void nyToDisplay(bool i)
+{
+  if(i==1)
+  {
+    char_M1(dig_y);
+    char_M2(dig_off);
+    char_M3(dig_off);
+  }
+  else
+  {
+    char_M1(dig_n);
+    char_M2(dig_off);
+    char_M3(dig_off);
+  }
+}

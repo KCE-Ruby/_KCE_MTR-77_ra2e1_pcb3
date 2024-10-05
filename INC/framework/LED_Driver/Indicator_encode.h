@@ -140,5 +140,6 @@ void CharToDisplay(uint8_t _char);
 void HiToDisplay(void);
 void LoToDisplay(void);
 void rStToDisplay(void);
+void nyToDisplay(bool i);
 
 #endif /* INC_INDICATOR_ENCODE_H_ */

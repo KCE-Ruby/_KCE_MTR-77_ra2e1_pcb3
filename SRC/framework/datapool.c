@@ -43,11 +43,11 @@ __IO ByteSettingTable bytetable[End] =
   { LS,         -50.0,           110,        -50.0,     Pr2},
   { US,         -50.0,           110,        110.0,     Pr2},
   { Ot,           -12,            12,            0,     Pr2},
-  {P2P,       exist_n,       exist_y,      exist_y,     Pr2}, //n=不存在; y=存在
+  {P2P,             0,           0.1,          0.1,     Pr2}, //n=不存在; y=存在
   { OE,           -12,            12,            0,     Pr2},
-  {P3P,       exist_n,       exist_y,      exist_n,     Pr2}, //n=不存在; y=存在
+  {P3P,             0,           0.1,            0,     Pr2}, //n=不存在; y=存在
   { O3,           -12,            12,            0,     Pr2},
-  {P4P,       exist_n,       exist_y,      exist_n,     Pr2}, //n=不存在; y=存在
+  {P4P,             0,           0.1,            0,     Pr2}, //n=不存在; y=存在
   { O4,           -12,            12,            0,     Pr2},
   {OdS,             0,           255,            0,     Pr1},
   { AC,             0,            50,            1,     Pr1},
