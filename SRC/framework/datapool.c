@@ -203,11 +203,26 @@ void offset_EEtoSYS(void)
 /* Function definitions ------------------------------------------------------*/
 void get_Pv(void)
 {
+  uint8_t source=1;
   //Pv值來自於sensor1 or 2, TODO:訊號源未新增
-  if(1)
-    System.pv = TempValue.sensor1 + System.value[Ot];
-  else
-    System.pv = TempValue.sensor2 + System.value[OE];
+  switch (source)
+  {
+    case 1:
+      System.pv = TempValue.sensor1 + System.value[Ot];
+      break;
+    case 2:
+      System.pv = TempValue.sensor2 + System.value[OE];
+      break;
+    case 3:
+      System.pv = TempValue.sensor3 + System.value[O3];
+      break;
+    case 4:
+      System.pv = TempValue.sensor4 + System.value[O4];
+      break;
+  
+    default:
+      break;
+  }
 }
 
 void get_HistoryMax(void)
