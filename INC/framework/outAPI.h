@@ -29,14 +29,7 @@ typedef struct
 } TemperatureAdTable;
 
 /* task function protocol -----------------------------------------------*/
-void out1_FAN_on(void);
-void out1_FAN_off(void);
-void out2_Compressor_on(void);
-void out2_Compressor_off(void);
-void out3_Defrost_on(void);
-void out3_Defrost_off(void);
-void out4_buzzer_on(void);
-void out4_buzzer_off(void);
+bool manual_defrost(bool flag);
 void Out_main(void);
 
 #endif /* INC_OUTAPI_H_ */

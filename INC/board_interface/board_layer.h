@@ -34,7 +34,7 @@ enum DISPLAY_SPECIAL
   CLEARALL=19999, //清除所有數字區顯示
 };
 
-enum
+enum SYSTEM_MODE
 {
   homeMode,
   historyMode,
@@ -42,6 +42,22 @@ enum
   level2Mode,
   checkgMode,
   settingMode,
+};
+
+enum DELAY_TYPE_sec
+{
+  dly_OdS,
+
+  dly_end_sec
+};
+
+enum DELAY_TYPE_ms
+{
+  dly_fHigh,
+  dly_fLow,
+  dly_fLeave,
+
+  dly_end_ms
 };
 
 /* typedef definitions -----------------------------------------------------*/
@@ -103,5 +119,6 @@ void set_scanflag(bool flag);
 void SMG_OPEN(uint8_t smg);
 void SMG_CLOSE(uint8_t smg);
 void Key_ReadPin(void);
-bool Mydelay(uint16_t ms);
+bool Mydelay_sec(uint8_t flag, uint16_t sec);
+bool Mydelay_ms(uint8_t flag, uint16_t ms);
 #endif /* INC_BOARD_LAYER_H_ */

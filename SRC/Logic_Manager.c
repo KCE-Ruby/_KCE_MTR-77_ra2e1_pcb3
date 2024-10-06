@@ -37,7 +37,8 @@ extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
 // extern __IO ByteSettingTable bytetable[End];
 extern __IO uint8_t bytetable_pr1[End];
 extern __IO uint8_t bytetable_pr2[End];
-extern __IO uint32_t catch_ms;
+extern __IO uint32_t catch_s[dly_end_sec];
+extern __IO uint32_t catch_ms[dly_end_ms];
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
@@ -81,7 +82,9 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
   System.keymode.Max_flag = false;
   System.keymode.Min_flag = false;
   System.keymode.clear_flag = false;
-  catch_ms = 0;
+  catch_ms[dly_fHigh] = 0;
+  catch_ms[dly_fLow] = 0;
+  catch_ms[dly_fLeave] = 0;
 }
 
 static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
@@ -94,13 +97,13 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     //顯示一秒後, 顯示歷史最大數值
     HiToDisplay();
     if(*fHigh == false)
-      *fHigh = Mydelay(1000);
+      *fHigh = Mydelay_ms(dly_fHigh, 1000);
     else
     {
       //顯示數值, 5秒後離開這層
       NumToDisplay(System.history_max);
       if(*fLeave == false)
-        *fLeave = Mydelay(5000);
+        *fLeave = Mydelay_ms(dly_fLeave, 5000);
       else
         System.mode = homeMode;
     }
@@ -114,13 +117,13 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     //顯示一秒後, 顯示歷史最小數值
     LoToDisplay();
     if(*fLow == false)
-      *fLow = Mydelay(1000);
+      *fLow = Mydelay_ms(dly_fLow, 1000);
     else
     {
       //顯示數值, 5秒後離開這層
       NumToDisplay(System.history_min);
       if(*fLeave == false)
-        *fLeave = Mydelay(5000);
+        *fLeave = Mydelay_ms(dly_fLeave, 5000);
       else
         System.mode = homeMode;
     }
@@ -433,7 +436,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x42;
+  const uint8_t test    = 0x44;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

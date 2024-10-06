@@ -28,7 +28,8 @@ __IO bsp_io_level_t KeyPin, pin_sta[7];
 __IO s_Var System;
 __IO s_Flag sFlag;
 __IO uint8_t Pr1_size, Pr2_size;
-__IO uint32_t catch_ms = 0;
+__IO uint16_t catch_s[dly_end_sec] = {};
+__IO uint32_t catch_ms[dly_end_ms] = {};
 
 /* task function protocol -----------------------------------------------*/
 static void TMR_init(void);
@@ -216,23 +217,58 @@ void Key_ReadPin(void)
 }
 
 //timer
-bool Mydelay(uint16_t ms)
+bool Mydelay_sec(uint8_t flag, uint16_t sec)
 {
   /*
-  * 用系統值delay ms, 第一次進來的時候catch住當時的時間
-  * 結束之後free掉ms, 給下次用
+  * 這是以秒為單位的計時器
+  * 用系統值delay s, 第一次進來的時候catch住當時的時間
+  * 結束之後free掉s, 給下次用
+  * 因為是loop執行, 所以有可能別人的delay還沒跑完就又要跑下一個delay
+  * 可以同時執行多個delay, 所以要catch_ms分旗標用, 每個人的起始值都獨立運算
   */
+  const uint16_t catch_end = (tmr.Cnt_1s-catch_s[flag]);
   bool ret=false;
-  if(catch_ms == 0)
+
+  // printf("delay的sec = %d\r\n", sec);
+  // printf("tmr.Cnt_1s = %d\r\n", tmr.Cnt_1s);
+  if(catch_s[flag] == 0)
   {
-    catch_ms = tmr.Cnt_1ms; //記住當下值
+    catch_s[flag] = tmr.Cnt_1s; //記住當下值
+    // printf("記住當下值\r\n");
   }
-  else if((tmr.Cnt_1ms-catch_ms) >= ms)
+  else if(catch_end >= sec)
   {
     //時間到後, 清除catch值以及回傳true代表delay計時結束
-    catch_ms = 0;
+    catch_s[flag] = 0;
     ret = true;
-    // printf("catch_ms = %d\r\n", catch_ms);
+    // printf("catch_s[%d] = %d;   ", flag, catch_s[flag]);
+    // printf("sec = %d\r\n", sec);
+  }
+  return ret;
+}
+
+bool Mydelay_ms(uint8_t flag, uint16_t ms)
+{
+  /*
+  * 這是以毫秒為單位的計時器
+  * 用系統值delay ms, 第一次進來的時候catch住當時的時間
+  * 結束之後free掉ms, 給下次用
+  * 因為是loop執行, 所以有可能別人的delay還沒跑完就又要跑下一個delay
+  * 可以同時執行多個delay, 所以要catch_ms分旗標用, 每個人的起始值都獨立運算
+  */
+  const uint32_t catch_end = (tmr.Cnt_1ms-catch_ms[flag]);
+  bool ret=false;
+
+  if(catch_ms[flag] == 0)
+  {
+    catch_ms[flag] = tmr.Cnt_1ms; //記住當下值
+  }
+  else if(catch_end >= ms)
+  {
+    //時間到後, 清除catch值以及回傳true代表delay計時結束
+    catch_ms[flag] = 0;
+    ret = true;
+    // printf("catch_ms[%d] = %d\r\n", flag, catch_ms[flag]);
   }
   return ret;
 }
