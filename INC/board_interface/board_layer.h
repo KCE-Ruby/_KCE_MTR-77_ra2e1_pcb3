@@ -47,6 +47,7 @@ enum SYSTEM_MODE
 enum DELAY_TYPE_sec
 {
   dly_OdS,
+  dly_AC,
 
   dly_end_sec
 };

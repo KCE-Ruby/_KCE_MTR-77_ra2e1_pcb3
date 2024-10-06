@@ -241,8 +241,8 @@ bool Mydelay_sec(uint8_t flag, uint16_t sec)
     //時間到後, 清除catch值以及回傳true代表delay計時結束
     catch_s[flag] = 0;
     ret = true;
-    // printf("catch_s[%d] = %d;   ", flag, catch_s[flag]);
-    // printf("sec = %d\r\n", sec);
+    printf("catch_s[%d] = %d;   ", flag, catch_s[flag]);
+    printf("sec = %d\r\n", sec);
   }
   return ret;
 }

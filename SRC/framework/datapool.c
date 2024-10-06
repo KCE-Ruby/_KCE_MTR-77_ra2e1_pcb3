@@ -49,7 +49,7 @@ __IO ByteSettingTable bytetable[End] =
   { O3,           -12,            12,            0,     Pr2},
   {P4P,             0,           0.1,            0,     Pr2}, //n=不存在; y=存在
   { O4,           -12,            12,            0,     Pr2},
-  {OdS,             0,           255,            1,     Pr1},
+  {OdS,             0,           255,            0,     Pr1},
   { AC,             0,            50,            1,     Pr1},
   {rtr,             0,           100,          100,     Pr2}, //P1=100, P2=0
   {CCt,           0.0,          24.0,            0,     Pr2}, //精度為0.1hour = 6min

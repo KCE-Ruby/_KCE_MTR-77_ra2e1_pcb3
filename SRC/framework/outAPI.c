@@ -28,6 +28,7 @@
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var System;
+extern __IO icon_api_flag icon;
 
 /* Private function protocol -----------------------------------------------*/
 static void out1_FAN_on(void);
@@ -41,8 +42,8 @@ static void out4_buzzer_off(void);
 static void out_alloff(void);
 
 /* static output logic function api protocol---------------------------------*/
-static void out_alloff(void);
-
+static bool ac_logic(bool act);
+static bool ods_logic(void);
 
 /* Function definitions ------------------------------------------------------*/
 bool manual_defrost(bool flag)
@@ -70,12 +71,24 @@ static void out1_FAN_off(void)
 
 static void out2_Compressor_on(void)
 {
-  R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_02_PIN_07, BSP_IO_LEVEL_HIGH);
+  /* 
+  * 控制壓縮機輸出, 若輸入ON代表溫度值到點了
+  * 但實際輸出需依據AC參數做防頻繁啟動的限制
+  * 每次壓縮機被關閉後, 旗標需要被reset
+  */
+  if(ac_logic(act_on) == true)
+  {
+    icon.Refrigerate_sta = ICON_ON;
+    R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_02_PIN_07, BSP_IO_LEVEL_HIGH);
+  }
 }
 
 static void out2_Compressor_off(void)
 {
+  //壓縮機off時, 不須delay且重置旗標為false
+  icon.Refrigerate_sta = ICON_OFF;
   R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_02_PIN_07, BSP_IO_LEVEL_LOW);
+  ac_logic(act_off);
 }
 
 static void out3_Defrost_on(void)
@@ -123,6 +136,38 @@ static void out_alloff(void)
 }
 
 /* static output logic function api ------------------------------------------------------*/
+static bool ac_logic(bool act)
+{
+  /* 
+  * 防頻繁啟動延時, 保證壓縮機從關機到開機的最短間隔時間
+  * 每次壓縮機被關閉後, 旗標需要被reset
+  * 由於System.value是小數後一位被放大10倍的值, 所以要除回去才是正確的整數值
+  * AC單位為分鐘, 需要做個小轉換變成ms做delay
+  * 如果AC有值才需要做delay的判斷
+  */
+  static bool ret=false;
+  const uint8_t min2sec = 60;
+  const uint16_t sec = (System.value[AC]/10)*min2sec;
+
+  //壓縮機off時, 不須delay且reset ret旗標為false
+  if(act == act_off)
+    return ret=false;
+
+  //當壓縮機on時, 開始計時
+  if((ret==false) && (sec>0))
+  {
+    icon.Refrigerate_sta = ICON_FLASHING;
+    ret = Mydelay_sec(dly_AC, sec);
+    // printf("System.value[AC] = %d\r\n", System.value[AC]);
+    // printf("sec = %d\r\n", sec);
+    // printf("ret = %d\r\n", ret);
+  }
+  else
+    ret = true;
+
+  return ret;
+}
+
 static bool ods_logic(void)
 {
   /* 

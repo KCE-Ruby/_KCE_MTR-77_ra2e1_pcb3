@@ -12,6 +12,22 @@
 #define INC_APP_LED_CTRL_H_ 
 #ifdef INC_APP_LED_CTRL_H_
 
+
+/* Enum type definitions -----------------------------------------------------*/
+enum ICON_API_STATE
+{
+  ICON_ON,
+  ICON_OFF,
+  ICON_FLASHING,
+};
+
+/* typedef definitions -----------------------------------------------------*/
+typedef struct
+{
+  uint8_t Refrigerate_sta; 
+} icon_api_flag;
+
+
 /* Public function protocol -----------------------------------------------*/
 void ALL_LED_ON(void);
 void ALL_LED_OFF(void);
@@ -21,6 +37,7 @@ uint8_t ICON_LeaveSet_Flashing(uint8_t flash_cnt);
 void ICON_Refrigerate_ON(void);
 void ICON_Refrigerate_OFF(void);
 void ICON_Refrigerate_Flashing(void);
+void ICON_Refrigerate_API(void);
 
 void ICON_Defrost_ON(void);
 void ICON_Defrost_OFF(void);

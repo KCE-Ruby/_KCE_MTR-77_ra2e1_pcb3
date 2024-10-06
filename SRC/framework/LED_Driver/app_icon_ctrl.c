@@ -27,6 +27,7 @@ extern __IO s_Var System;
 
 /* variables -----------------------------------------------------------------*/
 __IO bool ALL_LED_FLAG, CLOSE_LED_FLAG;
+__IO icon_api_flag icon;
 
 /* static private function protocol -----------------------------------------------*/
 static bool Flash_timer_setting(void);
@@ -125,6 +126,26 @@ void ICON_Refrigerate_Flashing(void)
     ICON_Refrigerate_ON();
   else
     ICON_Refrigerate_OFF();
+}
+
+void ICON_Refrigerate_API(void)
+{
+  switch (icon.Refrigerate_sta)
+  {
+    case ICON_ON:
+      ICON_Refrigerate_ON();
+      break;
+    case ICON_OFF:
+      ICON_Refrigerate_OFF();
+      break;
+    case ICON_FLASHING:
+      ICON_Refrigerate_Flashing();
+      break;
+
+    default:
+      ICON_Refrigerate_OFF();
+      break;
+  }
 }
 
 //融霜icon三種型態, 開; 關; 閃爍中

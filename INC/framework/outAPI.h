@@ -12,6 +12,13 @@
 #define INC_OUTAPI_H_ 
 #ifdef INC_OUTAPI_H_
 
+/* Enum type definitions -----------------------------------------------------*/
+enum OUT_ACTION
+{
+  act_off = 0,
+  act_on = 1,
+};
+
 /* typedef definitions -----------------------------------------------------*/
 typedef struct  //different timer flags
 {

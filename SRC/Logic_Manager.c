@@ -211,8 +211,12 @@ static void update_history_value(void)
 
 static void update_icon(void)
 {
+  /* 更新icon狀態
+  *  華/攝氏_燈號控制
+  *  壓縮機啟動_燈號控制
+  */
   ICON_degrees_API();
-  // ICON_Refrigerate_ON();
+  ICON_Refrigerate_API();
   // ICON_Fan_Flashing();
   // ICON_Defrost_Flashing();
   // ICON_Alarm_ON();
@@ -436,7 +440,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x44;
+  const uint8_t test    = 0x45;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
