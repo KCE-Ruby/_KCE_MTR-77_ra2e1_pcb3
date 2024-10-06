@@ -203,26 +203,22 @@ void offset_EEtoSYS(void)
 /* Function definitions ------------------------------------------------------*/
 void get_Pv(void)
 {
-  uint8_t source=1;
-  //Pv值來自於sensor1 or 2, TODO:訊號源未新增
-  switch (source)
-  {
-    case 1:
-      System.pv = TempValue.sensor1 + System.value[Ot];
-      break;
-    case 2:
-      System.pv = TempValue.sensor2 + System.value[OE];
-      break;
-    case 3:
-      System.pv = TempValue.sensor3 + System.value[O3];
-      break;
-    case 4:
-      System.pv = TempValue.sensor4 + System.value[O4];
-      break;
-  
-    default:
-      break;
-  }
+  //System.value參數基準點為小數後一位, 所以數值已經放大10倍, 取整數的話要除10回來
+  const uint16_t rtr_const = System.value[rtr]/10;
+  const uint8_t source = 8;
+  int16_t pv_1, pv_2, pv_3, pv_4;
+
+  //目前判斷點是依據rtr參數將P1與P2的比例做調整, 整合後為pv值使用
+  pv_1 = TempValue.sensor1 + System.value[Ot];
+  pv_2 = TempValue.sensor2 + System.value[OE];
+  pv_3 = TempValue.sensor3 + System.value[O3];
+  pv_4 = TempValue.sensor4 + System.value[O4];
+  System.pv = (rtr_const * (pv_1-pv_2) /100) + pv_2;
+
+  // printf("rtr_const = %d\r\n", rtr_const);
+  // printf("pv_1 = %d\r\n", pv_1);
+  // printf("pv_2 = %d\r\n", pv_2);
+  // printf("System.pv = %d\r\n", System.pv);
 }
 
 void get_HistoryMax(void)
