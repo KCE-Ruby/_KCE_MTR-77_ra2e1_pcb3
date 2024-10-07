@@ -44,6 +44,13 @@ enum SYSTEM_MODE
   settingMode,
 };
 
+enum DELAY_TYPE_min
+{
+  dly_CCt,
+
+  dly_end_min
+};
+
 enum DELAY_TYPE_sec
 {
   dly_OdS,
@@ -71,9 +78,10 @@ typedef enum {
 typedef struct  //different timer flags
 {
   bool FlashFlag_1Hz, FlashFlag_2Hz;
-  bool Flag_1ms, Flag_5ms,Flag_100ms, Flag_200ms, Flag_500ms, Flag_1s, Flag_2s;
+  bool Flag_1ms, Flag_100ms;
+  bool Flag_1s;
   uint8_t COM_Port, COM_Port_pre;
-  int16_t Cnt_1s;
+  int16_t Cnt_1s, Cnt_60s;
   uint32_t Cnt_1ms;
 }r_tmr;
 
@@ -120,6 +128,7 @@ void set_scanflag(bool flag);
 void SMG_OPEN(uint8_t smg);
 void SMG_CLOSE(uint8_t smg);
 void Key_ReadPin(void);
+bool Mydelay_min(uint8_t flag, uint16_t min);
 bool Mydelay_sec(uint8_t flag, uint16_t sec);
 bool Mydelay_ms(uint8_t flag, uint16_t ms);
 #endif /* INC_BOARD_LAYER_H_ */

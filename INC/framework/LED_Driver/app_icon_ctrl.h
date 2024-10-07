@@ -16,15 +16,16 @@
 /* Enum type definitions -----------------------------------------------------*/
 enum ICON_API_STATE
 {
-  ICON_ON,
   ICON_OFF,
+  ICON_ON,
   ICON_FLASHING,
 };
 
 /* typedef definitions -----------------------------------------------------*/
 typedef struct
 {
-  uint8_t Refrigerate_sta; 
+  uint8_t Refrigerate_sta;
+  bool Enhanced_Cooling_sta;
 } icon_api_flag;
 
 
@@ -59,6 +60,7 @@ void ICON_Alarm_OFF(void);
 
 void ICON_Enhanced_Cooling_ON(void);
 void ICON_Enhanced_Cooling_OFF(void);
+void ICON_Enhanced_Cooling_API(void);
 
 void ICON_Energy_Saving_ON(void);
 void ICON_Energy_Saving_OFF(void);

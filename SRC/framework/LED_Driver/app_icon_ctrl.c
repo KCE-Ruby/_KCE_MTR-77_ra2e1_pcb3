@@ -132,11 +132,11 @@ void ICON_Refrigerate_API(void)
 {
   switch (icon.Refrigerate_sta)
   {
-    case ICON_ON:
-      ICON_Refrigerate_ON();
-      break;
     case ICON_OFF:
       ICON_Refrigerate_OFF();
+      break;
+    case ICON_ON:
+      ICON_Refrigerate_ON();
       break;
     case ICON_FLASHING:
       ICON_Refrigerate_Flashing();
@@ -294,6 +294,23 @@ void ICON_Enhanced_Cooling_OFF(void)
 {
   //TODO: 加強製冷icon, 動作關閉, 熄滅
   Scan4temp.scan4.enhanced_cooling = false;
+}
+
+void ICON_Enhanced_Cooling_API(void)
+{
+  switch (icon.Enhanced_Cooling_sta)
+  {
+    case ICON_OFF:
+      ICON_Enhanced_Cooling_OFF();
+      break;
+    case ICON_ON:
+      ICON_Enhanced_Cooling_ON();
+      break;
+
+    default:
+      ICON_Enhanced_Cooling_OFF();
+      break;
+  }
 }
 
 //節能運行

@@ -217,6 +217,7 @@ static void update_icon(void)
   */
   ICON_degrees_API();
   ICON_Refrigerate_API();
+  ICON_Enhanced_Cooling_API();
   // ICON_Fan_Flashing();
   // ICON_Defrost_Flashing();
   // ICON_Alarm_ON();
@@ -440,7 +441,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x46;
+  const uint8_t test    = 0x47;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
