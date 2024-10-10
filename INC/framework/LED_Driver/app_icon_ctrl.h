@@ -21,11 +21,23 @@ enum ICON_API_STATE
   ICON_FLASHING,
 };
 
+enum Enhanced_Cooling_TYPE
+{
+  //先開一個uint8_t用, 所有可能會讓壓縮機開關的條件都在這, 兩兩一組
+  /*縮寫解釋
+  * enhanced_cooling -> EC, 加強製冷
+  */
+  icon_none = 0,
+  icon_EC_enable     = 0x01,     //第1個bit 啟動要用 0b0000 0001(0x01)
+  icon_EC_disable    = 0xFE,     //第1個bit 清除要用 &1111 1110(0xFE)
+};
+
+
 /* typedef definitions -----------------------------------------------------*/
 typedef struct
 {
   uint8_t Refrigerate_sta;
-  bool Enhanced_Cooling_sta;
+  uint8_t Enhanced_Cooling_sta;
 } icon_api_flag;
 
 

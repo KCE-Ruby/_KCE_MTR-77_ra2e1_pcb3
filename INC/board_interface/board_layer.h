@@ -128,7 +128,7 @@ void set_scanflag(bool flag);
 void SMG_OPEN(uint8_t smg);
 void SMG_CLOSE(uint8_t smg);
 void Key_ReadPin(void);
-bool Mydelay_min(uint8_t flag, uint16_t min);
+bool Mydelay_min(uint8_t flag, uint32_t min);
 bool Mydelay_sec(uint8_t flag, uint16_t sec);
 bool Mydelay_ms(uint8_t flag, uint16_t ms);
 #endif /* INC_BOARD_LAYER_H_ */

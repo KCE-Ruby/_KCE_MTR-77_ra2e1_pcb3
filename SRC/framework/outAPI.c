@@ -29,21 +29,33 @@
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var System;
 extern __IO icon_api_flag icon;
+extern __IO uint16_t catch_min[dly_end_min];
+extern __IO uint16_t catch_s[dly_end_sec];
+
+/* static variables -----------------------------------------------------------------*/
+static out_api_flag out_sta;
 
 /* Private function protocol -----------------------------------------------*/
 static void out1_FAN_on(void);
 static void out1_FAN_off(void);
+static void out1_FAN_api(void);
 static void out2_Compressor_on(void);
 static void out2_Compressor_off(void);
+static void out2_Compressor_api(void);
 static void out3_Defrost_on(void);
 static void out3_Defrost_off(void);
+static void out3_Defrost_api(void);
 static void out4_buzzer_on(void);
 static void out4_buzzer_off(void);
+static void out4_buzzer_api(void);
 static void out_alloff(void);
 
 /* static output logic function api protocol---------------------------------*/
 static bool ac_logic(bool act);
 static bool ods_logic(void);
+static bool defrost_logic(void);
+static void cct_logic(void);
+static void normal_refrigerate_logic(void);
 
 /* Function definitions ------------------------------------------------------*/
 bool manual_defrost(bool flag)
@@ -69,6 +81,22 @@ static void out1_FAN_off(void)
   R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_03_PIN_01, BSP_IO_LEVEL_LOW);
 }
 
+static void out1_FAN_api(void)
+{
+  switch (out_sta.fan)
+  {
+    case true:
+      out1_FAN_on();
+      break;
+    case false:
+      out1_FAN_off();
+      break;
+    
+    default:
+      break;
+  }
+}
+
 static void out2_Compressor_on(void)
 {
   /* 
@@ -78,7 +106,6 @@ static void out2_Compressor_on(void)
   */
   if(ac_logic(act_on) == true)
   {
-    icon.Refrigerate_sta = ICON_ON;
     R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_02_PIN_07, BSP_IO_LEVEL_HIGH);
   }
 }
@@ -86,9 +113,22 @@ static void out2_Compressor_on(void)
 static void out2_Compressor_off(void)
 {
   //壓縮機off時, 不須delay且重置旗標為false
-  icon.Refrigerate_sta = ICON_OFF;
   R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_02_PIN_07, BSP_IO_LEVEL_LOW);
   ac_logic(act_off);
+}
+
+static void out2_Compressor_api(void)
+{
+  switch (out_sta.compressor)
+  {
+    case out_none:
+      out2_Compressor_off();
+      break;
+    
+    default:
+      out2_Compressor_on();
+      break;
+  }
 }
 
 static void out3_Defrost_on(void)
@@ -117,6 +157,22 @@ static void out3_Defrost_off(void)
     R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_03_PIN_02, BSP_IO_LEVEL_HIGH);
 }
 
+static void out3_Defrost_api(void)
+{
+  switch (out_sta.defrost)
+  {
+    case true:
+      out3_Defrost_on();
+      break;
+    case false:
+      out3_Defrost_off();
+      break;
+    
+    default:
+      break;
+  }
+}
+
 static void out4_buzzer_on(void)
 {
   R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_15, BSP_IO_LEVEL_HIGH);
@@ -127,19 +183,35 @@ static void out4_buzzer_off(void)
   R_IOPORT_PinWrite(&g_ioport_ctrl, BSP_IO_PORT_09_PIN_15, BSP_IO_LEVEL_LOW);
 }
 
+static void out4_buzzer_api(void)
+{
+  switch (out_sta.buzzer)
+  {
+    case true:
+      out4_buzzer_on();
+      break;
+    case false:
+      out4_buzzer_off();
+      break;
+    
+    default:
+      break;
+  }
+}
+
 static void out_alloff(void)
 {
-  out1_FAN_off();
-  out2_Compressor_off();
-  out3_Defrost_off();
-  out4_buzzer_off();
+  out_sta.fan = false;
+  out_sta.compressor = false;
+  out_sta.defrost = false;
+  out_sta.buzzer = false;
 }
 
 /* static output logic function api ------------------------------------------------------*/
 static bool ac_logic(bool act)
 {
-  /* 
-  * 防頻繁啟動延時, 保證壓縮機從關機到開機的最短間隔時間
+  /* 防頻繁啟動延時
+  * 保證壓縮機從關機到開機的最短間隔時間
   * 每次壓縮機被關閉後, 旗標需要被reset
   * 由於System.value是小數後一位被放大10倍的值, 所以要除回去才是正確的整數值
   * AC單位為分鐘, 需要做個小轉換變成ms做delay
@@ -170,8 +242,8 @@ static bool ac_logic(bool act)
 
 static bool ods_logic(void)
 {
-  /* 
-  * 上電延遲, 在這段時間內任何輸出都維持在未通電狀態
+  /* 上電延遲
+  * 在這段時間內任何輸出都維持在未通電狀態
   * 上電後只會執行一次, 當ret轉成true後不會再執行此含式
   * 由於System.value是小數後一位被放大10倍的值, 所以要除回去才是正確的整數值
   * OdS單位為分鐘, 需要做個小轉換變成ms做delay
@@ -194,35 +266,118 @@ static bool ods_logic(void)
   return ret;
 }
 
-/* Output Logical Function definitions ------------------------------------------------------*/
-void Out_main(void)
+static bool defrost_logic(void)
 {
-  /*
-  * 首先確認是否有上電延遲需求, 否則
+  //TODO: 融霜邏輯
+  return 0;
+}
+
+static void cct_logic(void)
+{
+  /* 強冷凍循環
+  * 確認不在融霜狀態, 且使用者是否啟動強冷循環模式
+  * 若大於等於CCS加速冷凍設定點, 則依據CCt時間持續啟動壓縮機
+  * 若CCt的時間到了但是系統還是沒降到CCS的設定點, 離開模式且關閉壓縮機
+  * 若低於設定值, 則不動作(依照普通製冷邏輯控制壓縮機輸出)
+  * 若低於設定值, 重置計時器的狀態(可有可無)
+  * 回傳true代表CCt強冷功能啟動中計時未完成,  反之false代表未啟動強冷功能
   */
-  int8_t sv = (System.value[Set]+System.value[Hy]);
-  if(ods_logic() == true)
+  const bool CCS_sta = (System.pv >= System.value[CCS])? true:false;
+  const uint8_t CCt_hour = (System.value[CCt]/10);
+  uint8_t CCt_min = (System.value[CCt]%10) * 10;
+  uint8_t CCt_sum = CCt_min + (CCt_hour*60);  //總合成分鐘數
+  static bool dly = true;
+
+  // printf("CCt_hour = %d\r\n", CCt_hour);
+  // printf("CCt_min = %d\r\n", CCt_min);
+  // printf("CCt_sum = %d\r\n", CCt_sum);
+  if((defrost_logic()==false) && (icon.Enhanced_Cooling_sta!=icon_none))
   {
-    if(System.pv > sv)
+    // printf("CCt_處於強冷模式\r\n");
+    // printf("CCS_sta = %d\r\n, CCS_sta");
+    if(CCS_sta)
     {
-      out2_Compressor_on();
-      // printf("System.pv = %d\r\n", System.pv);
-      // printf("sv = %d\r\n", sv);
-      // printf("開啟壓縮機輸出\r\n\n\n");
+      dly = Mydelay_min(dly_CCt, CCt_sum);
+      if(dly==false)
+      {
+        out_sta.compressor |= out_EC_enable;
+        // printf("CCS_開啟壓縮機輸出\r\n");
+      }
+      else  //時間到後, 系統還是沒降到CCS的設定點, 關閉壓縮機且離開模式
+      {
+        out_sta.compressor &= out_EC_disable;
+        icon.Enhanced_Cooling_sta &= icon_EC_disable;
+        // printf("CCt_關閉壓縮機輸出\r\n");
+      }
     }
-    else if(System.pv <= System.value[Set])
+    else
     {
-      out2_Compressor_off();
-      // printf("System.pv = %d\r\n", System.pv);
-      // printf("sv = %d\r\n", sv);
-      // printf("關閉壓縮機輸出\r\n\n\n");
+      out_sta.compressor &= out_EC_disable;
     }
   }
   else
   {
-    out_alloff();
-    // printf("關閉所有輸出邏輯\r\n");
+    //若在融霜模式下, 則不可啟動強冷功能
+    out_sta.compressor &= out_EC_disable;
+    icon.Enhanced_Cooling_sta = icon_none;
   }
+}
+
+
+
+static void normal_refrigerate_logic(void)
+{
+  int16_t sv = (System.value[Set]+System.value[Hy]);
+  if(System.pv > sv)
+  {
+    icon.Refrigerate_sta = ICON_ON;
+    out_sta.compressor |= out_NR_enable;
+    // printf("System.pv = %d\r\n", System.pv);
+    // printf("System.Set = %d\r\n", System.value[Set]);
+    // printf("System.Hy = %d\r\n", System.value[Hy]);
+    // printf("sv = %d\r\n", sv);
+    // printf("normal開啟壓縮機輸出\r\n\n\n");
+  }
+  else if(System.pv <= System.value[Set])
+  {
+    icon.Refrigerate_sta = ICON_OFF;
+    out_sta.compressor &= out_NR_disable;
+    // printf("System.pv = %d\r\n", System.pv);
+    // printf("sv = %d\r\n", sv);
+    // printf("normal關閉壓縮機輸出\r\n\n\n");
+  }
+}
+
+static void out_logic(void)
+{
+  /* 輸出間的邏輯控制
+  * 首先確認是否有上電延遲需求 (ods_logic)
+  * 是否為強冷凍循環 (cct_logic)
+  * 進入普通製冷流程 (normal_refrigerate_logic)
+  */
+  if(ods_logic() == true)
+  {
+    cct_logic();
+    normal_refrigerate_logic();
+  }
+  else
+  {
+    out_alloff();
+    printf("關閉所有輸出邏輯\r\n");
+  }
+}
+
+/* Output Logical Function definitions ------------------------------------------------------*/
+void Out_main(void)
+{
+  // 確認旗標狀態後, 執行out_api依照各旗標運作
+
+  out_logic();
+  out1_FAN_api();
+  out2_Compressor_api();
+  out3_Defrost_api();
+  out4_buzzer_api();
+  
 }
 
 

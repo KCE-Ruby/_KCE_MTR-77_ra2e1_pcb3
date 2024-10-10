@@ -41,6 +41,7 @@ extern __IO uint8_t bytetable_pr2[End];
 extern __IO uint8_t Pr1_size, Pr2_size;
 extern __IO ByteSettingTable bytetable[End];
 extern __IO bool clear_Max_flag, clear_Min_flag;
+extern __IO icon_api_flag icon;
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t disp_level;
@@ -190,6 +191,7 @@ static Key_Manager key_detect(Key_Manager key)
 static key_up_function(void)
 {
   /*[上鍵功能]
+  * 長按3秒進入加強製冷模式(舉起flag)
   * Home狀態下, 單擊可查看最大值
   * Menu狀態下, 單擊向下(參數表)瀏覽參數
   * Setting狀態下, 單擊增加參數值
@@ -201,10 +203,16 @@ static key_up_function(void)
   static uint32_t lastIncrementTime_up = 0;
   uint8_t AUTO_INCREMENT_DELAY;
 
+
   if(api_sta==API_FREE)
   {
+    if(KeyUp.Cnt > KEY_cnt_3s)
+    {
+      icon.Enhanced_Cooling_sta = icon_EC_enable;
+      api_sta = API_BUSY1;
+    }
     //TODO:看能不能把level1跟level2的code改成API call
-    if(KeyUp.shortPressed != 0)
+    else if(KeyUp.shortPressed != 0)
     {
       System.keymode.Max_flag = false;
       System.keymode.Min_flag = false;
@@ -356,11 +364,19 @@ static key_up_function(void)
     }
 
   }
-  else
+  else if(KeyUp.Cnt==0)
   {
-    KeyUp.LongPressed = 0;
-    KeyUp.shortPressed = 0;
-    KeyUp.conti_pressed = 0;
+    switch (api_sta)
+    {
+      case API_BUSY1:
+        KeyUp.LongPressed = 0;
+        KeyUp.shortPressed = 0;
+        KeyUp.conti_pressed = 0;
+        break;
+      
+      default:
+        break;
+    }
   }
 }
 

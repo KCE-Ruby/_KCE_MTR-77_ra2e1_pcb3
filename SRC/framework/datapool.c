@@ -37,7 +37,7 @@ __IO uint8_t bytetable_pr2[End];
 __IO ByteSettingTable bytetable[End] =
 {
   {xxx,             0,             0,            0,     NaN}, //對齊參數用的而已
-  {Set,           -50,           110,         -5.0,     NaN},
+  {Set,           -50,           110,        15.0,     NaN},
   //參數字元,  下限值,        上限值,        預設值,   權限層
   { Hy,           0.1,          25.5,          2.0,     Pr1},
   { LS,         -50.0,           110,        -50.0,     Pr2},
@@ -50,10 +50,10 @@ __IO ByteSettingTable bytetable[End] =
   {P4P,             0,           0.1,            0,     Pr2}, //n=不存在; y=存在
   { O4,           -12,            12,            0,     Pr2},
   {OdS,             0,           255,            0,     Pr1},
-  { AC,             0,            50,            1,     Pr1},
+  { AC,             0,            50,            0,     Pr1},
   {rtr,             0,           100,          100,     Pr2}, //P1=100, P2=0
-  {CCt,           0.0,          24.0,            0,     Pr2}, //精度為0.1hour = 6min
-  {CCS,         -55.0,         150.0,           -5,     Pr1},
+  {CCt,           0.0,          24.0,         0.1,     Pr2}, //精度為0.1hour = 6min
+  {CCS,         -55.0,         150.0,         5.0,     Pr1},
   {COn,             0,           255,           15,     Pr1},
   {COF,             0,           255,           30,     Pr1},
   { CF,      degree_C,      degree_F,     degree_C,     Pr1}, //攝氏=C, 華氏=F

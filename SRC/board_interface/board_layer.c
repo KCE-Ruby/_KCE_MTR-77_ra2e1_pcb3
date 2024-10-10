@@ -28,7 +28,7 @@ __IO bsp_io_level_t KeyPin, pin_sta[7];
 __IO s_Var System;
 __IO s_Flag sFlag;
 __IO uint8_t Pr1_size, Pr2_size;
-__IO uint16_t catch_min[dly_end_min] = {};
+__IO uint32_t catch_min[dly_end_min] = {};
 __IO uint16_t catch_s[dly_end_sec] = {};
 __IO uint32_t catch_ms[dly_end_ms] = {};
 
@@ -218,26 +218,26 @@ void Key_ReadPin(void)
 }
 
 //timer
-bool Mydelay_min(uint8_t flag, uint16_t min)
+bool Mydelay_min(uint8_t flag, uint32_t min)
 {
   /*
-  * 這是以分為單位的計時器
+  * 這是以分為單位的計時器, 如果用60s的計時單位會有誤差值最多1min, 所以要用s
   * 用系統值delay min, 第一次進來的時候catch住當時的時間
   * 結束之後free掉min, 給下次用
   * 因為是loop執行, 所以有可能別人的delay還沒跑完就又要跑下一個delay
   * 可以同時執行多個delay, 所以要catch_min分旗標用, 每個人的起始值都獨立運算
   */
-  const uint16_t catch_end = (tmr.Cnt_60s-catch_min[flag]);
+  const uint32_t catch_end = (tmr.Cnt_1s-catch_min[flag]);
   bool ret=false;
 
   // printf("delay的sec = %d\r\n", min);
   // printf("tmr.Cnt_60s = %d\r\n", tmr.Cnt_60s);
   if(catch_min[flag] == 0)
   {
-    catch_min[flag] = tmr.Cnt_60s; //記住當下值
+    catch_min[flag] = tmr.Cnt_1s; //記住當下值
     // printf("記住當下值\r\n");
   }
-  else if(catch_end >= min)
+  else if(catch_end >= (min*60))
   {
     //時間到後, 清除catch值以及回傳true代表delay計時結束
     catch_min[flag] = 0;

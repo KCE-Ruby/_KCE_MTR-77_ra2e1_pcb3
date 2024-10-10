@@ -300,15 +300,12 @@ void ICON_Enhanced_Cooling_API(void)
 {
   switch (icon.Enhanced_Cooling_sta)
   {
-    case ICON_OFF:
+    case icon_none:
       ICON_Enhanced_Cooling_OFF();
-      break;
-    case ICON_ON:
-      ICON_Enhanced_Cooling_ON();
       break;
 
     default:
-      ICON_Enhanced_Cooling_OFF();
+      ICON_Enhanced_Cooling_ON();
       break;
   }
 }
