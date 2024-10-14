@@ -308,7 +308,7 @@ int16_t check_Limit_Value(int16_t data, int8_t index)
         // printf("數值不須處理\r\n");
       }
       break;
-    
+
     default:
     //for level1&2參數內的數值使用
       max_data = (int16_t)(bytetable[index].Range_High*10);

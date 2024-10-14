@@ -49,6 +49,8 @@ __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
   static uint8_t api_sta=API_FREE;
 
 /* Private function protocol -----------------------------------------------*/
+static Vvalue_process_keyup(int8_t pr_index);
+static Vvalue_process_keydown(int8_t pr_index);
 static Key_Manager key_detect(Key_Manager key);
 static key_up_function(void);
 static key_down_function(void);
@@ -150,6 +152,37 @@ bool IsAnyKeyPressed(void)
     return false;
 }
 
+/* Static Function definitions ------------------------------------------------------*/
+static Vvalue_process_keyup(int8_t pr_index)
+{
+  switch (pr_index)
+  {
+    //要先處理某些需要先特殊處理的參數
+    case CCt:
+      if(System.value[CCt]%10 >= 6)
+        System.value[CCt] += (10 - (System.value[CCt]%10));
+      break;
+    
+    default:
+      break;
+  }
+}
+
+static Vvalue_process_keydown(int8_t pr_index)
+{
+  switch (pr_index)
+  {
+    //要先處理某些需要先特殊處理的參數, 降位要從5開始, 先-10是降位, 再-6是從6進位的意思
+    case CCt:
+      if(System.value[CCt]%10 > 6)
+        System.value[CCt] -= (10-6);
+      break;
+    
+    default:
+      break;
+  }
+}
+
 static Key_Manager key_detect(Key_Manager key)
 {
   // Key HW config, Release = High; Pressed = Low
@@ -206,7 +239,7 @@ static key_up_function(void)
 
   if(api_sta==API_FREE)
   {
-    if(KeyUp.Cnt > KEY_cnt_3s)
+    if((KeyUp.Cnt>KEY_cnt_3s) && (System.mode==homeMode))
     {
       icon.Enhanced_Cooling_sta = icon_EC_enable;
       api_sta = API_BUSY1;
@@ -245,7 +278,23 @@ static key_up_function(void)
             pr1_index = bytetable_pr1[System.level1_index];
             if(pr1_index <= onF)
             {
+              //數值需要先被加過後再進行特殊參數處理
               System.value[pr1_index]++;
+
+              //要先處理某些需要先特殊處理的參數
+              Vvalue_process_keyup(pr1_index);
+              // switch (pr1_index)
+              // {
+                
+              //   case CCt:
+              //     System.value[CCt]++;
+              //     if(System.value[CCt]%10 > 6)
+              //       System.value[CCt] += 10 - (System.value[CCt]%10);
+              //     break;
+                
+              //   default:
+              //     break;
+              // }
 
               //檢查最大最小值, index要放pr1的不是總表的
               data_bytetable = System.value[pr1_index];
@@ -275,7 +324,11 @@ static key_up_function(void)
             pr2_index = bytetable_pr2[System.level2_index];
             if(pr2_index <= onF)
             {
+              //數值需要先被加過後再進行特殊參數處理
               System.value[pr2_index]++;
+
+              //要先處理某些需要先特殊處理的參數
+              Vvalue_process_keyup(pr2_index);
 
               //檢查最大最小值, index要放pr1的不是總表的
               data_bytetable = System.value[pr2_index];
@@ -426,7 +479,11 @@ static key_down_function(void)
             pr1_index = bytetable_pr1[System.level1_index];
             if(pr1_index <= onF)
             {
+              //數值需要先被加過後再進行特殊參數處理
               System.value[pr1_index]--;    //onF以後的參數只能讀不能改
+
+              //要先處理某些需要先特殊處理的參數
+              Vvalue_process_keydown(pr1_index);
             
               //檢查最大最小值, index要放pr1的不是總表的
               // printf("-------------key down測試開始-------------\r\n");
@@ -455,7 +512,11 @@ static key_down_function(void)
             pr2_index = bytetable_pr2[System.level2_index];
             if(pr2_index <= onF)
             {
+              //數值需要先被加過後再進行特殊參數處理
               System.value[pr2_index]--;    //onF以後的參數只能讀不能改
+
+              //要先處理某些需要先特殊處理的參數
+              Vvalue_process_keydown(pr2_index);
 
               //檢查最大最小值, index要放pr1的不是總表的
               // printf("-------------key down測試開始-------------\r\n");
