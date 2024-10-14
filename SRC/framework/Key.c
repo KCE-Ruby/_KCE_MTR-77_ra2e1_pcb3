@@ -46,20 +46,22 @@ extern __IO icon_api_flag icon;
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t disp_level;
 __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
-  static uint8_t api_sta=API_FREE;
+static uint8_t api_sta=API_FREE;
 
 /* Private function protocol -----------------------------------------------*/
-static Vindex_process_keyup(int8_t pr_index);
-static Vindex_process_keydown(int8_t pr_index);
-static Vvalue_process_keyup(int8_t pr_index);
-static Vvalue_process_keydown(int8_t pr_index);
+static void levelmode_keyup_handle(uint8_t *index);
+static void Vindex_process_keyup(int8_t pr_index);
+static void Vindex_process_keydown(int8_t pr_index);
+static void Vvalue_process_keyup(int8_t pr_index);
+static void Vvalue_process_keydown(int8_t pr_index);
+static void activateEnhancedCooling(void);
 static Key_Manager key_detect(Key_Manager key);
-static key_up_function(void);
-static key_down_function(void);
-static key_standby_function(void);
-static key_bulb_function(void);
-static key_defrost_function(void);
-static key_set_function(void);
+static void key_up_function(void);
+static void key_down_function(void);
+static void key_standby_function(void);
+static void key_bulb_function(void);
+static void key_defrost_function(void);
+static void key_set_function(void);
 
 /* Function definitions ------------------------------------------------------*/
 void Key_main(void)
@@ -155,7 +157,63 @@ bool IsAnyKeyPressed(void)
 }
 
 /* Static Function definitions ------------------------------------------------------*/
-static Vindex_process_keyup(int8_t pr_index)
+static void levelmode_keyup_handle(uint8_t *index)
+{
+  /*[處理單擊上鍵後進入level1 or level2的功能]
+  * 預先處理level1與level2的差異
+  * 如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
+  * 
+  * 如果是顯示參數字元, 則++對應table的index(pr1或是pr2), 而非總表的
+  * 因為總表有一些保留字元, 在系統上是不會顯示的(也就是未開放功能)
+  * 有一些比較特殊的參數數值顯示的方式不同,需要在選中該字元時就先做標記
+  * 
+  * 如果是顯示參數數值, 將數值++完後, 比較最大最小值即結束
+  */
+
+  uint8_t pr_size;
+  int8_t *level_index;
+  int8_t pr_index;
+
+  //預先處理level1與level2的差異
+  if(*index == sFlag.Level1_value)
+  {
+    level_index = &System.level1_index;
+    pr_size = Pr1_size;
+    pr_index = bytetable_pr1[(*level_index)];
+  }
+  else
+  {
+    level_index = &System.level2_index;
+    pr_size = Pr2_size;
+    pr_index = bytetable_pr2[(*level_index)];
+  }
+
+  //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
+  if(KeySet.Cnt==0)
+  {
+    if(*index == Vindex)
+    {
+      //顯示參數字元index++
+      (*level_index)++;
+      if((*level_index) >= pr_size) (*level_index)= 0;
+      //要先處理某些需要先特殊處理的參數
+      Vindex_process_keyup(pr_index);
+    }
+    else if(*index == Vvalue)
+    {
+      //pr_index就是要被放到總表當index的, 所以在總表的onF以下都是可以改的數值
+      if(pr_index <= onF)
+      {
+        //數值需要先被加過後再檢查最大最小值
+        System.value[pr_index]++;
+        System.value[pr_index] = check_Limit_Value(System.value[pr_index], pr_index);
+        // printf("keyup數值 = %d\r\n", System.value[pr_index]);
+      }
+    }
+  }
+}
+
+static void Vindex_process_keyup(int8_t pr_index)
 {
   sFlag.Vvalue_int = false;
   switch (pr_index)
@@ -170,7 +228,7 @@ static Vindex_process_keyup(int8_t pr_index)
   }
 }
 
-static Vindex_process_keydown(int8_t pr_index)
+static void Vindex_process_keydown(int8_t pr_index)
 {
   sFlag.Vvalue_int = false;
   switch (pr_index)
@@ -185,7 +243,7 @@ static Vindex_process_keydown(int8_t pr_index)
   }
 }
 
-static Vvalue_process_keyup(int8_t pr_index)
+static void Vvalue_process_keyup(int8_t pr_index)
 {
   switch (pr_index)
   {
@@ -200,7 +258,7 @@ static Vvalue_process_keyup(int8_t pr_index)
   }
 }
 
-static Vvalue_process_keydown(int8_t pr_index)
+static void Vvalue_process_keydown(int8_t pr_index)
 {
   switch (pr_index)
   {
@@ -213,6 +271,12 @@ static Vvalue_process_keydown(int8_t pr_index)
     default:
       break;
   }
+}
+
+static void activateEnhancedCooling(void)
+{
+  icon.Enhanced_Cooling_sta = icon_EC_enable;
+  api_sta = API_BUSY1;
 }
 
 static Key_Manager key_detect(Key_Manager key)
@@ -253,7 +317,7 @@ static Key_Manager key_detect(Key_Manager key)
   return key;
 }
 
-static key_up_function(void)
+static void key_up_function(void)
 {
   /*[上鍵功能]
   * 長按3秒進入加強製冷模式(舉起flag)
@@ -272,10 +336,7 @@ static key_up_function(void)
   if(api_sta==API_FREE)
   {
     if((KeyUp.Cnt>KEY_cnt_3s) && (System.mode==homeMode))
-    {
-      icon.Enhanced_Cooling_sta = icon_EC_enable;
-      api_sta = API_BUSY1;
-    }
+      activateEnhancedCooling();
     //TODO:看能不能把level1跟level2的code改成API call
     else if(KeyUp.shortPressed != 0)
     {
@@ -294,86 +355,11 @@ static key_up_function(void)
         break;
 
         case level1Mode:
-        //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
-        if(KeySet.Cnt==0)
-        {
-          if(sFlag.Level1_value == Vindex)
-          {
-            //要被修改的index應該是pr1的table, 而不是System.value的table
-            System.level1_index++;
-            if(System.level1_index >= Pr1_size) System.level1_index= 0;
-
-            //要先處理某些需要先特殊處理的參數
-            pr1_index = bytetable_pr1[System.level1_index];
-            Vindex_process_keyup(pr1_index);
-          }
-          else if(sFlag.Level1_value == Vvalue)
-          {
-            //要被修改的index應該是pr1的table, 而不是System.value的table
-            pr1_index = bytetable_pr1[System.level1_index];
-            if(pr1_index <= onF)
-            {
-              //數值需要先被加過後再進行特殊參數處理
-              System.value[pr1_index]++;
-
-              // switch (pr1_index)
-              // {
-                
-              //   case CCt:
-              //     System.value[CCt]++;
-              //     if(System.value[CCt]%10 > 6)
-              //       System.value[CCt] += 10 - (System.value[CCt]%10);
-              //     break;
-                
-              //   default:
-              //     break;
-              // }
-
-              //檢查最大最小值, index要放pr1的不是總表的
-              data_bytetable = System.value[pr1_index];
-              // printf("-------------key up測試開始-------------\r\n");
-              // printf("data_bytetable = %d\r\n", data_bytetable);
-              System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-              // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
-            }
-          }
-        }
+          levelmode_keyup_handle(&sFlag.Level1_value);
         break;
 
         case level2Mode:
-        //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
-        if(KeySet.Cnt==0)
-        {
-          //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
-          if(sFlag.Level2_value == Vindex)
-          {
-
-            //要被修改的index應該是pr1的table, 而不是System.value的table
-            System.level2_index++;
-            if(System.level2_index >= Pr2_size) System.level2_index= 0;
-
-            //要先處理某些需要先特殊處理的參數
-            pr2_index = bytetable_pr2[System.level2_index];
-            Vindex_process_keyup(pr2_index);
-          }
-          else if(sFlag.Level2_value == Vvalue)
-          {
-            //要被修改的index應該是pr1的table, 而不是System.value的table
-            pr2_index = bytetable_pr2[System.level2_index];
-            if(pr2_index <= onF)
-            {
-              //數值需要先被加過後再進行特殊參數處理
-              System.value[pr2_index]++;
-
-              //檢查最大最小值, index要放pr1的不是總表的
-              data_bytetable = System.value[pr2_index];
-              // printf("-------------key up測試開始-------------\r\n");
-              // printf("data_bytetable = %d\r\n", data_bytetable);
-              System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-              // printf("keyup數值 = %d\r\n", System.value[pr2_index]);
-            }
-          }
-        }
+          levelmode_keyup_handle(&sFlag.Level2_value);
         break;
 
         case settingMode:
@@ -468,7 +454,7 @@ static key_up_function(void)
   }
 }
 
-static key_down_function(void)
+static void key_down_function(void)
 {
   /*[下鍵功能]
   * Home狀態下, 單擊可查看最小值
@@ -658,7 +644,7 @@ static key_down_function(void)
   }
 }
 
-static key_standby_function(void)
+static void key_standby_function(void)
 {
   /*[待機鍵功能]
   * 在參數 onF=oFF時, 單擊進入待機功能;
@@ -683,7 +669,7 @@ static key_standby_function(void)
  }
 }
 
-static key_bulb_function(void)
+static void key_bulb_function(void)
 {
   /*[燈開關鍵功能]
   * 此鍵不可用(無作用)
@@ -707,7 +693,7 @@ static key_bulb_function(void)
  }
 }
 
-static key_defrost_function(void)
+static void key_defrost_function(void)
 {
   /*[融霜鍵功能]
   * Home狀態下, 單擊啟動一次手動融霜
@@ -768,7 +754,7 @@ static key_defrost_function(void)
  }
 }
 
-static key_set_function(void)
+static void key_set_function(void)
 {
   static uint8_t api_sta=API_FREE;
   int16_t pre_value[End];
