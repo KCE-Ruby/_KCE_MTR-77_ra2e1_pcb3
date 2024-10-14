@@ -171,6 +171,7 @@ static const uint8_t ByteTable[][3] = {
 /* extern variables -----------------------------------------------------------------*/
 extern __IO r_tmr tmr;
 extern __IO s_Var System;
+extern __IO s_Flag sFlag;
 extern __IO ByteSettingTable bytetable[End];
 extern __IO uint8_t bytetable_pr2[End];
 
@@ -480,10 +481,15 @@ void NumToDisplay(int16_t temp)
   //轉換的數值不能超過最大值, 且恆為正數
   if(temp!=CLEARALL)
   {
+    //某些參數要已整數型態顯示其數值
+    if(sFlag.Vvalue_int==true)
+      dot = false;
+
+    //若為三位數則不顯示小數點
     if(temp > DISPLAY_MAX_DIGITS)
     {
-      dot = false;  //若為三位數則不顯示小數點
       temp = temp/10;
+      dot = false;
     }
   }
 

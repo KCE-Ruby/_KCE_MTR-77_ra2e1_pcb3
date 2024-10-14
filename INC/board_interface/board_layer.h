@@ -116,6 +116,7 @@ typedef struct  //different timer flags
   uint8_t Level1_value;
   bool Level2_value;
   bool leaveSet;
+  bool Vvalue_int;
 }s_Flag;
 
 /* task function protocol -----------------------------------------------*/

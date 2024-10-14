@@ -309,6 +309,17 @@ int16_t check_Limit_Value(int16_t data, int8_t index)
       }
       break;
 
+    case OdS:
+    case AC:
+      //for level1&2參數內的數值使用
+      max_data = (int16_t)(bytetable[index].Range_High);
+      min_data = (int16_t)(bytetable[index].Range_Low);
+      if(data > max_data)
+        data = max_data;
+      else if(data < min_data)
+        data = min_data;
+      break;
+
     default:
     //for level1&2參數內的數值使用
       max_data = (int16_t)(bytetable[index].Range_High*10);

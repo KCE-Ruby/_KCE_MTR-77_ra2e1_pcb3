@@ -49,6 +49,8 @@ __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
   static uint8_t api_sta=API_FREE;
 
 /* Private function protocol -----------------------------------------------*/
+static Vindex_process_keyup(int8_t pr_index);
+static Vindex_process_keydown(int8_t pr_index);
 static Vvalue_process_keyup(int8_t pr_index);
 static Vvalue_process_keydown(int8_t pr_index);
 static Key_Manager key_detect(Key_Manager key);
@@ -153,6 +155,36 @@ bool IsAnyKeyPressed(void)
 }
 
 /* Static Function definitions ------------------------------------------------------*/
+static Vindex_process_keyup(int8_t pr_index)
+{
+  sFlag.Vvalue_int = false;
+  switch (pr_index)
+  {
+    case OdS:
+    case AC:
+      sFlag.Vvalue_int = true;
+      break;
+    
+    default:
+      break;
+  }
+}
+
+static Vindex_process_keydown(int8_t pr_index)
+{
+  sFlag.Vvalue_int = false;
+  switch (pr_index)
+  {
+    case OdS:
+    case AC:
+      sFlag.Vvalue_int = true;
+      break;
+    
+    default:
+      break;
+  }
+}
+
 static Vvalue_process_keyup(int8_t pr_index)
 {
   switch (pr_index)
@@ -162,7 +194,7 @@ static Vvalue_process_keyup(int8_t pr_index)
       if(System.value[CCt]%10 >= 6)
         System.value[CCt] += (10 - (System.value[CCt]%10));
       break;
-    
+
     default:
       break;
   }
@@ -177,7 +209,7 @@ static Vvalue_process_keydown(int8_t pr_index)
       if(System.value[CCt]%10 > 6)
         System.value[CCt] -= (10-6);
       break;
-    
+
     default:
       break;
   }
@@ -265,12 +297,15 @@ static key_up_function(void)
         //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
         if(KeySet.Cnt==0)
         {
-          //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
           if(sFlag.Level1_value == Vindex)
           {
             //要被修改的index應該是pr1的table, 而不是System.value的table
             System.level1_index++;
             if(System.level1_index >= Pr1_size) System.level1_index= 0;
+
+            //要先處理某些需要先特殊處理的參數
+            pr1_index = bytetable_pr1[System.level1_index];
+            Vindex_process_keyup(pr1_index);
           }
           else if(sFlag.Level1_value == Vvalue)
           {
@@ -281,8 +316,6 @@ static key_up_function(void)
               //數值需要先被加過後再進行特殊參數處理
               System.value[pr1_index]++;
 
-              //要先處理某些需要先特殊處理的參數
-              Vvalue_process_keyup(pr1_index);
               // switch (pr1_index)
               // {
                 
@@ -314,9 +347,14 @@ static key_up_function(void)
           //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
           if(sFlag.Level2_value == Vindex)
           {
+
             //要被修改的index應該是pr1的table, 而不是System.value的table
             System.level2_index++;
             if(System.level2_index >= Pr2_size) System.level2_index= 0;
+
+            //要先處理某些需要先特殊處理的參數
+            pr2_index = bytetable_pr2[System.level2_index];
+            Vindex_process_keyup(pr2_index);
           }
           else if(sFlag.Level2_value == Vvalue)
           {
@@ -326,9 +364,6 @@ static key_up_function(void)
             {
               //數值需要先被加過後再進行特殊參數處理
               System.value[pr2_index]++;
-
-              //要先處理某些需要先特殊處理的參數
-              Vvalue_process_keyup(pr2_index);
 
               //檢查最大最小值, index要放pr1的不是總表的
               data_bytetable = System.value[pr2_index];
@@ -472,6 +507,10 @@ static key_down_function(void)
           {
             System.level1_index--;
             if(System.level1_index < 0) System.level1_index = (Pr1_size-1);
+
+            //要先處理某些需要先特殊處理的參數
+            pr1_index = bytetable_pr1[System.level1_index];
+            Vindex_process_keydown(pr1_index);
           }
           else if(sFlag.Level1_value == Vvalue)
           {
@@ -481,9 +520,6 @@ static key_down_function(void)
             {
               //數值需要先被加過後再進行特殊參數處理
               System.value[pr1_index]--;    //onF以後的參數只能讀不能改
-
-              //要先處理某些需要先特殊處理的參數
-              Vvalue_process_keydown(pr1_index);
             
               //檢查最大最小值, index要放pr1的不是總表的
               // printf("-------------key down測試開始-------------\r\n");
@@ -505,6 +541,10 @@ static key_down_function(void)
           {
             System.level2_index--;
             if(System.level2_index < 0) System.level2_index = (Pr2_size-1);
+            
+            //要先處理某些需要先特殊處理的參數
+            pr2_index = bytetable_pr2[System.level2_index];
+            Vindex_process_keydown(pr2_index);
           }
           else if(sFlag.Level2_value == Vvalue)
           {
@@ -514,9 +554,6 @@ static key_down_function(void)
             {
               //數值需要先被加過後再進行特殊參數處理
               System.value[pr2_index]--;    //onF以後的參數只能讀不能改
-
-              //要先處理某些需要先特殊處理的參數
-              Vvalue_process_keydown(pr2_index);
 
               //檢查最大最小值, index要放pr1的不是總表的
               // printf("-------------key down測試開始-------------\r\n");
