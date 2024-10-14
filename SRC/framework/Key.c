@@ -521,72 +521,10 @@ static void key_down_function(void)
 
         case level1Mode:
           levelmode_handle(&sFlag.Level1_value, false);
-        //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
-        // if(KeySet.Cnt==0)
-        // {
-        //   //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
-        //   if(sFlag.Level1_value == Vindex)
-        //   {
-        //     System.level1_index--;
-        //     if(System.level1_index < 0) System.level1_index = (Pr1_size-1);
-
-        //     //要先處理某些需要先特殊處理的參數
-        //     pr1_index = bytetable_pr1[System.level1_index];
-        //     Vindex_process_keydown(pr1_index);
-        //   }
-        //   else if(sFlag.Level1_value == Vvalue)
-        //   {
-        //     //要被修改的index應該是pr1的table, 而不是System.value的table
-        //     pr1_index = bytetable_pr1[System.level1_index];
-        //     if(pr1_index <= onF)
-        //     {
-        //       //數值需要先被加過後再進行特殊參數處理
-        //       System.value[pr1_index]--;    //onF以後的參數只能讀不能改
-            
-        //       //檢查最大最小值, index要放pr1的不是總表的
-        //       // printf("-------------key down測試開始-------------\r\n");
-        //       data_bytetable = System.value[pr1_index];
-        //       // printf("data_bytetable = %d\r\n", data_bytetable);
-        //       System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-        //       // printf("keydown數值 = %d\r\n", System.value[pr1_index]);
-        //     }
-        //   }
-        // }
         break;
 
         case level2Mode:
           levelmode_handle(&sFlag.Level2_value, false);
-        //如果有SET鍵代表要離開level1層了, 所以要加減數值必須要沒有SET鍵
-        // if(KeySet.Cnt==0)
-        // {
-        //   //TODO:要先帶入現有的數值再--, 還要檢查最大最小值
-        //   if(sFlag.Level2_value == Vindex)
-        //   {
-        //     System.level2_index--;
-        //     if(System.level2_index < 0) System.level2_index = (Pr2_size-1);
-            
-        //     //要先處理某些需要先特殊處理的參數
-        //     pr2_index = bytetable_pr2[System.level2_index];
-        //     Vindex_process_keydown(pr2_index);
-        //   }
-        //   else if(sFlag.Level2_value == Vvalue)
-        //   {
-        //     //要被修改的index應該是pr2的table, 而不是System.value的table
-        //     pr2_index = bytetable_pr2[System.level2_index];
-        //     if(pr2_index <= onF)
-        //     {
-        //       //數值需要先被加過後再進行特殊參數處理
-        //       System.value[pr2_index]--;    //onF以後的參數只能讀不能改
-
-        //       //檢查最大最小值, index要放pr1的不是總表的
-        //       // printf("-------------key down測試開始-------------\r\n");
-        //       data_bytetable = System.value[pr2_index];
-        //       // printf("data_bytetable = %d\r\n", data_bytetable);
-        //       System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-        //       // printf("keydown數值 = %d\r\n", System.value[pr2_index]);
-        //     }
-        //   }
-        // }
         break;
 
         case settingMode:
