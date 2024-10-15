@@ -254,6 +254,9 @@ static void Vindex_process_keyup(int8_t pr_index)
   {
     case OdS:
     case AC:
+    case COn:
+    case COF:
+      //數值為整數單位
       sFlag.Vvalue_int = true;
       break;
     
@@ -270,6 +273,9 @@ static void Vindex_process_keydown(int8_t pr_index)
   {
     case OdS:
     case AC:
+    case COn:
+    case COF:
+      //數值為整數單位
       sFlag.Vvalue_int = true;
       break;
     

@@ -49,8 +49,8 @@ __IO ByteSettingTable bytetable[End] =
   { O3,           -12,            12,            0,     Pr2},
   {P4P,             0,           0.1,            0,     Pr2}, //n=不存在; y=存在
   { O4,           -12,            12,            0,     Pr2},
-  {OdS,             0,           255,            0,     Pr1},
-  { AC,             0,            50,            0,     Pr1},
+  {OdS,             0,           255,            1,     Pr1},
+  { AC,             0,            50,            5,     Pr1},
   {rtr,             0,           100,          100,     Pr2}, //P1=100, P2=0
   {CCt,           0.0,          24.0,         0.1,     Pr2}, //精度為0.1hour = 6min
   {CCS,         -55.0,         150.0,         5.0,     Pr1},
@@ -188,7 +188,19 @@ void offset_EEtoSYS(void)
   i=UserAddr_Set;
   while(i < UserAddr_End)
   {
-    System.value[i] = EE_Buf_u16[i];
+    switch (i)
+    {
+      case UserAddr_OdS:
+      case UserAddr_AC:
+      case UserAddr_COn:
+      case UserAddr_COF:
+        System.value[i] = EE_Buf_u16[i]/10;
+        break;
+      
+      default:
+        System.value[i] = EE_Buf_u16[i];
+        break;
+    }
     i++;
   }
 
@@ -311,7 +323,9 @@ int16_t check_Limit_Value(int16_t data, int8_t index)
 
     case OdS:
     case AC:
-      //for level1&2參數內的數值使用
+    case COn:
+    case COF:
+      //for level1&2參數內的數值使用, 直接顯示數值不*10倍
       max_data = (int16_t)(bytetable[index].Range_High);
       min_data = (int16_t)(bytetable[index].Range_Low);
       if(data > max_data)
