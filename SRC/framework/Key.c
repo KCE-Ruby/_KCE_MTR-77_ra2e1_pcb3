@@ -887,6 +887,9 @@ static void key_set_function(void)
               System.level1_index++;
               if(System.level1_index >= Pr1_size) System.level1_index= 0;
 
+              //要先處理某些需要先特殊處理的參數
+              Vindex_process_keyup(bytetable_pr1[System.level1_index]);
+
             }
           }
         break;
@@ -913,6 +916,9 @@ static void key_set_function(void)
               //從參數值換成顯示字符時, 往後加一組
               System.level2_index++;
               if(System.level2_index >= Pr2_size) System.level2_index= 0;
+
+              //要先處理某些需要先特殊處理的參數
+              Vindex_process_keyup(bytetable_pr2[System.level2_index]);
 
             }
           }

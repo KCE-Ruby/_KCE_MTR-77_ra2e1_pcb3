@@ -24,7 +24,7 @@ N. 修改Pr2參數加到Pr1按鍵體感				--未完成_v00.
 94. 修改Pr1長案SET+<上>至Pr2的按鍵體感		--未完成_v00.4
 93. 將數字判斷移到data那邊處理,取數值用get包	--未完成_v00.4 (用RS485讀寫時才會正常)
 
-92. SET鍵切換index無法清除小數點			--未完成_v00.4D (須配合sFlag.Vvalue_int)
+92. SET鍵切換index無法清除小數點			--已完成_v00.4D (須配合sFlag.Vvalue_int)
 91. 優化keydown內level1/2重複的程式碼		--已完成_v00.4C (跟keyup共用API)
 90. 優化keyup內level1/2重複的程式碼		--已完成_v00.4B
 89. 修改[OdS]參數數值顯示的offset			--已完成_v00.4A (移除用戶層內小數點)
