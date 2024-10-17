@@ -24,7 +24,7 @@ extern __IO bool scan_complete_flag;
 
 /*---------------------- variables ----------------------*/
 uint16_t AD[5];
-ADC_TemperatureValue TempValue;
+__IO ADC_TemperatureValue TempValue;
 static TemperatureAdTable table[TABLE_SIZE] = 
 {
   { -20, 3864 },

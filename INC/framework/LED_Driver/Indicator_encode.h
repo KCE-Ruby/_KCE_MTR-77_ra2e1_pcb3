@@ -141,5 +141,7 @@ void HiToDisplay(void);
 void LoToDisplay(void);
 void rStToDisplay(void);
 void nyToDisplay(bool i);
+void P1ToDisplay(void);
+void P2ToDisplay(void);
 
 #endif /* INC_INDICATOR_ENCODE_H_ */

@@ -31,6 +31,10 @@ enum COMPRESSOR_TYPE
   out_EC_disable    = 0xFE,     //第1個bit 清除要用 &1111 1110(0xFE)
   out_NR_enable     = 0x02,     //第2個bit 啟動要用 0b0000 0010(0x02)
   out_NR_disable    = 0xFD,     //第2個bit 清除要用 &1111 1101(0xFD)
+  out_COn_enable    = 0x04,     //第3個bit
+  out_COn_disable   = 0xFB,     //第3個bit
+  out_COF_enable    = 0x08,     //第4個bit
+  out_COF_disable   = 0xF7,     //第4個bit
 };
 
 /* typedef definitions -----------------------------------------------------*/

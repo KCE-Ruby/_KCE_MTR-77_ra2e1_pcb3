@@ -541,3 +541,17 @@ void nyToDisplay(bool i)
     char_M3(dig_off);
   }
 }
+
+void P1ToDisplay(void)
+{
+  char_M1(dig_1);
+  char_M2(dig_P);
+  char_M3(dig_off);
+}
+
+void P2ToDisplay(void)
+{
+  char_M1(dig_2);
+  char_M2(dig_P);
+  char_M3(dig_off);
+}

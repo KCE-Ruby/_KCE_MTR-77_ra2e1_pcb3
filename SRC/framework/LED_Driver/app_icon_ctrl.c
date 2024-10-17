@@ -397,3 +397,13 @@ bool rStToDisplay_Flashing(void)
   return ret;
 }
 
+void P1ToDisplay_Flashing(void)
+{
+  bool flag;  //頻率為1Hz or 2Hz
+  flag = Flash_timer_setting();
+  //探頭1失效時, 閃爍中, 預設為:1Hz 500ms亮, 500ms滅
+  if(flag == true)
+    P1ToDisplay();
+  else
+    NumToDisplay(CLEARALL);
+}

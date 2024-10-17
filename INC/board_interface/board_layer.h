@@ -16,6 +16,8 @@
 #include "debug_uart/bsp_debug_uart.h"
 #include "eeprom/i2c_ee.h"
 
+#define ERROR_AD                           (-999)
+
 /* Enum type definitions -----------------------------------------------------*/
 enum API_STATE
 {
@@ -47,6 +49,8 @@ enum SYSTEM_MODE
 enum DELAY_TYPE_min
 {
   dly_CCt,
+  dly_COn,
+  dly_COF,
 
   dly_end_min
 };

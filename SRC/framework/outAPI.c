@@ -29,8 +29,10 @@
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var System;
 extern __IO icon_api_flag icon;
+extern __IO ADC_TemperatureValue TempValue;
 extern __IO uint16_t catch_min[dly_end_min];
 extern __IO uint16_t catch_s[dly_end_sec];
+extern __IO bool bootled_En;
 
 /* static variables -----------------------------------------------------------------*/
 static out_api_flag out_sta;
@@ -55,6 +57,7 @@ static bool ac_logic(bool act);
 static bool ods_logic(void);
 static bool defrost_logic(void);
 static void cct_logic(void);
+static void concof_logic(void);
 static void normal_refrigerate_logic(void);
 
 /* Function definitions ------------------------------------------------------*/
@@ -301,7 +304,7 @@ static void cct_logic(void)
       if(dly==false)
       {
         out_sta.compressor |= out_EC_enable;
-        // printf("CCS_開啟壓縮機輸出\r\n");
+        // printf("CCS_開啟壓縮機輸出 = %d\r\n", out_sta.compressor);
       }
       else  //時間到後, 系統還是沒降到CCS的設定點, 關閉壓縮機且離開模式
       {
@@ -323,6 +326,62 @@ static void cct_logic(void)
   }
 }
 
+static void concof_logic(void)
+{
+  /* 探頭失靈時, 壓縮機動作
+  * 先啟動壓縮機, 依照COn時間保持開啟, 時間到後依據COF保持關閉, 以此循環
+  */
+
+  static bool dly_1 = false, dly_2 = false;
+  static bool working_mode=0;   //0:COn模式; 1:COF模式
+
+  if(TempValue.sensor1 == ERROR_AD)
+  {
+    if(working_mode==0)
+    {
+      dly_1 = Mydelay_min(dly_COn, System.value[COn]);
+      if(dly_1 == false)
+      {
+        out_sta.compressor|= out_COn_enable;
+        icon.Refrigerate_sta = ICON_ON;
+        // printf("COn_開啟壓縮機輸出 = %d\r\n", out_sta.compressor);
+      }
+      else
+      {
+        out_sta.compressor &= out_COn_disable;
+        icon.Refrigerate_sta = ICON_OFF;
+        // printf("COn_關閉壓縮機輸出 = %d\r\n", out_sta.compressor);
+        working_mode = 1;
+      }
+    }
+    else
+    {
+      dly_2 = Mydelay_min(dly_COF, System.value[COF]);
+      if(dly_2 == false)
+      {
+        out_sta.compressor &= out_COF_disable;
+        icon.Refrigerate_sta = ICON_OFF;
+        // printf("COF_關閉壓縮機輸出 = %d\r\n", out_sta.compressor);
+      }
+      else
+      {
+        out_sta.compressor|= out_COF_enable;
+        icon.Refrigerate_sta = ICON_ON;
+        working_mode = 0;
+        // printf("COF_開啟壓縮機輸出 = %d\r\n", out_sta.compressor);
+      }
+    }
+  }
+  else
+  {
+    icon.Refrigerate_sta = ICON_OFF;
+    out_sta.compressor &= out_COF_disable;
+    out_sta.compressor &= out_COn_disable;
+    dly_1 = false;
+    dly_2 = false;
+    working_mode = 0;
+  }
+}
 
 
 static void normal_refrigerate_logic(void)
@@ -358,6 +417,7 @@ static void out_logic(void)
   if(ods_logic() == true)
   {
     cct_logic();
+    concof_logic();
     normal_refrigerate_logic();
   }
   else
@@ -370,13 +430,17 @@ static void out_logic(void)
 /* Output Logical Function definitions ------------------------------------------------------*/
 void Out_main(void)
 {
+  // bootled_En -> 代表開機動畫已結束
   // 確認旗標狀態後, 執行out_api依照各旗標運作
 
-  out_logic();
-  out1_FAN_api();
-  out2_Compressor_api();
-  out3_Defrost_api();
-  out4_buzzer_api();
+  if(bootled_En==false)
+  {
+    out_logic();
+    out1_FAN_api();
+    out2_Compressor_api();
+    out3_Defrost_api();
+    out4_buzzer_api();
+  }
   
 }
 

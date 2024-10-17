@@ -21,7 +21,6 @@
 /* Private defines ----------------------------------------------------------*/
 #define BOOTonTIME                         (4500)      //4.5 = 1ms*4500 = 4500次
 #define BOOToffTIME                        (5000)      //+0.5s = 1ms*500 = 500次
-#define ERROR_AD                           (-999)
 #define KEYLEAVE_SETTIME                      (3)      //按鍵離開設定層的閃爍時間, 單位:秒
 #define AUTOLEAVE_CHECKSETTIME               (12)      //檢查設定值多久後自動跳出, 單位:秒
 #define AUTOLEAVE_CHANGESETTIME              (15)      //修改設定值多久後自動跳出, 單位:秒
@@ -31,6 +30,7 @@ extern r_tmr tmr;
 extern volatile uint8_t data;
 extern __IO s_Var System;
 extern __IO s_Flag sFlag;
+extern __IO ADC_TemperatureValue TempValue;
 
 extern __IO bool CLOSE_LED_FLAG;
 extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
@@ -43,7 +43,7 @@ extern __IO uint32_t catch_ms[dly_end_ms];
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
 __IO bool clear_Max_flag=0, clear_Min_flag=0;
-static bool bootled_En=true;
+__IO bool bootled_En=true;
 
 /* static update_display_message API Functions -------------------------------*/
 static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave);
@@ -71,7 +71,13 @@ static void loop_100us(void);
 static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
 {
   //顯示目前量測到的溫度
-  NumToDisplay(System.pv);
+  if(TempValue.sensor1 == ERROR_AD)
+    P1ToDisplay_Flashing();
+  // else if (TempValue.sensor2 == ERROR_AD)
+  //   P2ToDisplay();
+  else
+    NumToDisplay(System.pv);
+  
   //更新顯示icon
   update_icon();
 
@@ -441,7 +447,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x4E;
+  const uint8_t test    = 0x4F;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

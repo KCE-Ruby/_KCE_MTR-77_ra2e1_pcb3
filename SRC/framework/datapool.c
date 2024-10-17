@@ -54,8 +54,8 @@ __IO ByteSettingTable bytetable[End] =
   {rtr,             0,           100,          100,     Pr2}, //P1=100, P2=0
   {CCt,           0.0,          24.0,         0.1,     Pr2}, //精度為0.1hour = 6min
   {CCS,         -55.0,         150.0,         5.0,     Pr1},
-  {COn,             0,           255,           15,     Pr1},
-  {COF,             0,           255,           30,     Pr1},
+  {COn,             0,           255,           2,     Pr1},
+  {COF,             0,           255,           1,     Pr1},
   { CF,      degree_C,      degree_F,     degree_C,     Pr1}, //攝氏=C, 華氏=F
   {rES,  DECIMAL_AT_1,  DECIMAL_AT_0, DECIMAL_AT_1,     Pr2}, //小數=dE=DECIMAL_AT_1, 整數=in=DECIMAL_AT_0
   {Lod,       disp_P1,      disp_dtr,      disp_P1,     Pr2},
