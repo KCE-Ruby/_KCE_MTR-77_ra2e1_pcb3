@@ -25,9 +25,9 @@
 #define CONTI_PRESS_times_M            (400)      //連續累加的承認次數, 單位:次
 #define CONTI_PRESS_times_H           (1000)      //連續累加的承認次數, 單位:次
 
-#define KEY_cnt_2s                     (400)
-#define KEY_cnt_3s                     (600)
-#define KEY_cnt_7s                    (1400)
+#define KEY_cnt_2s                     (350)
+#define KEY_cnt_3s                     (525)
+#define KEY_cnt_7s                    (1225)
 #define KEY_cnt_max                   (5000)
 #define KEY_cnt_min                      (1)
 
@@ -56,6 +56,7 @@ static void Vindex_process_keydown(int8_t pr_index);
 static void Vvalue_process_keyup(int8_t pr_index);
 static void Vvalue_process_keydown(int8_t pr_index);
 static void activateEnhancedCooling(void);
+static void intoPr2(void);
 static Key_Manager key_detect(Key_Manager key);
 static void key_up_function(void);
 static void key_down_function(void);
@@ -211,7 +212,7 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
       else
       {
         (*level_index)--;
-        if(System.level1_index < 0) System.level1_index = (Pr1_size-1);
+        if(*level_index < 0) *level_index = (pr_size-1);
         
         // 更新 pr_index 到最新值(一定要這樣寫)
         pr_index = ( *index == sFlag.Level1_value ) ? 
@@ -318,6 +319,18 @@ static void activateEnhancedCooling(void)
 {
   icon.Enhanced_Cooling_sta = icon_EC_enable;
   api_sta = API_BUSY1;
+}
+
+static void intoPr2(void)
+{
+  if(sFlag.Level1_value == Pr2_symbol)
+  {
+    //長按後7秒進入Pr2顯示後, 放開兩鍵則進入隱藏層
+    System.mode = level2Mode;
+    System.level2_index = 0;
+  }
+  KeySet.LongPressed = 0;
+  KeySet.shortPressed = 0;
 }
 
 static Key_Manager key_detect(Key_Manager key)
@@ -795,7 +808,19 @@ static void key_set_function(void)
         break;
 
         case level1Mode:
-        if((KeySet.Cnt>KEY_cnt_7s)&&(KeyDown.Cnt!=0))
+        if((sFlag.Level1_value==Pr2_symbol) &&(KeyDown.Cnt==0))
+        {
+          intoPr2();
+          // if(sFlag.Level1_value == Pr2_symbol)
+          // {
+          //   //長按後7秒進入Pr2顯示後, 放開兩鍵則進入隱藏層
+          //   System.mode = level2Mode;
+          //   System.level2_index = 0;
+          // }
+          // KeySet.LongPressed = 0;
+          // KeySet.shortPressed = 0;
+        }
+        else if((KeySet.Cnt>KEY_cnt_7s)&&(KeyDown.Cnt!=0))
         {
           //進入隱藏層第二層, 顯示Pr2
           sFlag.Level1_value = Pr2_symbol;
@@ -845,14 +870,15 @@ static void key_set_function(void)
   }
   else if(KeySet.LongPressed != 0) //放開後判斷為長按時的動作
   {
-    if(sFlag.Level1_value == Pr2_symbol)
-    {
-      //長按後7秒進入Pr2顯示後, 放開兩鍵則進入隱藏層
-      System.mode = level2Mode;
-      System.level2_index = 0;
-    }
-    KeySet.LongPressed = 0;
-    KeySet.shortPressed = 0;
+    intoPr2();
+    // if(sFlag.Level1_value == Pr2_symbol)
+    // {
+    //   //長按後7秒進入Pr2顯示後, 放開兩鍵則進入隱藏層
+    //   System.mode = level2Mode;
+    //   System.level2_index = 0;
+    // }
+    // KeySet.LongPressed = 0;
+    // KeySet.shortPressed = 0;
   }
   else if(KeySet.shortPressed != 0) //放開後判斷為短按時的動作
   {
