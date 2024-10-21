@@ -245,6 +245,11 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
       }
     }
   }
+  else if(KeyUp.shortPressed != 0)
+  {
+    KeyUp.Cnt = 0;
+    System.mode = homeMode;
+  }
 }
 
 static void Vindex_process_keyup(int8_t pr_index)
@@ -811,14 +816,6 @@ static void key_set_function(void)
         if((sFlag.Level1_value==Pr2_symbol) &&(KeyDown.Cnt==0))
         {
           intoPr2();
-          // if(sFlag.Level1_value == Pr2_symbol)
-          // {
-          //   //長按後7秒進入Pr2顯示後, 放開兩鍵則進入隱藏層
-          //   System.mode = level2Mode;
-          //   System.level2_index = 0;
-          // }
-          // KeySet.LongPressed = 0;
-          // KeySet.shortPressed = 0;
         }
         else if((KeySet.Cnt>KEY_cnt_7s)&&(KeyDown.Cnt!=0))
         {
@@ -871,14 +868,6 @@ static void key_set_function(void)
   else if(KeySet.LongPressed != 0) //放開後判斷為長按時的動作
   {
     intoPr2();
-    // if(sFlag.Level1_value == Pr2_symbol)
-    // {
-    //   //長按後7秒進入Pr2顯示後, 放開兩鍵則進入隱藏層
-    //   System.mode = level2Mode;
-    //   System.level2_index = 0;
-    // }
-    // KeySet.LongPressed = 0;
-    // KeySet.shortPressed = 0;
   }
   else if(KeySet.shortPressed != 0) //放開後判斷為短按時的動作
   {
@@ -901,9 +890,9 @@ static void key_set_function(void)
           {
             KeyUp.Cnt = 0;
             System.mode = homeMode;
-            // System.level1_index = 0;
           }
           else  //切換參數名稱or參數數值的地方
+          // if(KeyUp.Cnt==0)  //切換參數名稱or參數數值的地方
           {
             if(sFlag.Level1_value == Vindex)
               sFlag.Level1_value = Vvalue;
@@ -931,9 +920,9 @@ static void key_set_function(void)
           {
             KeyUp.Cnt = 0;
             System.mode = homeMode;
-            // System.level1_index = 0;
           }
           else  //切換參數名稱or參數數值的地方
+          // if(KeyUp.Cnt==0)  //切換參數名稱or參數數值的地方
           {
             if(sFlag.Level2_value == Vindex)
               sFlag.Level2_value = Vvalue;
