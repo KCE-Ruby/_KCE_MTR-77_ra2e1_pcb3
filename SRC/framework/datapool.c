@@ -56,7 +56,7 @@ __IO ByteSettingTable bytetable[End] =
   {CCS,         -55.0,         150.0,         5.0,     Pr1},
   {COn,             0,           255,           2,     Pr1},
   {COF,             0,           255,           1,     Pr1},
-  { CF,      degree_C,      degree_F,     degree_C,     Pr1}, //攝氏=C, 華氏=F
+  { CF,             0,           0.1,           0,     Pr1}, //攝氏=C, 華氏=F
   {rES,  DECIMAL_AT_1,  DECIMAL_AT_0, DECIMAL_AT_1,     Pr2}, //小數=dE=DECIMAL_AT_1, 整數=in=DECIMAL_AT_0
   {Lod,       disp_P1,      disp_dtr,      disp_P1,     Pr2},
   {rEd,       disp_P1,      disp_dtr,      disp_P1,     NaN},
@@ -219,12 +219,28 @@ void get_Pv(void)
   const uint16_t rtr_const = System.value[rtr]/10;
   const uint8_t source = 8;
   int16_t pv_1, pv_2, pv_3, pv_4;
+  int16_t t1_f, t2_f, t3_f, t4_f;
 
   //目前判斷點是依據rtr參數將P1與P2的比例做調整, 整合後為pv值使用
-  pv_1 = TempValue.sensor1 + System.value[Ot];
-  pv_2 = TempValue.sensor2 + System.value[OE];
-  pv_3 = TempValue.sensor3 + System.value[O3];
-  pv_4 = TempValue.sensor4 + System.value[O4];
+  if(System.value[CF] == degree_F)
+  {
+    t1_f = celsius_to_fahrenheit(TempValue.sensor1);
+    t2_f = celsius_to_fahrenheit(TempValue.sensor2);
+    t3_f = celsius_to_fahrenheit(TempValue.sensor3);
+    t4_f = celsius_to_fahrenheit(TempValue.sensor4);
+
+    pv_1 = t1_f + System.value[Ot];
+    pv_2 = t2_f + System.value[OE];
+    pv_3 = t3_f + System.value[O3];
+    pv_4 = t4_f + System.value[O4];
+  }
+  else
+  {
+    pv_1 = TempValue.sensor1 + System.value[Ot];
+    pv_2 = TempValue.sensor2 + System.value[OE];
+    pv_3 = TempValue.sensor3 + System.value[O3];
+    pv_4 = TempValue.sensor4 + System.value[O4];
+  }
   System.pv = (rtr_const * (pv_1-pv_2) /100) + pv_2;
 
   // printf("rtr_const = %d\r\n", rtr_const);
@@ -306,19 +322,9 @@ int16_t check_Limit_Value(int16_t data, int8_t index)
       //設定值的最小允許值 = LS
       min_data = (int16_t)(System.value[LS]);
       if(data > max_data)
-      {
         data = max_data;
-        // printf("數值大於最大值, 取代後 = %d\r\n", data);
-      }
       else if(data < min_data)
-      {
         data = min_data;
-        // printf("數值小於最小值, 取代後 = %d\r\n", data);
-      }
-      else
-      {
-        // printf("數值不須處理\r\n");
-      }
       break;
 
     case OdS:
@@ -360,5 +366,11 @@ int16_t check_Limit_Value(int16_t data, int8_t index)
   return data;
 }
 
-
+int16_t celsius_to_fahrenheit(int16_t pv)
+{
+  int16_t ret;
+    // ret = (pv * 9.0 / 5.0) + 320;
+    ret = (pv * 9 + 1600) / 5;
+  return ret;
+}
 

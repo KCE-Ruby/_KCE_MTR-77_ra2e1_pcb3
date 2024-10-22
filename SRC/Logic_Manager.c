@@ -195,6 +195,10 @@ static void valuetodisplay(uint8_t table)
 {
   switch (table)
   {
+    case CF:
+      CFToDisplay((bool)System.value[table]);
+      break;
+
     case P2P:
     case P3P:
     case P4P:

@@ -54,6 +54,7 @@ enum digitis
   dig_on = 34,
   dig_minus = 35,
   dig_underscore = 36,
+  dig_degree = 37,
 };
 
 /* typedef definitions -----------------------------------------------------*/
@@ -141,6 +142,7 @@ void HiToDisplay(void);
 void LoToDisplay(void);
 void rStToDisplay(void);
 void nyToDisplay(bool i);
+void CFToDisplay(bool i);
 void P1ToDisplay(void);
 void P2ToDisplay(void);
 

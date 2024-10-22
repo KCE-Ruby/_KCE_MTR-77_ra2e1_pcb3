@@ -76,6 +76,7 @@ static const uint8_t _char_LookupTable[][8] = {
   {1,1,1,1,1,1,1,1},     // all   display  '8.'
   {0,0,0,0,0,0,1,0},     // display symbol '-'
   {0,0,0,1,0,0,0,0},     // display symbol '_'
+  {1,1,0,0,0,1,1,0},     // display symbol '°'
 };
 
 static const uint8_t ByteTable[][3] = {
@@ -524,6 +525,22 @@ void rStToDisplay(void)
   char_M1(dig_t);
   char_M2(dig_S);
   char_M3(dig_r);
+}
+
+void CFToDisplay(bool i)
+{
+  if(i==0)
+  {
+    char_M1(dig_C);
+    char_M2(dig_degree);
+    char_M3(dig_off);
+  }
+  else
+  {
+    char_M1(dig_F);
+    char_M2(dig_degree);
+    char_M3(dig_off);
+  }
 }
 
 void nyToDisplay(bool i)
