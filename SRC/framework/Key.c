@@ -33,7 +33,7 @@
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO bsp_io_level_t KeyPin, pin_sta[6];
-extern __IO s_Var System;
+extern __IO s_Var Syscfg, Preload;
 extern __IO s_Flag sFlag;
 extern __IO r_tmr tmr;
 extern __IO uint8_t bytetable_pr1[End];
@@ -179,13 +179,13 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
   //預先處理level1與level2的差異
   if(*index == sFlag.Level1_value)
   {
-    level_index = &System.level1_index;
+    level_index = &Syscfg.level1_index;
     pr_size = Pr1_size;
     pr_index = bytetable_pr1[(*level_index)];
   }
   else
   {
-    level_index = &System.level2_index;
+    level_index = &Syscfg.level2_index;
     pr_size = Pr2_size;
     pr_index = bytetable_pr2[(*level_index)];
   }
@@ -231,24 +231,25 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
       {
         //數值需要先被加過後再檢查最大最小值
         if(iskeyup)
-          System.value[pr_index]++;
+          Preload.value[pr_index]++;
         else
-          System.value[pr_index]--;
+          Preload.value[pr_index]--;
 
         // 更新 pr_index 到最新值(一定要這樣寫)
         pr_index = ( *index == sFlag.Level1_value ) ? 
                     bytetable_pr1[(*level_index)] : 
                     bytetable_pr2[(*level_index)];
 
-        System.value[pr_index] = check_Limit_Value(System.value[pr_index], pr_index);
-        // printf("數值 = %d\r\n", System.value[pr_index]);
+        Preload.value[pr_index] = check_Limit_Value(Preload.value[pr_index], pr_index);
+        // printf("數值 = %d\r\n", Preload.value[pr_index]);
       }
     }
   }
   else if(KeyUp.shortPressed != 0)
   {
+    upload_syscfg_data(pr_index);
     KeyUp.Cnt = 0;
-    System.mode = homeMode;
+    Syscfg.mode = homeMode;
   }
 }
 
@@ -296,8 +297,8 @@ static void Vvalue_process_keyup(int8_t pr_index)
   {
     //要先處理某些需要先特殊處理的參數
     case CCt:
-      if(System.value[CCt]%10 >= 6)
-        System.value[CCt] += (10 - (System.value[CCt]%10));
+      if(Preload.value[CCt]%10 >= 6)
+        Preload.value[CCt] += (10 - (Preload.value[CCt]%10));
       break;
 
     default:
@@ -311,8 +312,8 @@ static void Vvalue_process_keydown(int8_t pr_index)
   {
     //要先處理某些需要先特殊處理的參數, 降位要從5開始, 先-10是降位, 再-6是從6進位的意思
     case CCt:
-      if(System.value[CCt]%10 > 6)
-        System.value[CCt] -= (10-6);
+      if(Preload.value[CCt]%10 > 6)
+        Preload.value[CCt] -= (10-6);
       break;
 
     default:
@@ -331,8 +332,8 @@ static void intoPr2(void)
   if(sFlag.Level1_value == Pr2_symbol)
   {
     //長按後7秒進入Pr2顯示後, 放開兩鍵則進入隱藏層
-    System.mode = level2Mode;
-    System.level2_index = 0;
+    Syscfg.mode = level2Mode;
+    Syscfg.level2_index = 0;
   }
   KeySet.LongPressed = 0;
   KeySet.shortPressed = 0;
@@ -394,23 +395,23 @@ static void key_up_function(void)
 
   if(api_sta==API_FREE)
   {
-    if((KeyUp.Cnt>KEY_cnt_3s) && (System.mode==homeMode))
+    if((KeyUp.Cnt>KEY_cnt_3s) && (Syscfg.mode==homeMode))
       activateEnhancedCooling();
     //TODO:看能不能把level1跟level2的code改成API call
     else if(KeyUp.shortPressed != 0)
     {
-      System.keymode.Max_flag = false;
-      System.keymode.Min_flag = false;
-      switch (System.mode)
+      Syscfg.keymode.Max_flag = false;
+      Syscfg.keymode.Min_flag = false;
+      switch (Syscfg.mode)
       {
         case homeMode:
-          System.keymode.Max_flag = true;
-          System.mode = historyMode;
+          Syscfg.keymode.Max_flag = true;
+          Syscfg.mode = historyMode;
         break;
 
         case historyMode:
-          System.keymode.Max_flag = false;
-          System.mode = homeMode;
+          Syscfg.keymode.Max_flag = false;
+          Syscfg.mode = homeMode;
         break;
 
         case level1Mode:
@@ -423,14 +424,14 @@ static void key_up_function(void)
 
         case settingMode:
           //TODO: get設定值的最大值API, 不要extern 整個table
-          System.value[Set]++;
-          System.value[Set] = check_Limit_Value(System.value[Set], Set);
-          // if(System.value[Set] > 1100) System.value[Set] = 1100;
+          Preload.value[Set]++;
+          Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
+          // if(Preload.value[Set] > 1100) Preload.value[Set] = 1100;
         break;
 
         default:
-          System.keymode.Max_flag = false;
-          System.keymode.Min_flag = false;
+          Syscfg.keymode.Max_flag = false;
+          Syscfg.keymode.Min_flag = false;
         break;
       }
       KeyUp.shortPressed = 0;
@@ -451,46 +452,46 @@ static void key_up_function(void)
         if (tmr.Cnt_1ms - lastIncrementTime_up >= AUTO_INCREMENT_DELAY)
         {
           lastIncrementTime_up = tmr.Cnt_1ms;  //更新累加時間
-          if((System.mode==level1Mode) && (pr1_index<=onF))
+          if((Syscfg.mode==level1Mode) && (pr1_index<=onF))
           {
             //處理長時間連加數值的動作
             if(sFlag.Level1_value == Vvalue)
             {
-              //要被修改的index應該是pr1的table, 而不是System.value的table
-              pr1_index = bytetable_pr1[System.level1_index];
+              //要被修改的index應該是pr1的table, 而不是Syscfg.value的table
+              pr1_index = bytetable_pr1[Syscfg.level1_index];
               if(pr1_index <= onF)
-                System.value[pr1_index]++;    //onF以後的參數只能讀不能改
+                Preload.value[pr1_index]++;    //onF以後的參數只能讀不能改
 
               //檢查最大最小值, index要放pr1的不是總表的
-              data_bytetable = System.value[pr1_index];
+              data_bytetable = Preload.value[pr1_index];
               // printf("-------------連加測試開始-------------\r\n");
               // printf("data_bytetable = %d\r\n", data_bytetable);
-              System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-              // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+              Preload.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+              // printf("keyup數值 = %d\r\n", Preload.value[pr1_index]);
             }
           }
-          else if((System.mode==level2Mode) && (pr2_index<=onF))
+          else if((Syscfg.mode==level2Mode) && (pr2_index<=onF))
           {
             //處理長時間連加數值的動作
             if(sFlag.Level2_value == Vvalue)
             {
-              //要被修改的index應該是pr2的table, 而不是System.value的table
-              pr2_index = bytetable_pr2[System.level2_index];
+              //要被修改的index應該是pr2的table, 而不是Syscfg.value的table
+              pr2_index = bytetable_pr2[Syscfg.level2_index];
               if(pr2_index <= onF)
-                System.value[pr2_index]++;    //onF以後的參數只能讀不能改
+                Preload.value[pr2_index]++;    //onF以後的參數只能讀不能改
 
               //檢查最大最小值, index要放pr1的不是總表的
-              data_bytetable = System.value[pr2_index];
+              data_bytetable = Preload.value[pr2_index];
               // printf("-------------連加測試開始-------------\r\n");
               // printf("data_bytetable = %d\r\n", data_bytetable);
-              System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-              // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+              Preload.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+              // printf("keyup數值 = %d\r\n", Preload.value[pr1_index]);
             }
           }
-          else if(System.mode==settingMode)
+          else if(Syscfg.mode==settingMode)
           {
-            System.value[Set]++;
-            System.value[Set] = check_Limit_Value(System.value[Set], Set);
+            Preload.value[Set]++;
+            Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
           }
         }
       }
@@ -529,18 +530,18 @@ static void key_down_function(void)
   {
     if(KeyDown.shortPressed)
     {
-      System.keymode.Max_flag = false;
-      System.keymode.Min_flag = false;
-      switch (System.mode)
+      Syscfg.keymode.Max_flag = false;
+      Syscfg.keymode.Min_flag = false;
+      switch (Syscfg.mode)
       {
         case homeMode:
-          System.keymode.Min_flag = true;
-          System.mode = historyMode;
+          Syscfg.keymode.Min_flag = true;
+          Syscfg.mode = historyMode;
         break;
 
         case historyMode:
-          System.keymode.Min_flag = false;
-          System.mode = homeMode;
+          Syscfg.keymode.Min_flag = false;
+          Syscfg.mode = homeMode;
         break;
 
         case level1Mode:
@@ -553,13 +554,13 @@ static void key_down_function(void)
 
         case settingMode:
           //TODO: get設定值的最小值API, 不要extern 整個table
-          System.value[Set]--;
-          System.value[Set] = check_Limit_Value(System.value[Set], Set);
+          Preload.value[Set]--;
+          Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
         break;
 
         default:
-          System.keymode.Max_flag = false;
-          System.keymode.Min_flag = false;
+          Syscfg.keymode.Max_flag = false;
+          Syscfg.keymode.Min_flag = false;
         break;
       }
       KeyDown.shortPressed = 0;
@@ -585,50 +586,50 @@ static void key_down_function(void)
         if (tmr.Cnt_1ms - lastIncrementTime_down >= AUTO_INCREMENT_DELAY)
         {
           lastIncrementTime_down = tmr.Cnt_1ms;  //更新累加時間
-          if(System.mode==level1Mode)
+          if(Syscfg.mode==level1Mode)
           {
             //處理長時間連減數值的動作
             if(sFlag.Level1_value == Vvalue)
             {
-              //要被修改的index應該是pr1的table, 而不是System.value的table
-              pr1_index = bytetable_pr1[System.level1_index];
+              //要被修改的index應該是pr1的table, 而不是Syscfg.value的table
+              pr1_index = bytetable_pr1[Syscfg.level1_index];
               if(pr1_index<=onF)
               {
-                System.value[pr1_index]--;
+                Preload.value[pr1_index]--;
 
                 //檢查最大最小值, index要放pr1的不是總表的
-                data_bytetable = System.value[pr1_index];
+                data_bytetable = Preload.value[pr1_index];
                 // printf("-------------連加測試開始-------------\r\n");
                 // printf("data_bytetable = %d\r\n", data_bytetable);
-                System.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-                // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+                Preload.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+                // printf("keyup數值 = %d\r\n", Preload.value[pr1_index]);
               }
             }
           }
-          else if(System.mode==level2Mode)
+          else if(Syscfg.mode==level2Mode)
           {
             //處理長時間連加數值的動作
             if(sFlag.Level2_value == Vvalue)
             {
-              //要被修改的index應該是pr1的table, 而不是System.value的table
-              pr2_index = bytetable_pr2[System.level2_index];
+              //要被修改的index應該是pr1的table, 而不是Syscfg.value的table
+              pr2_index = bytetable_pr2[Syscfg.level2_index];
               if(pr2_index<=onF)
               {
-                System.value[pr2_index]--;
+                Preload.value[pr2_index]--;
 
                 //檢查最大最小值, index要放pr1的不是總表的
-                data_bytetable = System.value[pr2_index];
+                data_bytetable = Preload.value[pr2_index];
                 // printf("-------------連加測試開始-------------\r\n");
                 // printf("data_bytetable = %d\r\n", data_bytetable);
-                System.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-                // printf("keyup數值 = %d\r\n", System.value[pr1_index]);
+                Preload.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+                // printf("keyup數值 = %d\r\n", Preload.value[pr1_index]);
               }
             }
           }
-          else if(System.mode==settingMode)
+          else if(Syscfg.mode==settingMode)
           {
-            System.value[Set]--;
-            System.value[Set] = check_Limit_Value(System.value[Set], Set);
+            Preload.value[Set]--;
+            Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
           }
         }
       }
@@ -653,12 +654,12 @@ static void key_standby_function(void)
  if(KeyStandby.shortPressed)
  {
     //TODO: 按下按鍵後的功能
-    switch (System.mode)
+    switch (Syscfg.mode)
     {
       case historyMode:
-        System.keymode.Max_flag = false;
-        System.keymode.Min_flag = false;
-        System.mode = homeMode;
+        Syscfg.keymode.Max_flag = false;
+        Syscfg.keymode.Min_flag = false;
+        Syscfg.mode = homeMode;
       break;
     
     default:
@@ -677,12 +678,12 @@ static void key_bulb_function(void)
  if(KeyBulb.shortPressed)
  {
     //TODO: 按下按鍵後的功能
-    switch (System.mode)
+    switch (Syscfg.mode)
     {
       case historyMode:
-        System.keymode.Max_flag = false;
-        System.keymode.Min_flag = false;
-        System.mode = homeMode;
+        Syscfg.keymode.Max_flag = false;
+        Syscfg.keymode.Min_flag = false;
+        Syscfg.mode = homeMode;
       break;
     
     default:
@@ -701,16 +702,16 @@ static void key_defrost_function(void)
 
  if(KeyDefrost.Cnt > KEY_cnt_2s)
  {
-    switch (System.mode)
+    switch (Syscfg.mode)
     {
       case homeMode:
         sFlag.Defrost = true;
       break;
 
       case historyMode:
-        System.keymode.Max_flag = false;
-        System.keymode.Min_flag = false;
-        System.mode = homeMode;
+        Syscfg.keymode.Max_flag = false;
+        Syscfg.keymode.Min_flag = false;
+        Syscfg.mode = homeMode;
       break;
 
       case level1Mode:
@@ -738,12 +739,12 @@ static void key_defrost_function(void)
  else if(KeyDefrost.shortPressed)
  {
     //TODO: 按下按鍵後的功能
-    switch (System.mode)
+    switch (Syscfg.mode)
     {
       case historyMode:
-        System.keymode.Max_flag = false;
-        System.keymode.Min_flag = false;
-        System.mode = homeMode;
+        Syscfg.keymode.Max_flag = false;
+        Syscfg.keymode.Min_flag = false;
+        Syscfg.mode = homeMode;
       break;
     
     default:
@@ -774,21 +775,21 @@ static void key_set_function(void)
  {
   if(KeySet.Cnt > KEY_cnt_2s)  //未放開達兩秒時的動作
   {
-      switch (System.mode)
+      switch (Syscfg.mode)
       {
         case homeMode:
         if(KeyDown.Cnt==0)
         {
           //進入修改設定值功能
-          System.mode = settingMode;
-          System.keymode.SET_value_flag = true;
+          Syscfg.mode = settingMode;
+          Syscfg.keymode.SET_value_flag = true;
           api_sta = API_BUSY2;
         }
         else
         {
           //進入用戶層第一層
-          System.mode = level1Mode;
-          System.level1_index = 0;
+          Syscfg.mode = level1Mode;
+          Syscfg.level1_index = 0;
         }
         break;
 
@@ -797,16 +798,16 @@ static void key_set_function(void)
         if(KeySet.Cnt > KEY_cnt_2s)
         {
           //只要觸發閃爍rSt功能必須閃完三次, 不會被中斷
-          System.keymode.clear_flag = true;
+          Syscfg.keymode.clear_flag = true;
 
           if(clear_Max_flag)
           {
-            System.history_max = System.pv;
+            Syscfg.history_max = Syscfg.pv;
             clear_Max_flag = false;
           }
           else if(clear_Min_flag)
           {
-            System.history_min = System.pv;
+            Syscfg.history_min = Syscfg.pv;
             clear_Min_flag = false;
           }
         }
@@ -841,28 +842,28 @@ static void key_set_function(void)
   }
   else if((KeySet.Cnt>0))   //當被按下時
   {
-    if((KeyDown.Cnt>0) && (System.mode==level2Mode))  //代表要改變Pr1與Pr2的值
+    if((KeyDown.Cnt>0) && (Syscfg.mode==level2Mode))  //代表要改變Pr1與Pr2的值
     {
       api_sta = API_BUSY1;
-      pr2_index  = bytetable_pr2[System.level2_index];
+      pr2_index  = bytetable_pr2[Syscfg.level2_index];
       if(bytetable[pr2_index].Mode == Pr1)
       {
         bytetable[pr2_index].Mode = Pr2;
-        printf("System.level2_index = %d\r\n", pr2_index);
+        printf("Syscfg.level2_index = %d\r\n", pr2_index);
         printf("更改後的mode = Pr2\r\n", Pr2);
       }
       else
       {
         bytetable[pr2_index].Mode = Pr1;
-        printf("System.level2_index = %d\r\n", pr2_index);
+        printf("Syscfg.level2_index = %d\r\n", pr2_index);
         printf("更改後的mode = Pr1\r\n", Pr1);
       }
       printf("api_sta = %d\r\n", api_sta);
     }
-    else if(System.mode==historyMode)
+    else if(Syscfg.mode==historyMode)
     {
-      System.keymode.Max_flag = false;
-      System.keymode.Min_flag = false;
+      Syscfg.keymode.Max_flag = false;
+      Syscfg.keymode.Min_flag = false;
     }
   }
   else if(KeySet.LongPressed != 0) //放開後判斷為長按時的動作
@@ -872,24 +873,24 @@ static void key_set_function(void)
   else if(KeySet.shortPressed != 0) //放開後判斷為短按時的動作
   {
       //TODO: 按下按鍵後的功能
-      switch (System.mode)
+      switch (Syscfg.mode)
       {
         case homeMode:
-          System.mode = checkgMode;
-          System.keymode.SET_value_flag = true;
+          Syscfg.mode = checkgMode;
+          Syscfg.keymode.SET_value_flag = true;
         break;
 
         case historyMode:
-          System.keymode.Max_flag = false;
-          System.keymode.Min_flag = false;
-          System.mode = homeMode;
+          Syscfg.keymode.Max_flag = false;
+          Syscfg.keymode.Min_flag = false;
+          Syscfg.mode = homeMode;
         break;
         
         case level1Mode:
           if(KeyUp.Cnt!=0)  //離開level1的路徑, 短按SET鍵+上鍵 -> 離開
           {
             KeyUp.Cnt = 0;
-            System.mode = homeMode;
+            Syscfg.mode = homeMode;
           }
           else  //切換參數名稱or參數數值的地方
           // if(KeyUp.Cnt==0)  //切換參數名稱or參數數值的地方
@@ -899,17 +900,18 @@ static void key_set_function(void)
             else
             {
               sFlag.Level1_value = Vindex;
-              if(pre_value[System.level1_index] != System.value[System.level1_index])
+              upload_syscfg_data(bytetable_pr1[Syscfg.level1_index]);
+              if(pre_value[Syscfg.level1_index] != Preload.value[Syscfg.level1_index])
               {
                 //TODO: 若參數有變動則寫入eeprom內
               }
 
               //從參數值換成顯示字符時, 往後加一組
-              System.level1_index++;
-              if(System.level1_index >= Pr1_size) System.level1_index= 0;
+              Syscfg.level1_index++;
+              if(Syscfg.level1_index >= Pr1_size) Syscfg.level1_index= 0;
 
               //要先處理某些需要先特殊處理的參數
-              Vindex_process_keyup(bytetable_pr1[System.level1_index]);
+              Vindex_process_keyup(bytetable_pr1[Syscfg.level1_index]);
 
             }
           }
@@ -919,7 +921,7 @@ static void key_set_function(void)
           if(KeyUp.Cnt!=0)  //離開level2的路徑, 短按SET鍵+上鍵 -> 離開
           {
             KeyUp.Cnt = 0;
-            System.mode = homeMode;
+            Syscfg.mode = homeMode;
           }
           else  //切換參數名稱or參數數值的地方
           // if(KeyUp.Cnt==0)  //切換參數名稱or參數數值的地方
@@ -929,17 +931,18 @@ static void key_set_function(void)
             else
             {
               sFlag.Level2_value = Vindex;
-              if(pre_value[System.level2_index] != System.value[System.level2_index])
+              upload_syscfg_data(bytetable_pr2[Syscfg.level2_index]);
+              if(pre_value[Syscfg.level2_index] != Preload.value[Syscfg.level2_index])
               {
                 //TODO: 若參數有變動則寫入eeprom內
               }
 
               //從參數值換成顯示字符時, 往後加一組
-              System.level2_index++;
-              if(System.level2_index >= Pr2_size) System.level2_index= 0;
+              Syscfg.level2_index++;
+              if(Syscfg.level2_index >= Pr2_size) Syscfg.level2_index= 0;
 
               //要先處理某些需要先特殊處理的參數
-              Vindex_process_keyup(bytetable_pr2[System.level2_index]);
+              Vindex_process_keyup(bytetable_pr2[Syscfg.level2_index]);
 
             }
           }
@@ -950,7 +953,7 @@ static void key_set_function(void)
         break;
 
         case checkgMode:
-          System.keymode.SET_value_flag = false;
+          Syscfg.keymode.SET_value_flag = false;
         break;
 
         default:

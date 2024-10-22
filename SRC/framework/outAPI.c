@@ -27,7 +27,7 @@
 #define NO_control            (1)   //(normal open)
 
 /* extern variables -----------------------------------------------------------------*/
-extern __IO s_Var System;
+extern __IO s_Var Syscfg;
 extern __IO icon_api_flag icon;
 extern __IO ADC_TemperatureValue TempValue;
 extern __IO uint16_t catch_min[dly_end_min];
@@ -63,7 +63,7 @@ static void normal_refrigerate_logic(void);
 /* Function definitions ------------------------------------------------------*/
 bool manual_defrost(bool flag)
 {
-  if(System.pv < System.value[dtE])
+  if(Syscfg.pv < Syscfg.value[dtE])
     out3_Defrost_on();
   else
   {
@@ -137,8 +137,8 @@ static void out2_Compressor_api(void)
 static void out3_Defrost_on(void)
 {
   bool init_type = false;
-  if(System.value[tdF] == type_EL) init_type = NC_control;
-  else if(System.value[tdF] == type_in) init_type = NO_control;
+  if(Syscfg.value[tdF] == type_EL) init_type = NC_control;
+  else if(Syscfg.value[tdF] == type_in) init_type = NO_control;
 
   ICON_Defrost_ON();
   if(init_type == NC_control)
@@ -150,8 +150,8 @@ static void out3_Defrost_on(void)
 static void out3_Defrost_off(void)
 {
   bool init_type = false;
-  if(System.value[tdF] == type_EL) init_type = NC_control;
-  else if(System.value[tdF] == type_in) init_type = NO_control;
+  if(Syscfg.value[tdF] == type_EL) init_type = NC_control;
+  else if(Syscfg.value[tdF] == type_in) init_type = NO_control;
   
   ICON_Defrost_OFF();
   if(init_type == NC_control)
@@ -216,13 +216,13 @@ static bool ac_logic(bool act)
   /* 防頻繁啟動延時
   * 保證壓縮機從關機到開機的最短間隔時間
   * 每次壓縮機被關閉後, 旗標需要被reset
-  * 由於System.value是小數後一位被放大10倍的值, 所以要除回去才是正確的整數值
+  * 由於Syscfg.value是小數後一位被放大10倍的值, 所以要除回去才是正確的整數值
   * AC單位為分鐘, 需要做個小轉換變成ms做delay
   * 如果AC有值才需要做delay的判斷
   */
   static bool ret=false;
   const uint8_t min2sec = 60;
-  const uint16_t sec = (System.value[AC]/10)*min2sec;
+  const uint16_t sec = (Syscfg.value[AC]/10)*min2sec;
 
   //壓縮機off時, 不須delay且reset ret旗標為false
   if(act == act_off)
@@ -233,7 +233,7 @@ static bool ac_logic(bool act)
   {
     icon.Refrigerate_sta = ICON_FLASHING;
     ret = Mydelay_sec(dly_AC, sec);
-    // printf("System.value[AC] = %d\r\n", System.value[AC]);
+    // printf("Syscfg.value[AC] = %d\r\n", Syscfg.value[AC]);
     // printf("sec = %d\r\n", sec);
     // printf("ret = %d\r\n", ret);
   }
@@ -248,18 +248,18 @@ static bool ods_logic(void)
   /* 上電延遲
   * 在這段時間內任何輸出都維持在未通電狀態
   * 上電後只會執行一次, 當ret轉成true後不會再執行此含式
-  * 由於System.value是小數後一位被放大10倍的值, 所以要除回去才是正確的整數值
+  * 由於Syscfg.value是小數後一位被放大10倍的值, 所以要除回去才是正確的整數值
   * OdS單位為分鐘, 需要做個小轉換變成ms做delay
   * 如果Ods有值才需要做delay的判斷
   */
   static bool ret=false;
   const uint8_t min2sec = 60;
-  const uint16_t sec = (System.value[OdS]/10)*min2sec;
+  const uint16_t sec = (Syscfg.value[OdS]/10)*min2sec;
 
   if((ret==false) && (sec>0))
   {
     ret = Mydelay_sec(dly_OdS, sec);
-    // printf("System.value[OdS] = %d\r\n", System.value[OdS]);
+    // printf("Syscfg.value[OdS] = %d\r\n", Syscfg.value[OdS]);
     // printf("sec = %d\r\n", sec);
     // printf("ret = %d\r\n", ret);
   }
@@ -285,9 +285,9 @@ static void cct_logic(void)
   * 若低於設定值, 重置計時器的狀態(可有可無)
   * 回傳true代表CCt強冷功能啟動中計時未完成,  反之false代表未啟動強冷功能
   */
-  const bool CCS_sta = (System.pv >= System.value[CCS])? true:false;
-  const uint8_t CCt_hour = (System.value[CCt]/10);
-  uint8_t CCt_min = (System.value[CCt]%10) * 10;
+  const bool CCS_sta = (Syscfg.pv >= Syscfg.value[CCS])? true:false;
+  const uint8_t CCt_hour = (Syscfg.value[CCt]/10);
+  uint8_t CCt_min = (Syscfg.value[CCt]%10) * 10;
   uint8_t CCt_sum = CCt_min + (CCt_hour*60);  //總合成分鐘數
   static bool dly = true;
 
@@ -339,7 +339,7 @@ static void concof_logic(void)
   {
     if(working_mode==0)
     {
-      dly_1 = Mydelay_min(dly_COn, System.value[COn]);
+      dly_1 = Mydelay_min(dly_COn, Syscfg.value[COn]);
       if(dly_1 == false)
       {
         out_sta.compressor|= out_COn_enable;
@@ -356,7 +356,7 @@ static void concof_logic(void)
     }
     else
     {
-      dly_2 = Mydelay_min(dly_COF, System.value[COF]);
+      dly_2 = Mydelay_min(dly_COF, Syscfg.value[COF]);
       if(dly_2 == false)
       {
         out_sta.compressor &= out_COF_disable;
@@ -386,22 +386,22 @@ static void concof_logic(void)
 
 static void normal_refrigerate_logic(void)
 {
-  int16_t sv = (System.value[Set]+System.value[Hy]);
-  if(System.pv > sv)
+  int16_t sv = (Syscfg.value[Set]+Syscfg.value[Hy]);
+  if(Syscfg.pv > sv)
   {
     icon.Refrigerate_sta = ICON_ON;
     out_sta.compressor |= out_NR_enable;
-    // printf("System.pv = %d\r\n", System.pv);
-    // printf("System.Set = %d\r\n", System.value[Set]);
-    // printf("System.Hy = %d\r\n", System.value[Hy]);
+    // printf("Syscfg.pv = %d\r\n", Syscfg.pv);
+    // printf("Syscfg.Set = %d\r\n", Syscfg.value[Set]);
+    // printf("Syscfg.Hy = %d\r\n", Syscfg.value[Hy]);
     // printf("sv = %d\r\n", sv);
     // printf("normal開啟壓縮機輸出\r\n\n\n");
   }
-  else if(System.pv <= System.value[Set])
+  else if(Syscfg.pv <= Syscfg.value[Set])
   {
     icon.Refrigerate_sta = ICON_OFF;
     out_sta.compressor &= out_NR_disable;
-    // printf("System.pv = %d\r\n", System.pv);
+    // printf("Syscfg.pv = %d\r\n", Syscfg.pv);
     // printf("sv = %d\r\n", sv);
     // printf("normal關閉壓縮機輸出\r\n\n\n");
   }

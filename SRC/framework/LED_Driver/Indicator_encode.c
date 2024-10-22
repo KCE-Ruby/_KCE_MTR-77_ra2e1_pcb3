@@ -171,7 +171,7 @@ static const uint8_t ByteTable[][3] = {
 };
 /* extern variables -----------------------------------------------------------------*/
 extern __IO r_tmr tmr;
-extern __IO s_Var System;
+extern __IO s_Var Syscfg;
 extern __IO s_Flag sFlag;
 extern __IO ByteSettingTable bytetable[End];
 extern __IO uint8_t bytetable_pr2[End];
@@ -291,7 +291,7 @@ static void main_M2(uint16_t num, bool dot)
   else
   {
     //若數字為2位數則亮燈 
-    Scan2temp.scan2.M2_dp = (System.decimalIndex == DECIMAL_AT_1)? true:false;
+    Scan2temp.scan2.M2_dp = (Syscfg.decimalIndex == DECIMAL_AT_1)? true:false;
   }
 }
 
@@ -344,7 +344,7 @@ static void main_M3(uint16_t num, bool dot)
   else
   {
     //若數字為1位數則亮燈
-    Scan3temp.scan3.M3_dp = (System.decimalIndex == DECIMAL_AT_2)? true:false;
+    Scan3temp.scan3.M3_dp = (Syscfg.decimalIndex == DECIMAL_AT_2)? true:false;
   }
 }
 
@@ -412,15 +412,15 @@ static void char_M2(uint8_t _char)
       break;
     }
   }
-  if((System.mode==level1Mode) || (System.mode==historyMode))
+  if((Syscfg.mode==level1Mode) || (Syscfg.mode==historyMode))
   {
     //若在設定/歷史值層或離開時需閃爍則不顯示小數點
     Scan2temp.scan2.M2_dp = false;
   }
-  else if(System.mode == level2Mode)
+  else if(Syscfg.mode == level2Mode)
   {
     //TODO:要在第一層也有的才會有小數點
-    pr2_index = bytetable_pr2[System.level2_index];
+    pr2_index = bytetable_pr2[Syscfg.level2_index];
     if(bytetable[pr2_index].Mode == Pr1)
       Scan2temp.scan2.M2_dp = true;
     else
@@ -459,15 +459,15 @@ static void char_M3(uint8_t _char)
     }
   }
 
-  if(System.mode == level1Mode)
+  if(Syscfg.mode == level1Mode)
   {
     //若在設定層或離開時需閃爍則不顯示小數點
     Scan3temp.scan3.M3_dp = false;
   }
-  else if(System.mode == level2Mode)
+  else if(Syscfg.mode == level2Mode)
   {
     //要在第一層有的才會有點
-    Scan3temp.scan3.M3_dp = (System.decimalIndex == DECIMAL_AT_2)? true:false;
+    Scan3temp.scan3.M3_dp = (Syscfg.decimalIndex == DECIMAL_AT_2)? true:false;
   }
 }
 

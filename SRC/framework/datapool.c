@@ -27,7 +27,7 @@
 #define Ot_OFFSET                   (-120)   //參數的offset值, -12.0
 
 /* extern variables -----------------------------------------------------------------*/
-extern __IO s_Var System;
+extern __IO s_Var Syscfg, Preload;
 extern ADC_TemperatureValue TempValue;
 
 /* variables -----------------------------------------------------------------*/
@@ -194,59 +194,61 @@ void offset_EEtoSYS(void)
       case UserAddr_AC:
       case UserAddr_COn:
       case UserAddr_COF:
-        System.value[i] = EE_Buf_u16[i]/10;
+        Preload.value[i] = EE_Buf_u16[i]/10;
+        Syscfg.value[i] = Preload.value[i];
         break;
       
       default:
-        System.value[i] = EE_Buf_u16[i];
+        Preload.value[i] = EE_Buf_u16[i];
+        Syscfg.value[i] = Preload.value[i];
         break;
     }
     i++;
   }
 
-  System.history_max = -9990;    //給最大值, 最小值做溫度基準, EE_Buf_u16[UserAddr_history_max]
-  System.history_min = 9990;    //給最小值, 最大值做溫度基準, EE_Buf_u16[UserAddr_history_min]
+  Syscfg.history_max = -9990;    //給最大值, 最小值做溫度基準, EE_Buf_u16[UserAddr_history_max]
+  Syscfg.history_min = 9990;    //給最小值, 最大值做溫度基準, EE_Buf_u16[UserAddr_history_min]
   
-  System.value[rSE] = System.value[Set];
-  System.value[rEL] = 10;           //v1.0
+  Syscfg.value[rSE] = Syscfg.value[Set];
+  Syscfg.value[rEL] = 10;           //v1.0
   // printf("測試結束25\r\n");
 }
 
 /* Function definitions ------------------------------------------------------*/
 void get_Pv(void)
 {
-  //System.value參數基準點為小數後一位, 所以數值已經放大10倍, 取整數的話要除10回來
-  const uint16_t rtr_const = System.value[rtr]/10;
+  //Syscfg.value參數基準點為小數後一位, 所以數值已經放大10倍, 取整數的話要除10回來
+  const uint16_t rtr_const = Syscfg.value[rtr]/10;
   const uint8_t source = 8;
   int16_t pv_1, pv_2, pv_3, pv_4;
   int16_t t1_f, t2_f, t3_f, t4_f;
 
   //目前判斷點是依據rtr參數將P1與P2的比例做調整, 整合後為pv值使用
-  if(System.value[CF] == degree_F)
+  if(Syscfg.value[CF] == degree_F)
   {
     t1_f = celsius_to_fahrenheit(TempValue.sensor1);
     t2_f = celsius_to_fahrenheit(TempValue.sensor2);
     t3_f = celsius_to_fahrenheit(TempValue.sensor3);
     t4_f = celsius_to_fahrenheit(TempValue.sensor4);
 
-    pv_1 = t1_f + System.value[Ot];
-    pv_2 = t2_f + System.value[OE];
-    pv_3 = t3_f + System.value[O3];
-    pv_4 = t4_f + System.value[O4];
+    pv_1 = t1_f + Syscfg.value[Ot];
+    pv_2 = t2_f + Syscfg.value[OE];
+    pv_3 = t3_f + Syscfg.value[O3];
+    pv_4 = t4_f + Syscfg.value[O4];
   }
   else
   {
-    pv_1 = TempValue.sensor1 + System.value[Ot];
-    pv_2 = TempValue.sensor2 + System.value[OE];
-    pv_3 = TempValue.sensor3 + System.value[O3];
-    pv_4 = TempValue.sensor4 + System.value[O4];
+    pv_1 = TempValue.sensor1 + Syscfg.value[Ot];
+    pv_2 = TempValue.sensor2 + Syscfg.value[OE];
+    pv_3 = TempValue.sensor3 + Syscfg.value[O3];
+    pv_4 = TempValue.sensor4 + Syscfg.value[O4];
   }
-  System.pv = (rtr_const * (pv_1-pv_2) /100) + pv_2;
+  Syscfg.pv = (rtr_const * (pv_1-pv_2) /100) + pv_2;
 
   // printf("rtr_const = %d\r\n", rtr_const);
   // printf("pv_1 = %d\r\n", pv_1);
   // printf("pv_2 = %d\r\n", pv_2);
-  // printf("System.pv = %d\r\n", System.pv);
+  // printf("Syscfg.pv = %d\r\n", Syscfg.pv);
 }
 
 void get_HistoryMax(void)
@@ -254,11 +256,11 @@ void get_HistoryMax(void)
   uint8_t addr = eep_max_low;
   uint8_t length = eep_size_max;
 
-  if(System.pv > System.history_max)
+  if(Syscfg.pv > Syscfg.history_max)
   {
-    System.history_max = System.pv;
-    I2c_Buf_Write[addr] = System.history_max & 0xFF;
-    I2c_Buf_Write[addr+1] = System.history_max >> 8;
+    Syscfg.history_max = Syscfg.pv;
+    I2c_Buf_Write[addr] = Syscfg.history_max & 0xFF;
+    I2c_Buf_Write[addr+1] = Syscfg.history_max >> 8;
     // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
   }
 }
@@ -268,11 +270,11 @@ void get_HistoryMin(void)
   uint8_t addr = eep_min_low;
   uint8_t length = eep_size_min;
 
-  if(System.pv < System.history_min)
+  if(Syscfg.pv < Syscfg.history_min)
   {
-    System.history_min = System.pv;
-    I2c_Buf_Write[addr] = System.history_min & 0xFF;
-    I2c_Buf_Write[addr+1] = System.history_min >> 8;
+    Syscfg.history_min = Syscfg.pv;
+    I2c_Buf_Write[addr] = Syscfg.history_min & 0xFF;
+    I2c_Buf_Write[addr+1] = Syscfg.history_min >> 8;
     // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
   }
 }
@@ -318,9 +320,9 @@ int16_t check_Limit_Value(int16_t data, int8_t index)
   {
     case Set:
       //設定值的最大允許值 = US
-      max_data = (int16_t)(System.value[US]);
+      max_data = (int16_t)(Syscfg.value[US]);
       //設定值的最小允許值 = LS
-      min_data = (int16_t)(System.value[LS]);
+      min_data = (int16_t)(Syscfg.value[LS]);
       if(data > max_data)
         data = max_data;
       else if(data < min_data)
@@ -373,4 +375,14 @@ int16_t celsius_to_fahrenheit(int16_t pv)
     ret = (pv * 9 + 1600) / 5;
   return ret;
 }
+
+/* upload data Function definitions ------------------------------------------------------*/
+void upload_syscfg_data(int8_t pr_index)
+{
+  Syscfg.value[pr_index] = Preload.value[pr_index];
+}
+
+
+
+
 

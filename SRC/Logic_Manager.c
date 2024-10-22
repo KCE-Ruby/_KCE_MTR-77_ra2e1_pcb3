@@ -28,7 +28,7 @@
 /* extern variables -----------------------------------------------------------------*/
 extern r_tmr tmr;
 extern volatile uint8_t data;
-extern __IO s_Var System;
+extern __IO s_Var Syscfg, Preload;
 extern __IO s_Flag sFlag;
 extern __IO ADC_TemperatureValue TempValue;
 
@@ -76,7 +76,7 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
   // else if (TempValue.sensor2 == ERROR_AD)
   //   P2ToDisplay();
   else
-    NumToDisplay(System.pv);
+    NumToDisplay(Syscfg.pv);
   
   //更新顯示icon
   update_icon();
@@ -85,9 +85,9 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
   *fHigh = false;
   *fLow = false;
   *fLeave = false;
-  System.keymode.Max_flag = false;
-  System.keymode.Min_flag = false;
-  System.keymode.clear_flag = false;
+  Syscfg.keymode.Max_flag = false;
+  Syscfg.keymode.Min_flag = false;
+  Syscfg.keymode.clear_flag = false;
   catch_ms[dly_fHigh] = 0;
   catch_ms[dly_fLow] = 0;
   catch_ms[dly_fLeave] = 0;
@@ -95,7 +95,7 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
 
 static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
 {
-  if(System.keymode.Max_flag)
+  if(Syscfg.keymode.Max_flag)
   {
     clear_Max_flag = true;
     clear_Min_flag = false;
@@ -107,15 +107,15 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     else
     {
       //顯示數值, 5秒後離開這層
-      NumToDisplay(System.history_max);
+      NumToDisplay(Syscfg.history_max);
       if(*fLeave == false)
         *fLeave = Mydelay_ms(dly_fLeave, 5000);
       else
-        System.mode = homeMode;
+        Syscfg.mode = homeMode;
     }
     // printf("HIS_dly_f_H = %d\r\n", *fHigh);
   }
-  else if(System.keymode.Min_flag)
+  else if(Syscfg.keymode.Min_flag)
   {
     clear_Min_flag = true;
     clear_Max_flag = false;
@@ -127,24 +127,24 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     else
     {
       //顯示數值, 5秒後離開這層
-      NumToDisplay(System.history_min);
+      NumToDisplay(Syscfg.history_min);
       if(*fLeave == false)
         *fLeave = Mydelay_ms(dly_fLeave, 5000);
       else
-        System.mode = homeMode;
+        Syscfg.mode = homeMode;
     }
     // printf("HIS_dly_f_L = %d\r\n", *fLow);
   }
   else  //非正在顯示極值時
   {
-    if(System.keymode.clear_flag)
+    if(Syscfg.keymode.clear_flag)
     {
       //代表長按SET超過3秒, 開始閃爍
       if(rStToDisplay_Flashing()==true)
       {
         //閃爍rSt3次後離開
-        System.mode = homeMode;
-        System.keymode.clear_flag = false;
+        Syscfg.mode = homeMode;
+        Syscfg.keymode.clear_flag = false;
       }
     }
     else  //長按SET的時候長亮rSt鍵
@@ -156,7 +156,7 @@ static void level1Modelogic(void)
 {
   uint8_t table = 0;
   ICON_degrees_Flashing();
-  table = bytetable_pr1[System.level1_index];
+  table = bytetable_pr1[Syscfg.level1_index];
   if(sFlag.Level1_value == Vindex)
     CharToDisplay(table);
   else if(sFlag.Level1_value == Vvalue)
@@ -169,7 +169,7 @@ static void level2Modelogic(void)
 {
   uint8_t table = 0;
   ICON_degrees_Flashing();
-  table = bytetable_pr2[System.level2_index];
+  table = bytetable_pr2[Syscfg.level2_index];
   if(sFlag.Level2_value == Vindex)
     CharToDisplay(table);
   else if(sFlag.Level2_value == Vvalue)
@@ -196,17 +196,17 @@ static void valuetodisplay(uint8_t table)
   switch (table)
   {
     case CF:
-      CFToDisplay((bool)System.value[table]);
+      CFToDisplay((bool)Preload.value[table]);
       break;
 
     case P2P:
     case P3P:
     case P4P:
-      nyToDisplay((bool)System.value[table]);
+      nyToDisplay((bool)Preload.value[table]);
       break;
   
     default:
-      NumToDisplay(System.value[table]);
+      NumToDisplay(Preload.value[table]);
       break;
   }
 
@@ -241,19 +241,19 @@ static void update_icon(void)
 static void check_set_value(void)
 {
   static uint32_t check_set_value_cnt=0;
-  if(System.keymode.SET_value_flag)
+  if(Syscfg.keymode.SET_value_flag)
   {
-    NumToDisplay(System.value[Set]);
+    NumToDisplay(Syscfg.value[Set]);
     if(check_set_value_cnt == 0)
       check_set_value_cnt = tmr.Cnt_1s;
 
     if(tmr.Cnt_1s >= (check_set_value_cnt + AUTOLEAVE_CHECKSETTIME))
-      System.keymode.SET_value_flag = false;
+      Syscfg.keymode.SET_value_flag = false;
   }
   else
   {
     check_set_value_cnt = 0;
-    System.mode = homeMode;
+    Syscfg.mode = homeMode;
   }
 }
 
@@ -262,33 +262,35 @@ static void change_set_value(void)
   static uint32_t change_set_value_cnt=0;
   bool cnt_reset = (IsAnyKeyPressed())? true:false;
 
-  if(System.keymode.SET_value_flag)
+  if(Syscfg.keymode.SET_value_flag)
   {
-    NumToDisplay(System.value[Set]);
+    NumToDisplay(Preload.value[Set]);
     ICON_degrees_Flashing();
     if((change_set_value_cnt == 0) || cnt_reset)
       change_set_value_cnt = tmr.Cnt_1s;
 
     if(tmr.Cnt_1s >= (change_set_value_cnt + AUTOLEAVE_CHANGESETTIME))
-      System.keymode.SET_value_flag = false;
+      Syscfg.keymode.SET_value_flag = false;
   }
   else 
   {
     change_set_value_cnt = 0;
-    System.mode = homeMode;
+    Syscfg.mode = homeMode;
   }
 }
 
 static void leave_settingMode(void)
 {
   static uint8_t flash_cnt=0;
+
+  upload_syscfg_data(Set);
   //閃爍三次畫面
   flash_cnt = ICON_LeaveSet_Flashing(flash_cnt);
 
   //離開set回到home
   if(flash_cnt > (KEYLEAVE_SETTIME*2-1))
   {
-    System.mode = homeMode; //短按一次後回到home模式
+    Syscfg.mode = homeMode; //短按一次後回到home模式
     flash_cnt = 0;
     sFlag.leaveSet = false;
   }
@@ -298,7 +300,7 @@ static void update_display_message(void)
 {
   static bool dly_flag_H=false, dly_flag_L=false, leave_flag=false;
   //主要顯示控制區
-  switch (System.mode)
+  switch (Syscfg.mode)
   {
     case homeMode:
       homeModelogic(&dly_flag_H, &dly_flag_L, &leave_flag);
@@ -425,7 +427,7 @@ static void loop_100ms(void)
       sFlag.Defrost = manual_defrost(sFlag.Defrost);
 
     //更新最大最小值
-    if(System.pv != ERROR_AD)
+    if(Syscfg.pv != ERROR_AD)
       update_history_value();
 
     //主要顯示控制區, 切換顯示模式等等..
@@ -451,7 +453,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x50;
+  const uint8_t test    = 0x53;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

@@ -25,7 +25,7 @@
 static bool scan_complete_flag = false;
 __IO r_tmr tmr;
 __IO bsp_io_level_t KeyPin, pin_sta[7];
-__IO s_Var System;
+__IO s_Var Syscfg, Preload;
 __IO s_Flag sFlag;
 __IO uint8_t Pr1_size, Pr2_size;
 __IO uint32_t catch_min[dly_end_min] = {};
@@ -52,7 +52,7 @@ void System_Init(void)
   Pr1_size = get_bytetable_pr1();  //開機時取得當次的用戶層相關table
   Pr2_size = get_bytetable_pr2();  //開機時取得當次的隱藏層相關table
   //預設開機為小數點一位數, TODO:讀取eeprom後這行要拿掉
-  System.decimalIndex = DECIMAL_AT_1;
+  Syscfg.decimalIndex = DECIMAL_AT_1;
 }
 
 static void TMR_init(void)

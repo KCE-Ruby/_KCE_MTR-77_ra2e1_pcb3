@@ -23,7 +23,7 @@
 extern __IO r_tmr tmr;
 extern __IO ICON_SCAN4 Scan4temp;
 extern __IO ICON_SCAN5 Scan5temp;
-extern __IO s_Var System;
+extern __IO s_Var Syscfg;
 
 /* variables -----------------------------------------------------------------*/
 __IO bool ALL_LED_FLAG, CLOSE_LED_FLAG;
@@ -77,13 +77,13 @@ uint8_t ICON_LeaveSet_Flashing(uint8_t flash_cnt)
   if(flag == true)
   {
     //離開設定層時, 數字&依據溫度單位閃爍燈號3次
-    NumToDisplay(System.value[Set]);
-    if(System.value[CF] == degree_C)
+    NumToDisplay(Syscfg.value[Set]);
+    if(Syscfg.value[CF] == degree_C)
     {
       ICON_degrees_Celsius_ON();
       ICON_degrees_Fahrenheit_OFF();
     }
-    else if(System.value[CF] == degree_F)
+    else if(Syscfg.value[CF] == degree_F)
     {
       ICON_degrees_Fahrenheit_ON();
       ICON_degrees_Celsius_OFF();
@@ -228,15 +228,15 @@ void ICON_degrees_Flashing(void)
   //溫度icon, 系統處於設定模式中, 閃爍中, 預設為:1Hz 500ms亮, 500ms滅
   if(flag == true)
   {
-    if((System.mode == level1Mode) || (System.mode == settingMode))
+    if((Syscfg.mode == level1Mode) || (Syscfg.mode == settingMode))
     {
       //在用戶層及設定層內, 依據溫度單位閃爍燈號
-      if(System.value[CF] == degree_C)
+      if(Syscfg.value[CF] == degree_C)
       {
         ICON_degrees_Celsius_ON();
         ICON_degrees_Fahrenheit_OFF();
       }
-      else if(System.value[CF] == degree_F)
+      else if(Syscfg.value[CF] == degree_F)
       {
         ICON_degrees_Fahrenheit_ON();
         ICON_degrees_Celsius_OFF();
@@ -258,12 +258,12 @@ void ICON_degrees_Flashing(void)
 
 void ICON_degrees_API(void)
 {
-  if(System.value[CF] == degree_C)
+  if(Syscfg.value[CF] == degree_C)
   {
     ICON_degrees_Celsius_ON();
     ICON_degrees_Fahrenheit_OFF();
   }
-  else if(System.value[CF] == degree_F)
+  else if(Syscfg.value[CF] == degree_F)
   {
     ICON_degrees_Fahrenheit_ON();
     ICON_degrees_Celsius_OFF();

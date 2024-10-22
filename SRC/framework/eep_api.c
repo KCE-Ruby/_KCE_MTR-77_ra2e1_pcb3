@@ -15,7 +15,7 @@
 // #include "INC/framework/eep_api.h"
 
 // /* extern variables -----------------------------------------------------------------*/
-// extern __IO s_Var System;
+// extern __IO s_Var Syscfg;
 
 // /* variables -----------------------------------------------------------------*/
 
@@ -67,7 +67,7 @@
 
 //   // //IsEEPROMWrited
 //   // sysCfg.sysVar.EEPWrite_times = EEP_Read_API(UserAddr_EEPWrite_times);
-//   // if(System.eep.IsEEPROMWrited != EEP_written)
+//   // if(Syscfg.eep.IsEEPROMWrited != EEP_written)
 //   //   EEP_ResetALL();
 // }
 
