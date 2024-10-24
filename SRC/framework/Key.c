@@ -231,9 +231,19 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
       {
         //數值需要先被加過後再檢查最大最小值
         if(iskeyup)
-          Preload.value[pr_index]++;
+        {
+          if(Syscfg.value[rES] == DECIMAL_AT_0)
+            Preload.value[pr_index] += 10;
+          else if(Syscfg.value[rES] == DECIMAL_AT_1)
+            Preload.value[pr_index]++;
+        }
         else
-          Preload.value[pr_index]--;
+        {
+          if(Syscfg.value[rES] == DECIMAL_AT_0)
+            Preload.value[pr_index] -= 10;
+          else if(Syscfg.value[rES] == DECIMAL_AT_1)
+            Preload.value[pr_index]--;
+        }
 
         // 更新 pr_index 到最新值(一定要這樣寫)
         pr_index = ( *index == sFlag.Level1_value ) ? 
@@ -424,7 +434,11 @@ static void key_up_function(void)
 
         case settingMode:
           //TODO: get設定值的最大值API, 不要extern 整個table
-          Preload.value[Set]++;
+          if(Syscfg.value[rES] == DECIMAL_AT_0)
+            Preload.value[Set] += 10;
+          else if(Syscfg.value[rES] == DECIMAL_AT_1)
+            Preload.value[Set]++;
+
           Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
           // if(Preload.value[Set] > 1100) Preload.value[Set] = 1100;
         break;
@@ -490,7 +504,11 @@ static void key_up_function(void)
           }
           else if(Syscfg.mode==settingMode)
           {
-            Preload.value[Set]++;
+            if(Syscfg.value[rES] == DECIMAL_AT_0)
+              Preload.value[Set] += 10;
+            else if(Syscfg.value[rES] == DECIMAL_AT_1)
+              Preload.value[Set]++;
+
             Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
           }
         }
@@ -554,7 +572,11 @@ static void key_down_function(void)
 
         case settingMode:
           //TODO: get設定值的最小值API, 不要extern 整個table
-          Preload.value[Set]--;
+          if(Syscfg.value[rES] == DECIMAL_AT_0)
+            Preload.value[Set] -= 10;
+          else if(Syscfg.value[rES] == DECIMAL_AT_1)
+            Preload.value[Set]--;
+
           Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
         break;
 
@@ -628,7 +650,11 @@ static void key_down_function(void)
           }
           else if(Syscfg.mode==settingMode)
           {
-            Preload.value[Set]--;
+            if(Syscfg.value[rES] == DECIMAL_AT_0)
+              Preload.value[Set] -= 10;
+            else if(Syscfg.value[rES] == DECIMAL_AT_1)
+              Preload.value[Set]--;
+
             Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
           }
         }

@@ -76,8 +76,13 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
   // else if (TempValue.sensor2 == ERROR_AD)
   //   P2ToDisplay();
   else
-    NumToDisplay(Syscfg.pv);
-  
+  {
+    if(Syscfg.value[rES] == DECIMAL_AT_0)
+      NumToDisplay(Syscfg.pv/10);
+    else if(Syscfg.value[rES] == DECIMAL_AT_1)
+      NumToDisplay(Syscfg.pv);
+  }
+
   //更新顯示icon
   update_icon();
 
@@ -107,7 +112,11 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     else
     {
       //顯示數值, 5秒後離開這層
-      NumToDisplay(Syscfg.history_max);
+      if(Syscfg.value[rES] == DECIMAL_AT_0)
+        NumToDisplay(Syscfg.history_max/10);
+      else if(Syscfg.value[rES] == DECIMAL_AT_1)
+        NumToDisplay(Syscfg.history_max);
+
       if(*fLeave == false)
         *fLeave = Mydelay_ms(dly_fLeave, 5000);
       else
@@ -127,7 +136,11 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     else
     {
       //顯示數值, 5秒後離開這層
-      NumToDisplay(Syscfg.history_min);
+      if(Syscfg.value[rES] == DECIMAL_AT_0)
+        NumToDisplay(Syscfg.history_min/10);
+      else if(Syscfg.value[rES] == DECIMAL_AT_1)
+        NumToDisplay(Syscfg.history_min);
+
       if(*fLeave == false)
         *fLeave = Mydelay_ms(dly_fLeave, 5000);
       else
@@ -195,18 +208,25 @@ static void valuetodisplay(uint8_t table)
 {
   switch (table)
   {
-    case CF:
-      CFToDisplay((bool)Preload.value[table]);
-      break;
-
     case P2P:
     case P3P:
     case P4P:
       nyToDisplay((bool)Preload.value[table]);
       break;
+
+    case CF:
+      CFToDisplay((bool)Preload.value[table]);
+      break;
+
+    case rES:
+      rESToDisplay((bool)Preload.value[table]);
+      break;
   
     default:
-      NumToDisplay(Preload.value[table]);
+      if(Syscfg.value[rES] == DECIMAL_AT_0)
+        NumToDisplay(Preload.value[table]/10);
+      else if(Syscfg.value[rES] == DECIMAL_AT_1)
+        NumToDisplay(Preload.value[table]);
       break;
   }
 
@@ -243,7 +263,11 @@ static void check_set_value(void)
   static uint32_t check_set_value_cnt=0;
   if(Syscfg.keymode.SET_value_flag)
   {
-    NumToDisplay(Syscfg.value[Set]);
+    if(Syscfg.value[rES] == DECIMAL_AT_0)
+      NumToDisplay(Syscfg.value[Set]/10);
+    else if(Syscfg.value[rES] == DECIMAL_AT_1)
+      NumToDisplay(Syscfg.value[Set]);
+
     if(check_set_value_cnt == 0)
       check_set_value_cnt = tmr.Cnt_1s;
 
@@ -264,7 +288,11 @@ static void change_set_value(void)
 
   if(Syscfg.keymode.SET_value_flag)
   {
-    NumToDisplay(Preload.value[Set]);
+    if(Syscfg.value[rES] == DECIMAL_AT_0)
+      NumToDisplay(Preload.value[Set]/10);
+    else if(Syscfg.value[rES] == DECIMAL_AT_1)
+      NumToDisplay(Preload.value[Set]);
+
     ICON_degrees_Flashing();
     if((change_set_value_cnt == 0) || cnt_reset)
       change_set_value_cnt = tmr.Cnt_1s;
@@ -453,7 +481,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x53;
+  const uint8_t test    = 0x54;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

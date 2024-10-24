@@ -77,7 +77,11 @@ uint8_t ICON_LeaveSet_Flashing(uint8_t flash_cnt)
   if(flag == true)
   {
     //離開設定層時, 數字&依據溫度單位閃爍燈號3次
-    NumToDisplay(Syscfg.value[Set]);
+    if(Syscfg.value[rES] == DECIMAL_AT_0)
+      NumToDisplay(Syscfg.value[Set]/10);
+    else if(Syscfg.value[rES] == DECIMAL_AT_1)
+      NumToDisplay(Syscfg.value[Set]);
+
     if(Syscfg.value[CF] == degree_C)
     {
       ICON_degrees_Celsius_ON();

@@ -482,7 +482,7 @@ void NumToDisplay(int16_t temp)
   //轉換的數值不能超過最大值, 且恆為正數
   if(temp!=CLEARALL)
   {
-    //某些參數要已整數型態顯示其數值
+    //某些參數要以整數型態顯示其數值
     if(sFlag.Vvalue_int==true)
       dot = false;
 
@@ -492,8 +492,12 @@ void NumToDisplay(int16_t temp)
       temp = temp/10;
       dot = false;
     }
+    //若系統設定為整數型態則不顯示小數點(中間值個位數時也不顯示0)
+    if(Syscfg.value[rES] == DECIMAL_AT_0)
+      dot = false;
   }
 
+  Syscfg.decimalIndex = Syscfg.value[rES];
   main_M1((uint16_t)temp, minus_flag);
   main_M2((uint16_t)temp, dot);
   main_M3((uint16_t)temp, dot);
@@ -571,4 +575,22 @@ void P2ToDisplay(void)
   char_M1(dig_2);
   char_M2(dig_P);
   char_M3(dig_off);
+}
+
+void rESToDisplay(bool i)
+{
+  if(i==0)
+  {
+    //in
+    char_M1(dig_n);
+    char_M2(dig_i);
+    char_M3(dig_off);
+  }
+  else
+  {
+    //dE
+    char_M1(dig_E);
+    char_M2(dig_d);
+    char_M3(dig_off);
+  }
 }

@@ -57,7 +57,7 @@ __IO ByteSettingTable bytetable[End] =
   {COn,             0,           255,           2,     Pr1},
   {COF,             0,           255,           1,     Pr1},
   { CF,             0,           0.1,           0,     Pr1}, //攝氏=C, 華氏=F
-  {rES,  DECIMAL_AT_1,  DECIMAL_AT_0, DECIMAL_AT_1,     Pr2}, //小數=dE=DECIMAL_AT_1, 整數=in=DECIMAL_AT_0
+  {rES,             0,           0.1,         0.1,     Pr2}, //小數=dE=DECIMAL_AT_1, 整數=in=DECIMAL_AT_0
   {Lod,       disp_P1,      disp_dtr,      disp_P1,     Pr2},
   {rEd,       disp_P1,      disp_dtr,      disp_P1,     NaN},
   {dLY,             0,          20.0,            0,     Pr2}, //單位:0~20.0分鐘, 分辨率10秒

@@ -74,7 +74,7 @@ enum DELAY_TYPE_ms
 
 /* typedef definitions -----------------------------------------------------*/
 typedef enum {
-  DECIMAL_AT_2 = 2, // 2.34
+  DECIMAL_AT_2 = 2, // 2.34 (不可能會有, 除非修改rES參數範圍)
   DECIMAL_AT_1 = 1, // 23.4
   DECIMAL_AT_0 = 0  // 234 (无小数点)
 } decimalIndex;
