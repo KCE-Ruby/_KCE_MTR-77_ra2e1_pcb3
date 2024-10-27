@@ -195,6 +195,7 @@ void I2C_EE_Writederase()
         I2c_Buf_Write[i] = 0xff;
     }
     I2C_EE_BufferWrite(I2c_Buf_Write, 0x00 , 256);
+  R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
 }
 
 

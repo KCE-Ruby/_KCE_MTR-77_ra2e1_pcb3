@@ -14,9 +14,14 @@
 
 /* Enum type definitions -----------------------------------------------------*/
 enum SPIAddr
-{ //26 (0~7 setting, 8~2047 data, page->40address, 2040/40=51 page)
-  //若是數值類型的參數, 一律使用2byte做存取
-  SPIAddr_EEPWrite_times,   //0 or 1
+{ 
+  /*
+  * 懷疑前面有保留位元, 所以從byte5開始使用, 最後一個byte(0xff)不可使用
+  * 可用的位置共有 255-2-1 = 252個byte
+  * 26 (0~7 setting, 8~2047 data, page->40address, 2040/40=51 page)
+  * 若是數值類型的參數, 一律使用2byte做存取
+  */
+  SPIAddr_Start = 5,   //0 or 1
 
   SPIAddr_Set_L,
   SPIAddr_Set_H,
@@ -165,11 +170,13 @@ enum SPIAddr
   SPIAddr_history_min_H,
   SPIAddr_history_max_L,
   SPIAddr_history_max_H,
+
+  SPIAddr_End,   //一次讀出全部時的結束點
 };
 
 enum UserAddr
 {
-  UserAddr_EEPWrite_times,
+  UserAddr_Start,
 
   UserAddr_Set,
 
@@ -259,5 +266,7 @@ enum UserAddr
 void EEP_ResetALL(void);
 uint32_t EEP_Read_API(uint8_t addr);
 void EEP_Write_API(uint8_t addr, uint32_t value);
+
+void EEPROM_TEST(void);
 
 #endif /* INC_EEP_API_H_ */
