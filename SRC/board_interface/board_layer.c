@@ -41,13 +41,13 @@ static fsp_err_t Uart_init(void);
 /* Global Function definitions ------------------------------------------------------*/
 void System_Init(void)
 {
-  // WDT_init();   //16384 cycle watchdog
-  // TMR_init();   //1ms Timer
+  WDT_init();   //16384 cycle watchdog
+  TMR_init();   //1ms Timer
   // if(debug)
   //   Debug_UART1_Init();
   // else
   Uart_init();
-  // ADC_init();
+  ADC_init();
   I2C_EE_Init();
   // Pr1_size = get_bytetable_pr1();  //開機時取得當次的用戶層相關table
   // Pr2_size = get_bytetable_pr2();  //開機時取得當次的隱藏層相關table

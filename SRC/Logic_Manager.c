@@ -484,36 +484,36 @@ void Task_Main(void)
   const uint8_t test    = 0x55;
   Device_Version = Release*65536 + dev*256 + test;
 
-  // EEPROM_TEST();
+  EEPROM_TEST();
 
-  System_Init();
-  while (1)
-  {
-    uint16_t start_addr = 0x00, end_addr = 0xFF;
-    uint8_t addr[10], data[10], length = 4;
-    uint8_t I2c_Buf_Read[0x3FF]={};
-    addr[0] = 0x01; data[0] = 0x33;
-    addr[1] = 0x05; data[1] = 0x55;
-    addr[2] = 0x08; data[2] = 0x77;
-    addr[3] = 0x07; data[3] = 0x11;
-    // I2C_EE_Writederase();
+  // System_Init();
+  // while (1)
+  // {
+  //   uint16_t start_addr = 0x00, end_addr = 0xFF;
+  //   uint8_t addr[10], data[10], length = 4;
+  //   uint8_t I2c_Buf_Read[0x3FF]={};
+  //   addr[0] = 0x01; data[0] = 0x33;
+  //   addr[1] = 0x05; data[1] = 0x55;
+  //   addr[2] = 0x08; data[2] = 0x77;
+  //   addr[3] = 0x07; data[3] = 0x11;
+  //   // I2C_EE_Writederase();
 
-      printf("[Logic_Manager] 開始寫入\r\n");
-      I2C_EE_BufferWrite(data, start_addr, length);
-      R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-      for(int i=start_addr; i<length; i++)
-      {
-        printf("[Logic_Manager] 寫入[%d] addr=0x%x, data=0x%x\r\n",i, i, data[i]);
-      }
+  //     printf("[Logic_Manager] 開始寫入\r\n");
+  //     I2C_EE_BufferWrite(data, start_addr, length);
+  //     R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
+  //     for(int i=start_addr; i<length; i++)
+  //     {
+  //       printf("[Logic_Manager] 寫入[%d] addr=0x%x, data=0x%x\r\n",i, i, data[i]);
+  //     }
 
-      printf("[Logic_Manager] 將eeprom內全部讀出\r\n");
-      I2C_EE_BufferRead(I2c_Buf_Read, 0x00, end_addr);
-      R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-      for(int i=(start_addr-2); i<(start_addr+length); i++)
-      {
-        printf("[Logic_Manager] 印出[0x%x] addr=0x%x, data=0x%x\r\n",i, i, I2c_Buf_Read[i]);
-      }
-  }
+  //     printf("[Logic_Manager] 將eeprom內全部讀出\r\n");
+  //     I2C_EE_BufferRead(I2c_Buf_Read, 0x00, end_addr);
+  //     R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
+  //     for(int i=(start_addr-2); i<(start_addr+length); i++)
+  //     {
+  //       printf("[Logic_Manager] 印出[0x%x] addr=0x%x, data=0x%x\r\n",i, i, I2c_Buf_Read[i]);
+  //     }
+  // }
 
   // System_Init();
   // printf("初始化完成\r\n");

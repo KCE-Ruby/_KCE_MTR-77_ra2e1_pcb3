@@ -260,7 +260,12 @@ enum UserAddr
 };
 
 /* typedef definitions -----------------------------------------------------*/
-
+// typedef struct
+// {
+// uint8_t start_addr, end_addr;
+// uint8_t length, data[];
+// uint8_t I2c_Buf_Read[];
+// } EEPROM_TEST;
 
 /* task function protocol -----------------------------------------------*/
 void EEP_ResetALL(void);

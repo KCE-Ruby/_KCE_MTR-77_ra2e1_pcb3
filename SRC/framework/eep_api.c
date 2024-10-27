@@ -33,6 +33,12 @@ extern __IO s_Var Syscfg;
 // uint8_t u8_eep_Read[], u8_eep_write[];
 int16_t u16_eep_Read[End], u16_eep_write[End];
 
+
+//EEPROM_TEST用
+uint16_t start_addr = 0x00, end_addr = 0xFF;
+uint8_t length = 8, tdata[10];
+uint8_t tI2c_Buf_Read[255];
+
 /* Static Function definitions ------------------------------------------------------*/
 // static uint32_t EEP_Read_API(uint8_t addr)
 // {
@@ -124,34 +130,40 @@ void IsMCUneedRST(bool reset)
 void EEPROM_TEST(void)
 {
   System_Init();
+
+  tdata[0] = 0x1A;
+  tdata[1] = 0x2B;
+  tdata[2] = 0x3C;
+  tdata[3] = 0x5D;
+  tdata[4] = 0x6D;
+  tdata[5] = 0x7C;
+  tdata[6] = 0x8B;
+  tdata[7] = 0x9A;
+  // I2C_EE_Writederase();
+
+  printf("開始寫入\r\n");
+  I2C_EE_BufferWrite( tdata, start_addr, length);
+  R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
+  for(int i=0; i<4; i++)  //這邊是要對應tdata的值
+  {
+    printf("寫入 addr=0x%x, data=0x%x\r\n", i, tdata[i]);
+    R_BSP_SoftwareDelay(10, BSP_DELAY_UNITS_MILLISECONDS);
+    WDT_Feed();
+  }
+
+  printf("將eeprom內全部讀出\r\n");
+  I2C_EE_BufferRead(tI2c_Buf_Read, 0x00, end_addr);
+  R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
+  for(int i=start_addr; i<(start_addr+length); i++) //這邊是實際要讀出來的值跟長度
+  {
+    printf("印出 addr=0x%x, data=0x%x\r\n", i, tI2c_Buf_Read[i]);
+    R_BSP_SoftwareDelay(10, BSP_DELAY_UNITS_MILLISECONDS);
+    WDT_Feed();
+  }
+
   while (1)
   {
-    uint16_t start_addr = 0x00, end_addr = 0xFF;
-    uint8_t length = 4, data[length];
-    uint8_t I2c_Buf_Read[end_addr]={};
-    data[0] = 0xA1;
-    data[1] = 0xB1;
-    data[2] = 0xC1;
-    data[3] = 0xD1;
-    // I2C_EE_Writederase();
-
-    printf("[Logic_Manager] 開始寫入\r\n");
-    I2C_EE_BufferWrite(data, start_addr, length);
-    R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-    for(int i=start_addr; i<length; i++)
-    {
-      printf("[Logic_Manager] 寫入 addr=0x%x, data=0x%x\r\n", i, data[i]);
-    }
-
-    printf("[Logic_Manager] 將eeprom內全部讀出\r\n");
-    I2C_EE_BufferRead(I2c_Buf_Read, 0x00, end_addr);
-    R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-    for(int i=start_addr; i<(start_addr+length); i++)
-    {
-      printf("[Logic_Manager] 印出 addr=0x%x, data=0x%x\r\n", i, I2c_Buf_Read[i]);
-    }
-
-
+    WDT_Feed();
     // R_BSP_SoftwareDelay(500, BSP_DELAY_UNITS_MILLISECONDS);
   }
 }
