@@ -35,7 +35,7 @@ int16_t u16_eep_Read[End], u16_eep_write[End];
 
 
 //EEPROM_TEST用
-uint16_t start_addr = 0x00, end_addr = 0xFF;
+uint16_t start_addr = 0x10, end_addr = 0xFF;
 uint8_t length = 8, tdata[10];
 uint8_t tI2c_Buf_Read[255];
 
@@ -131,14 +131,14 @@ void EEPROM_TEST(void)
 {
   System_Init();
 
-  tdata[0] = 0x10;
-  tdata[1] = 0x21;
-  tdata[2] = 0x32;
-  tdata[3] = 0x43;
-  tdata[4] = 0x53;
-  tdata[5] = 0x65;
-  tdata[6] = 0x76;
-  tdata[7] = 0x87;
+  tdata[0] = 0xAA;
+  tdata[1] = 0xBB;
+  tdata[2] = 0xCC;
+  tdata[3] = 0xDD;
+  tdata[4] = 0xEE;
+  tdata[5] = 0x00;
+  tdata[6] = 0x11;
+  tdata[7] = 0x22;
   // I2C_EE_Writederase();
 
   // printf("開始寫入\r\n");
