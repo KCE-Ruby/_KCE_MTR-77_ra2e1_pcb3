@@ -490,6 +490,7 @@ void Task_Main(void)
   printf("初始化完成\r\n");
   printf("軟體版本: 0x%02X\r\n", Device_Version);
   tmr.Cnt_1ms = 0;
+
   offset_EEtoSYS();
   while(1)
   {

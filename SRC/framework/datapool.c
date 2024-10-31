@@ -21,7 +21,6 @@
 
 #define DEBUG_PRINT                 (true)
 /* Private defines ----------------------------------------------------------*/
-#define GAIN_PARAMETER              (10)     //bytetable參數預設值的增益倍數
 #define LS_OFFSET                   (-500)   //參數的offset值, -50.0
 #define US_OFFSET                   (-500)   //參數的offset值, -50.0
 #define Ot_OFFSET                   (-120)   //參數的offset值, -12.0
@@ -118,11 +117,6 @@ __IO ByteSettingTable bytetable[End] =
   {Ptb,             0,             0,            0,     Pr2},
 };
 
-
-/* Static Function protocol -----------------------------------------------*/
-static int16_t offset_EEtoSYS_u8(uint8_t Table, uint8_t SPIaddr);
-static int16_t offset_EEtoSYS_u16(uint8_t Table, uint8_t SPIaddr);
-
 /* variables tranfer */
 void UserTabletoSytem(void)
 {
@@ -137,42 +131,7 @@ void UserTabletoSytem(void)
   }
 }
 
-
 /* Parameters from EEPROM to SYSTEM API ------------------------------------------------------*/
-static int16_t offset_EEtoSYS_u8(uint8_t Table, uint8_t SPIaddr)
-{
-  uint8_t EE_Buf_Read[End] = {0};
-  int16_t ret=0, offset=0;
-
-  // if(Table <= UserAddr_onF) // TODO:EEPROM的API會取代這整個if判斷式, offset可能要留下來
-  // {  
-  //   offset = (bytetable[Table].Range_Low*GAIN_PARAMETER);
-  //   EE_Buf_Read[SPIaddr] = (uint8_t)(bytetable[Table].DefaultValue*GAIN_PARAMETER-offset); //TODO:EEPROM的API會取代這行
-  // }
-  ret = (int16_t)(EE_Buf_Read[SPIaddr] + offset);
-
-  return ret;
-}
-
-static int16_t offset_EEtoSYS_u16(uint8_t Table, uint8_t SPIaddr)
-{
-  uint16_t base_u16=0;
-  uint8_t EE_Buf_Read[End] = {0};
-  int16_t ret=0, offset=0;
-
-  // if(Table <= UserAddr_onF) // TODO:EEPROM的API會取代這整個if判斷式, offset可能要留下來
-  // {
-  //   offset = (bytetable[Table].Range_Low*GAIN_PARAMETER);
-  //   base_u16 = (uint16_t)(bytetable[Table].DefaultValue*GAIN_PARAMETER-offset); //TODO:EEPROM的API會取代這行
-  //   EE_Buf_Read[SPIaddr+1] = base_u16 >> 8;      //取高位元, TODO:EEPROM的API會取代這行
-  //   EE_Buf_Read[SPIaddr] = base_u16 & 0xff;    //取低位元, TODO:EEPROM的API會取代這行
-  // }
-  base_u16 = (int16_t)(EE_Buf_Read[SPIaddr+1]<<8) + EE_Buf_Read[SPIaddr];  //組合成變數
-  ret = (int16_t)(base_u16 + offset);
-
-  return ret;
-}
-
 void offset_EEtoSYS(void)
 {
   uint8_t i=xxx, addr=SPIAddr_Start;

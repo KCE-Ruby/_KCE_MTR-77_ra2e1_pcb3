@@ -17,7 +17,6 @@
 #include "INC/framework/eep_api.h"
 
 /* Private defines ----------------------------------------------------------*/
-#define GAIN_PARAMETER              (10)     //bytetable參數預設值的增益倍數
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var Syscfg;
