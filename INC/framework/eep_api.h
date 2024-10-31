@@ -21,7 +21,7 @@ enum SPIAddr
   * 26 (0~7 setting, 8~2047 data, page->40address, 2040/40=51 page)
   * 若是數值類型的參數, 一律使用2byte做存取
   */
-  SPIAddr_Start = 5,   //0 or 1
+  SPIAddr_Start = 0,
 
   SPIAddr_Set_L,
   SPIAddr_Set_H,
@@ -260,12 +260,6 @@ enum UserAddr
 };
 
 /* typedef definitions -----------------------------------------------------*/
-// typedef struct
-// {
-// uint8_t start_addr, end_addr;
-// uint8_t length, data[];
-// uint8_t I2c_Buf_Read[];
-// } EEPROM_TEST;
 
 /* task function protocol -----------------------------------------------*/
 void EEP_ResetALL(void);

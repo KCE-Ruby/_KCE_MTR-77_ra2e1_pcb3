@@ -13,10 +13,16 @@
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/LED_Driver/app_menu_ctrl.h"
+#include "INC/framework/datapool.h"
 #include "INC/framework/eep_api.h"
+
+/* Private defines ----------------------------------------------------------*/
+#define GAIN_PARAMETER              (10)     //bytetable參數預設值的增益倍數
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var Syscfg;
+// extern __IO ByteSettingTable bytetable[End];
+extern __IO uint16_t rsttable[End];
 
 /* variables -----------------------------------------------------------------*/
 /*eeprom內各參數用途解釋
@@ -35,32 +41,12 @@ int16_t u16_eep_Read[End], u16_eep_write[End];
 
 
 //EEPROM_TEST用
-uint16_t start_addr = 0x10, end_addr = 0xFF;
+uint16_t start_addr = 0x00, end_addr = 0xFF;
 uint8_t length = 8, tdata[10];
-uint8_t tI2c_Buf_Read[255];
+uint8_t EE_Buf_Read[SPIAddr_End];
 
 /* Static Function definitions ------------------------------------------------------*/
-// static uint32_t EEP_Read_API(uint8_t addr)
-// {
-  // uint32_t data;
 
-  // switch (addr)
-  // {
-  //   case UserAddr_EEPWrite_page:
-  //     data = EEP_Read_Data_u8(SPIAddr_EEPWrite_page);
-  //     break;
-  //   case UserAddr_EEPWrite_times:
-  //     data = EEP_Read_Data_u8Convertu32(SPIAddr_EEPWrite_times_LL);
-  //     break;
-  // }
-  //   return data;
-  // I2C_EE_BufferRead(I2c_Buf_Read, 0x00 , DATA_Size);
-// }
-
-// static void EEP_Write_API(uint8_t addr, uint32_t value)
-// {
-  // I2C_EE_BufferWrite( I2c_Buf_Write, 0x00 , DATA_Size);
-// }
 
 /* Function definitions ------------------------------------------------------*/
 void EEP_Read_PWRON(void)
@@ -111,6 +97,39 @@ void EEP_ResetALL(void)
   * 拆除後陣列: I2c_Buf_Reset[SPIAddr_End]
   */
 
+  uint8_t i=xxx, addr=SPIAddr_Start;
+  uint8_t I2c_Buf_Reset[SPIAddr_End];
+  uint8_t length = SPIAddr_onF;
+
+  while(i < UserAddr_onF)
+  {
+    if((addr==SPIAddr_Start)||(addr==SPIAddr_P2P)||(addr==SPIAddr_P3P)||(addr==SPIAddr_P4P)||(addr==SPIAddr_CF)|| \
+      (addr==SPIAddr_rES)||(addr==SPIAddr_Lod)||(addr==SPIAddr_rEd)||(addr==SPIAddr_tdF)|| \
+      (addr==SPIAddr_dFP)||(addr==SPIAddr_dFd)||(addr==SPIAddr_dPo)||(addr==SPIAddr_FnC)|| \
+      (addr==SPIAddr_Fnd)||(addr==SPIAddr_FAP)||(addr==SPIAddr_ALC)||(addr==SPIAddr_AP2)|| \
+      (addr==SPIAddr_bLL)||(addr==SPIAddr_AC2)||(addr==SPIAddr_i1P)||(addr==SPIAddr_i1F)|| \
+      (addr==SPIAddr_odc)||(addr==SPIAddr_rrd)||(addr==SPIAddr_PbC)||(addr==SPIAddr_onF)
+      )
+    {
+      //把RST內uint8_t的值直接放入一格陣列
+      I2c_Buf_Reset[addr] = rsttable[i];
+      addr++;
+    }
+    else
+    {
+      //把RST內uint16_t的值拆成2個byte放入陣列
+      I2c_Buf_Reset[addr+1] = rsttable[i] >> 8;    //取高位元
+      I2c_Buf_Reset[addr] = rsttable[i] & 0xff;    //取低位元
+      addr+=2;
+    }
+    i++;
+    WDT_Feed();
+  }
+
+  //寫入原廠設定
+  I2C_EE_BufferWrite(I2c_Buf_Reset, 0x00, length);
+  printf("已恢復原廠參數值\r\n");
+
 }
 
 void IsMCUneedRST(bool reset)
@@ -131,29 +150,41 @@ void EEPROM_TEST(void)
 {
   System_Init();
 
-  tdata[0] = 0xAA;
-  tdata[1] = 0xBB;
-  tdata[2] = 0xCC;
-  tdata[3] = 0xDD;
-  tdata[4] = 0xEE;
-  tdata[5] = 0x00;
-  tdata[6] = 0x11;
-  tdata[7] = 0x22;
-  // I2C_EE_Writederase();
+  tdata[0] = 0x91;
+  tdata[1] = 0x82;
+  tdata[2] = 0x73;
+  tdata[3] = 0x65;
+  tdata[4] = 0x56;
+  tdata[5] = 0x37;
+  tdata[6] = 0x28;
+  tdata[7] = 0x19;
+  
+  // printf("reset table test\r\n");
+  UserTabletoSytem();
+  EEP_ResetALL();
+  I2C_EE_BufferRead(EE_Buf_Read, 0x00, end_addr);
+  offset_EEtoSYS();
+  
+  // printf("單寫單獨\r\n");
+  // I2C_EE_BufferWrite(tdata, 0x00, 1);
+  // I2C_EE_BufferRead(tI2c_Buf_Read, 0x00, 1);
 
   // printf("開始寫入\r\n");
-  I2C_EE_BufferWrite( tdata, start_addr, length);
-  R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-  // for(int i=0; i<4; i++)  //這邊是要對應tdata的值
-  // {
-  //   printf("寫入 addr=0x%x, data=0x%x\r\n", i, tdata[i]);
-  //   R_BSP_SoftwareDelay(10, BSP_DELAY_UNITS_MILLISECONDS);
-  //   WDT_Feed();
-  // }
+  // I2C_EE_BufferWrite( tdata, start_addr, length);
+  // R_BSP_SoftwareDelay(5, BSP_DELAY_UNITS_MILLISECONDS);
+  // // for(int i=0; i<4; i++)  //這邊是要對應tdata的值
+  // // {
+  // //   printf("寫入 addr=0x%x, data=0x%x\r\n", i, tdata[i]);
+  // //   R_BSP_SoftwareDelay(10, BSP_DELAY_UNITS_MILLISECONDS);
+  // //   WDT_Feed();
+  // // }
+
+  // EEP_ResetALL();
+  // R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
 
   // printf("將eeprom內全部讀出\r\n");
-  I2C_EE_BufferRead(tI2c_Buf_Read, 0x00, end_addr);
-  R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
+  // I2C_EE_BufferRead(EE_Buf_Read, 0x00, end_addr);
+  // R_BSP_SoftwareDelay(5, BSP_DELAY_UNITS_MILLISECONDS);
   // for(int i=start_addr; i<(start_addr+length); i++) //這邊是實際要讀出來的值跟長度
   // {
   //   printf("印出 addr=0x%x, data=0x%x\r\n", i, tI2c_Buf_Read[i]);
@@ -161,6 +192,7 @@ void EEPROM_TEST(void)
   //   WDT_Feed();
   // }
 
+  // offset_EEtoSYS();
   while (1)
   {
     WDT_Feed();

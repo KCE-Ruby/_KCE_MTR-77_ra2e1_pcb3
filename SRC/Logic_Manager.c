@@ -363,46 +363,46 @@ static void update_display_message(void)
   }
 }
 
-int8_t I2c_Buf_Reset[End] = {};
-uint16_t temp_value = 0;
-static void reset_eeprom(void)
-{
-  uint8_t start_addr = 0x00;
-  uint8_t length = End;
-  // int8_t I2c_Buf_Reset[End] = {};
-  uint8_t dataindex = Set;
-  // uint16_t temp_value = 0;
+// int8_t I2c_Buf_Reset[End] = {};
+// uint16_t temp_value = 0;
+// static void reset_eeprom(void)
+// {
+//   uint8_t start_addr = 0x00;
+//   uint8_t length = End;
+//   // int8_t I2c_Buf_Reset[End] = {};
+//   uint8_t dataindex = Set;
+//   // uint16_t temp_value = 0;
   
-  while(dataindex < End)
-  {
-    // if(bytetable[dataindex].DefaultValue < 0)
-    // {
-    //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*-10);
-    //   temp_value |= 0x8000;   //舉起eeprom內的負數旗標
-    // }
-    // else
-    // {
-    //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*10);
-    //   temp_value &= 0x7FFF;   //清除eeprom內的負數旗標
-    // }
+//   while(dataindex < End)
+//   {
+//     // if(bytetable[dataindex].DefaultValue < 0)
+//     // {
+//     //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*-10);
+//     //   temp_value |= 0x8000;   //舉起eeprom內的負數旗標
+//     // }
+//     // else
+//     // {
+//     //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*10);
+//     //   temp_value &= 0x7FFF;   //清除eeprom內的負數旗標
+//     // }
 
-    switch (dataindex)
-    {
-      case Set:
-        temp_value = 0x8032;
-        I2c_Buf_Reset[eep_Set_low] = temp_value & 0xFF;
-        I2c_Buf_Reset[eep_Set_high] = temp_value >> 8;
-        dataindex++;
-        break;
+//     switch (dataindex)
+//     {
+//       case Set:
+//         temp_value = 0x8032;
+//         I2c_Buf_Reset[eep_Set_low] = temp_value & 0xFF;
+//         I2c_Buf_Reset[eep_Set_high] = temp_value >> 8;
+//         dataindex++;
+//         break;
       
-      default:
-        dataindex = End;
-        break;
-    }
-  }
+//       default:
+//         dataindex = End;
+//         break;
+//     }
+//   }
 
-  I2C_EE_BufferWrite( I2c_Buf_Reset, start_addr , length);
-}
+//   I2C_EE_BufferWrite( I2c_Buf_Reset, start_addr , length);
+// }
 
 /* Static Function definitions ------------------------------------------------------*/
 static void boot_control(void)
@@ -484,66 +484,37 @@ void Task_Main(void)
   const uint8_t test    = 0x55;
   Device_Version = Release*65536 + dev*256 + test;
 
-  EEPROM_TEST();
+  EEPROM_TEST();   //單獨測試EEPROM寫入讀出功能
 
-  // System_Init();
-  // while (1)
-  // {
-  //   uint16_t start_addr = 0x00, end_addr = 0xFF;
-  //   uint8_t addr[10], data[10], length = 4;
-  //   uint8_t I2c_Buf_Read[0x3FF]={};
-  //   addr[0] = 0x01; data[0] = 0x33;
-  //   addr[1] = 0x05; data[1] = 0x55;
-  //   addr[2] = 0x08; data[2] = 0x77;
-  //   addr[3] = 0x07; data[3] = 0x11;
-  //   // I2C_EE_Writederase();
+  System_Init();
+  printf("初始化完成\r\n");
+  printf("軟體版本: 0x%02X\r\n", Device_Version);
+  tmr.Cnt_1ms = 0;
+  offset_EEtoSYS();
+  while(1)
+  {
+    /*
+    * 首頁顯示量測到的溫度, 有按鍵介入才換成顯示menu
+    *
+    * init - 系統初始化
+    * init - eeprom取值
+    * init - LED全亮全滅
+    * 
+    * 每200ms執行一次主程式邏輯
+    * 主程式 - 更新AD值
+    * 主程式 - Menu/Home切換顯示內容
+    * 主程式 - 更新Icon顯示
+    * 主程式 - 輸出邏輯判斷
+    * 
+    * 每100us執行一次系統控制
+    * 系統控制 - High/Low IO腳控制
+    * 系統控制 - 餵狗
+    * 系統控制 - 按鍵掃描(基於IO腳切換, 共6顆, loop為6 * 1ms = 6ms)
+    * 
+    */
+    boot_control();
 
-  //     printf("[Logic_Manager] 開始寫入\r\n");
-  //     I2C_EE_BufferWrite(data, start_addr, length);
-  //     R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-  //     for(int i=start_addr; i<length; i++)
-  //     {
-  //       printf("[Logic_Manager] 寫入[%d] addr=0x%x, data=0x%x\r\n",i, i, data[i]);
-  //     }
-
-  //     printf("[Logic_Manager] 將eeprom內全部讀出\r\n");
-  //     I2C_EE_BufferRead(I2c_Buf_Read, 0x00, end_addr);
-  //     R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-  //     for(int i=(start_addr-2); i<(start_addr+length); i++)
-  //     {
-  //       printf("[Logic_Manager] 印出[0x%x] addr=0x%x, data=0x%x\r\n",i, i, I2c_Buf_Read[i]);
-  //     }
-  // }
-
-  // System_Init();
-  // printf("初始化完成\r\n");
-  // printf("軟體版本: 0x%02X\r\n", Device_Version);
-  // tmr.Cnt_1ms = 0;
-  // offset_EEtoSYS();
-  // while(1)
-  // {
-  //   /*
-  //   * 首頁顯示量測到的溫度, 有按鍵介入才換成顯示menu
-  //   *
-  //   * init - 系統初始化
-  //   * init - eeprom取值
-  //   * init - LED全亮全滅
-  //   * 
-  //   * 每200ms執行一次主程式邏輯
-  //   * 主程式 - 更新AD值
-  //   * 主程式 - Menu/Home切換顯示內容
-  //   * 主程式 - 更新Icon顯示
-  //   * 主程式 - 輸出邏輯判斷
-  //   * 
-  //   * 每100us執行一次系統控制
-  //   * 系統控制 - High/Low IO腳控制
-  //   * 系統控制 - 餵狗
-  //   * 系統控制 - 按鍵掃描(基於IO腳切換, 共6顆, loop為6 * 1ms = 6ms)
-  //   * 
-  //   */
-  //   boot_control();
-
-  //   loop_100ms();
-  //   loop_100us();
-  // }
+    loop_100ms();
+    loop_100us();
+  }
 }

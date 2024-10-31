@@ -43,9 +43,6 @@ void System_Init(void)
 {
   WDT_init();   //16384 cycle watchdog
   TMR_init();   //1ms Timer
-  // if(debug)
-  //   Debug_UART1_Init();
-  // else
   Uart_init();
   ADC_init();
   I2C_EE_Init();
