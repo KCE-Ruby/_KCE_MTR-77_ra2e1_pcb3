@@ -594,3 +594,58 @@ void rESToDisplay(bool i)
     char_M3(dig_off);
   }
 }
+
+void LodToDisplay(uint8_t i)
+{
+  switch (i)
+  {
+    case disp_P1:
+      char_M1(dig_1);
+      char_M2(dig_P);
+      char_M3(dig_off);
+      break;
+    case disp_P2:
+      char_M1(dig_2);
+      char_M2(dig_P);
+      char_M3(dig_off);
+      break;
+    case disp_P3:
+      char_M1(dig_3);
+      char_M2(dig_P);
+      char_M3(dig_off);
+      break;
+    case disp_P4:
+      char_M1(dig_4);
+      char_M2(dig_P);
+      char_M3(dig_off);
+      break;
+    case disp_SEt:
+      char_M1(dig_t);
+      char_M2(dig_E);
+      char_M3(dig_S);
+      break;
+    case disp_dtr:
+      char_M1(dig_r);
+      char_M2(dig_t);
+      char_M3(dig_d);
+      break;
+    
+    default:
+      break;
+  }
+
+}
+
+void noPToDisplay(void)
+{
+  char_M1(dig_P);
+  char_M2(dig_o);
+  char_M3(dig_n);
+}
+
+
+
+
+
+
+

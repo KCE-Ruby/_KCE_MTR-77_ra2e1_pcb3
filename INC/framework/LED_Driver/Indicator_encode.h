@@ -141,9 +141,12 @@ void CharToDisplay(uint8_t _char);
 void HiToDisplay(void);
 void LoToDisplay(void);
 void rStToDisplay(void);
-void nyToDisplay(bool i);
 void CFToDisplay(bool i);
+void nyToDisplay(bool i);
 void P1ToDisplay(void);
 void P2ToDisplay(void);
+void rESToDisplay(bool i);
+void LodToDisplay(uint8_t i);
+void noPToDisplay(void);
 
 #endif /* INC_INDICATOR_ENCODE_H_ */

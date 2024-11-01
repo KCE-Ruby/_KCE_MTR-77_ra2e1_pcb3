@@ -243,7 +243,12 @@ void get_Pv(void)
     pv_3 = TempValue.sensor3 + Syscfg.value[O3];
     pv_4 = TempValue.sensor4 + Syscfg.value[O4];
   }
-  Syscfg.pv = (rtr_const * (pv_1-pv_2) /100) + pv_2;
+  if(Syscfg.value[Lod] == disp_dtr)
+    Syscfg.pv = (rtr_const * (pv_1-pv_2) /100) + pv_2;
+  else if (Syscfg.value[Lod] == disp_P1)
+    Syscfg.pv = pv_1;
+  else if (Syscfg.value[Lod] == disp_P2)
+    Syscfg.pv = pv_2;
 
   // printf("rtr_const = %d\r\n", rtr_const);
   // printf("pv_1 = %d\r\n", pv_1);
@@ -333,6 +338,7 @@ int16_t check_Limit_Value(int16_t data, int8_t index)
     case AC:
     case COn:
     case COF:
+    case Lod:
       //for level1&2參數內的數值使用, 直接顯示數值不*10倍
       max_data = (int16_t)(bytetable[index].Range_High);
       min_data = (int16_t)(bytetable[index].Range_Low);

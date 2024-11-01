@@ -87,5 +87,5 @@ void ICON_Clock_ON(void);
 void ICON_Clock_OFF(void);
 
 bool rStToDisplay_Flashing(void);
-void P1ToDisplay_Flashing(void);
+void PvToDisplay_Flashing(void);
 #endif /* INC_APP_LED_CTRL_H_ */

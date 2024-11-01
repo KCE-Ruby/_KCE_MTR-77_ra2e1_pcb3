@@ -34,13 +34,13 @@ enum DegreeUnit
   degree_F,
 };
 
-enum dashcover
+enum Paneldisplayselection
 {
   disp_P1,
   disp_P2,
   disp_P3,
   disp_P4,
-  disp_SET,
+  disp_SEt,
   disp_dtr,
 };
 

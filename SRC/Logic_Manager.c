@@ -70,12 +70,48 @@ static void loop_100us(void);
 /* static update_display_message API Functions -------------------------------*/
 static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
 {
-  //顯示目前量測到的溫度
-  if(TempValue.sensor1 == ERROR_AD)
-    P1ToDisplay_Flashing();
-  // else if (TempValue.sensor2 == ERROR_AD)
-  //   P2ToDisplay();
-  else
+  bool pv_err=1;
+  switch (Syscfg.value[Lod])
+  {
+    case disp_P1:
+      //顯示目前量測到的溫度P1
+      if(TempValue.sensor1 == ERROR_AD)
+        PvToDisplay_Flashing();
+      else
+        pv_err = 0;
+      break;
+    case disp_P2:
+      //顯示目前量測到的溫度P2
+      if(TempValue.sensor2 == ERROR_AD)
+        PvToDisplay_Flashing();
+      else
+        pv_err = 0;
+      break;
+    case disp_P3:
+      PvToDisplay_Flashing();
+      break;
+    case disp_P4:
+      PvToDisplay_Flashing();
+      break;
+    case disp_SEt:
+      if(Syscfg.value[rES] == DECIMAL_AT_0)
+        NumToDisplay(Syscfg.value[Set]/10);
+      else if(Syscfg.value[rES] == DECIMAL_AT_1)
+        NumToDisplay(Syscfg.value[Set]);
+      break;
+    case disp_dtr:
+      //顯示目前量測到的溫度P2
+      if((TempValue.sensor1==ERROR_AD) || (TempValue.sensor2==ERROR_AD))
+        PvToDisplay_Flashing();
+      else
+        pv_err = 0;
+      break;
+    
+    default:
+      break;
+  }
+
+  if(pv_err==0)
   {
     if(Syscfg.value[rES] == DECIMAL_AT_0)
       NumToDisplay(Syscfg.pv/10);
@@ -220,6 +256,10 @@ static void valuetodisplay(uint8_t table)
 
     case rES:
       rESToDisplay((bool)Preload.value[table]);
+      break;
+
+    case Lod:
+      LodToDisplay((uint8_t)Preload.value[table]);
       break;
   
     default:
@@ -481,7 +521,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x54;
+  const uint8_t test    = 0x55;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();

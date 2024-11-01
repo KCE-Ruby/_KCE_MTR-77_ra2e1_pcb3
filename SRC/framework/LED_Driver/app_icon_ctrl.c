@@ -11,10 +11,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
-#include "INC/framework/LED_Driver/app_icon_ctrl.h"
 #include "INC/framework/LED_Driver/Indicator_encode.h"
 #include "INC/framework/LED_Driver/app_menu_ctrl.h"
 #include "INC/framework/datapool.h"
+#include "INC/framework/ADC.h"
+#include "INC/framework/LED_Driver/app_icon_ctrl.h"
 
 /* Private defines ----------------------------------------------------------*/
 #define ICON_FLASH_FREQUENCY   1   //default: 1Hz
@@ -24,6 +25,7 @@ extern __IO r_tmr tmr;
 extern __IO ICON_SCAN4 Scan4temp;
 extern __IO ICON_SCAN5 Scan5temp;
 extern __IO s_Var Syscfg;
+extern __IO ADC_TemperatureValue TempValue;
 
 /* variables -----------------------------------------------------------------*/
 __IO bool ALL_LED_FLAG, CLOSE_LED_FLAG;
@@ -401,13 +403,27 @@ bool rStToDisplay_Flashing(void)
   return ret;
 }
 
-void P1ToDisplay_Flashing(void)
+void PvToDisplay_Flashing(void)
 {
   bool flag;  //頻率為1Hz or 2Hz
   flag = Flash_timer_setting();
   //探頭1失效時, 閃爍中, 預設為:1Hz 500ms亮, 500ms滅
   if(flag == true)
-    P1ToDisplay();
+  {
+    if(Syscfg.value[Lod]==disp_P1)
+      P1ToDisplay();
+    else if(Syscfg.value[Lod]==disp_P2)
+      P2ToDisplay();
+    else if(Syscfg.value[Lod]==disp_dtr)
+    {
+      if(TempValue.sensor1 == ERROR_AD)
+        P1ToDisplay();
+      if(TempValue.sensor2 == ERROR_AD)
+        P2ToDisplay();
+    }
+    else
+      noPToDisplay();
+  }
   else
     NumToDisplay(CLEARALL);
 }
