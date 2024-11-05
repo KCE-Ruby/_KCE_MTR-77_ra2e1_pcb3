@@ -419,12 +419,20 @@ static void char_M2(uint8_t _char)
   }
   else if(Syscfg.mode == level2Mode)
   {
-    //TODO:要在第一層也有的才會有小數點
-    pr2_index = bytetable_pr2[Syscfg.level2_index];
-    if(bytetable[pr2_index].Mode == Pr1)
-      Scan2temp.scan2.M2_dp = true;
-    else
-      Scan2temp.scan2.M2_dp = false;
+    //在value的都不要顯示小數點
+     if(sFlag.Level2_value == Vvalue)
+     {
+        Scan2temp.scan2.M2_dp = false;
+     }
+     else
+     {
+      //TODO:要在第一層也有的才會有小數點
+      pr2_index = bytetable_pr2[Syscfg.level2_index];
+      if(bytetable[pr2_index].Mode == Pr1)
+        Scan2temp.scan2.M2_dp = true;
+      else
+        Scan2temp.scan2.M2_dp = false;
+     }
   }
 }
 
@@ -466,8 +474,16 @@ static void char_M3(uint8_t _char)
   }
   else if(Syscfg.mode == level2Mode)
   {
-    //要在第一層有的才會有點
-    Scan3temp.scan3.M3_dp = (Syscfg.decimalIndex == DECIMAL_AT_2)? true:false;
+    //在value的都不要顯示小數點
+     if(sFlag.Level2_value == Vvalue)
+     {
+        Scan3temp.scan3.M3_dp = false;
+     }
+     else
+     {
+        //要在第一層有的才會有點
+        Scan3temp.scan3.M3_dp = (Syscfg.decimalIndex == DECIMAL_AT_2)? true:false;
+     }
   }
 }
 
@@ -633,7 +649,6 @@ void LodToDisplay(uint8_t i)
     default:
       break;
   }
-
 }
 
 void noPToDisplay(void)
@@ -643,6 +658,40 @@ void noPToDisplay(void)
   char_M3(dig_n);
 }
 
+void dFPToDisplay(uint8_t i)
+{
+  switch (i)
+  {
+    case defrost_np:
+      char_M1(dig_P);
+      char_M2(dig_n);
+      char_M3(dig_off);
+      break;
+    case defrost_p1:
+      char_M1(dig_1);
+      char_M2(dig_P);
+      char_M3(dig_off);
+      break;
+    case defrost_p2:
+      char_M1(dig_2);
+      char_M2(dig_P);
+      char_M3(dig_off);
+      break;
+    case defrost_p3:
+      char_M1(dig_3);
+      char_M2(dig_P);
+      char_M3(dig_off);
+      break;
+    case defrost_p4:
+      char_M1(dig_4);
+      char_M2(dig_P);
+      char_M3(dig_off);
+      break;
+    
+    default:
+      break;
+  }
+}
 
 
 
