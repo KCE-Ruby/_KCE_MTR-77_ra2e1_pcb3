@@ -219,6 +219,7 @@ void get_Pv(void)
 {
   //Syscfg.value參數基準點為小數後一位, 所以數值已經放大10倍, 取整數的話要除10回來
   const uint16_t rtr_const = Syscfg.value[rtr]/10;
+  const uint16_t dtr_const = Syscfg.value[dtr]/10;
   const uint8_t source = 8;
   int16_t pv_1, pv_2, pv_3, pv_4;
   int16_t t1_f, t2_f, t3_f, t4_f;
@@ -244,11 +245,13 @@ void get_Pv(void)
     pv_4 = TempValue.sensor4 + Syscfg.value[O4];
   }
   if(Syscfg.value[Lod] == disp_dtr)
-    Syscfg.pv = (rtr_const * (pv_1-pv_2) /100) + pv_2;
+    Syscfg.pv_disp = (dtr_const * (pv_1-pv_2) /100) + pv_2;
   else if (Syscfg.value[Lod] == disp_P1)
-    Syscfg.pv = pv_1;
+    Syscfg.pv_disp = pv_1;
   else if (Syscfg.value[Lod] == disp_P2)
-    Syscfg.pv = pv_2;
+    Syscfg.pv_disp = pv_2;
+
+  Syscfg.pv = (rtr_const * (pv_1-pv_2) /100) + pv_2;
 
   // printf("rtr_const = %d\r\n", rtr_const);
   // printf("pv_1 = %d\r\n", pv_1);

@@ -114,9 +114,9 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
   if(pv_err==0)
   {
     if(Syscfg.value[rES] == DECIMAL_AT_0)
-      NumToDisplay(Syscfg.pv/10);
+      NumToDisplay(Syscfg.pv_disp/10);
     else if(Syscfg.value[rES] == DECIMAL_AT_1)
-      NumToDisplay(Syscfg.pv);
+      NumToDisplay(Syscfg.pv_disp);
   }
 
   //更新顯示icon
@@ -486,6 +486,7 @@ static void loop_100ms(void)
   if(tmr.Flag_100ms)
   {
     ADC_Main();
+    //TODO: 新增一個loop by dLY的, 以控制取得Pv值的刷新頻率
     get_Pv();
     // Key_main();   //按鍵相關邏輯
     Out_main();
