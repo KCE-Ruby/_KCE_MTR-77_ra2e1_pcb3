@@ -194,6 +194,8 @@ void offset_EEtoSYS(void)
       case UserAddr_AC:
       case UserAddr_COn:
       case UserAddr_COF:
+      case UserAddr_Lod:
+      case UserAddr_dFP:
         Preload.value[i] = EE_Buf_u16[i]/10;
         Syscfg.value[i] = Preload.value[i];
         break;
