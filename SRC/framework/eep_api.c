@@ -42,7 +42,8 @@ int16_t u16_eep_Read[End], u16_eep_write[End];
 //EEPROM_TEST用
 uint16_t start_addr = 0x00, end_addr = 0xFF;
 uint8_t length = 8, tdata[10];
-uint8_t EE_Buf_Read[SPIAddr_End];
+extern uint8_t EE_Buf_Read[SPIAddr_End];
+extern uint8_t I2c_Buf_Reset[SPIAddr_End];
 
 /* Static Function definitions ------------------------------------------------------*/
 
@@ -97,7 +98,7 @@ void EEP_ResetALL(void)
   */
 
   uint8_t i=xxx, addr=SPIAddr_Start;
-  uint8_t I2c_Buf_Reset[SPIAddr_End];
+  // uint8_t I2c_Buf_Reset[SPIAddr_End];
   uint8_t length = SPIAddr_onF;
 
   while(i < UserAddr_onF)
@@ -149,16 +150,21 @@ void EEPROM_TEST(void)
 {
   System_Init();
 
-  tdata[0] = 0x91;
-  tdata[1] = 0x82;
-  tdata[2] = 0x73;
-  tdata[3] = 0x65;
-  tdata[4] = 0x56;
-  tdata[5] = 0x37;
-  tdata[6] = 0x28;
-  tdata[7] = 0x19;
+  tdata[0] = 0x18;
+  tdata[1] = 0x27;
+  tdata[2] = 0x36;
+  tdata[3] = 0x45;
+  tdata[4] = 0x54;
+  tdata[5] = 0x63;
+  tdata[6] = 0x72;
+  tdata[7] = 0x81;
   
   // printf("reset table test\r\n");
+  // I2C_EE_BufferWrite(tdata, 0x00, 8);
+  // printf("已恢復原廠參數值\r\n");
+  // I2C_EE_BufferRead(EE_Buf_Read, 0x00, 8);
+
+  printf("reset table test\r\n");
   UserTabletoSytem();
   EEP_ResetALL();
   I2C_EE_BufferRead(EE_Buf_Read, 0x00, end_addr);

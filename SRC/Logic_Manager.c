@@ -16,6 +16,7 @@
 #include "INC/framework/Key.h"
 #include "INC/framework/datapool.h"
 #include "eeprom/i2c_ee.h"
+#include "INC/framework/eep_api.h"
 #include "INC/Logic_Manager.h"
 
 /* Private defines ----------------------------------------------------------*/
@@ -44,6 +45,8 @@ extern __IO uint32_t catch_ms[dly_end_ms];
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
 __IO bool clear_Max_flag=0, clear_Min_flag=0;
 __IO bool bootled_En=true;
+uint8_t EE_Buf_Read[SPIAddr_End];
+uint8_t I2c_Buf_Reset[SPIAddr_End];
 
 /* static update_display_message API Functions -------------------------------*/
 static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave);
@@ -363,47 +366,6 @@ static void update_display_message(void)
   }
 }
 
-// int8_t I2c_Buf_Reset[End] = {};
-// uint16_t temp_value = 0;
-// static void reset_eeprom(void)
-// {
-//   uint8_t start_addr = 0x00;
-//   uint8_t length = End;
-//   // int8_t I2c_Buf_Reset[End] = {};
-//   uint8_t dataindex = Set;
-//   // uint16_t temp_value = 0;
-  
-//   while(dataindex < End)
-//   {
-//     // if(bytetable[dataindex].DefaultValue < 0)
-//     // {
-//     //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*-10);
-//     //   temp_value |= 0x8000;   //舉起eeprom內的負數旗標
-//     // }
-//     // else
-//     // {
-//     //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*10);
-//     //   temp_value &= 0x7FFF;   //清除eeprom內的負數旗標
-//     // }
-
-//     switch (dataindex)
-//     {
-//       case Set:
-//         temp_value = 0x8032;
-//         I2c_Buf_Reset[eep_Set_low] = temp_value & 0xFF;
-//         I2c_Buf_Reset[eep_Set_high] = temp_value >> 8;
-//         dataindex++;
-//         break;
-      
-//       default:
-//         dataindex = End;
-//         break;
-//     }
-//   }
-
-//   I2C_EE_BufferWrite( I2c_Buf_Reset, start_addr , length);
-// }
-
 /* Static Function definitions ------------------------------------------------------*/
 static void boot_control(void)
 {
@@ -487,11 +449,15 @@ void Task_Main(void)
   EEPROM_TEST();   //單獨測試EEPROM寫入讀出功能
 
   System_Init();
+  // UserTabletoSytem();
+  // EEP_ResetALL();
+  // I2C_EE_BufferRead(EE_Buf_Read, 0x00, 0xFF);
+  // offset_EEtoSYS();
+
   printf("初始化完成\r\n");
   printf("軟體版本: 0x%02X\r\n", Device_Version);
   tmr.Cnt_1ms = 0;
 
-  offset_EEtoSYS();
   while(1)
   {
     /*

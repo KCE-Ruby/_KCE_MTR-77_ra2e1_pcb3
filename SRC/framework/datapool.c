@@ -151,9 +151,9 @@ void offset_EEtoSYS(void)
       //把eeprom內uint8_t的值直接放入一格陣列, 並做offset
       EE_Buf_u16[i] = EE_Buf_Read[addr];
       EE_Buf_u16[i] += systable[i].Range_Low;
-      printf("EE_Buf_u16 = %d\r\n", EE_Buf_u16[i]);
-      printf("EE_Buf_Read = %d\r\n", EE_Buf_Read[addr]);
-      printf("Range_Low = %d\r\n", systable[i].Range_Low);
+      // printf("EE_Buf_u16 = %d\r\n", EE_Buf_u16[i]);
+      // printf("EE_Buf_Read = %d\r\n", EE_Buf_Read[addr]);
+      // printf("Range_Low = %d\r\n", systable[i].Range_Low);
       addr++;
     }
     else
@@ -161,9 +161,9 @@ void offset_EEtoSYS(void)
       EE_Buf_u16[i] = EE_Buf_Read[addr+1] << 8; //取高位元
       EE_Buf_u16[i] |= EE_Buf_Read[addr];       //取低位元
       EE_Buf_u16[i] += (int16_t)systable[i].Range_Low;     //做offset
-      printf("EE_Buf_u16 = %d\r\n", EE_Buf_u16[i]);
-      printf("EE_Buf_Read = %d\r\n", EE_Buf_Read[addr]);
-      printf("Range_Low = %d\r\n", systable[i].Range_Low);
+      // printf("EE_Buf_u16 = %d\r\n", EE_Buf_u16[i]);
+      // printf("EE_Buf_Read = %d\r\n", EE_Buf_Read[addr]);
+      // printf("Range_Low = %d\r\n", systable[i].Range_Low);
       addr+=2;
     }
     i++;
