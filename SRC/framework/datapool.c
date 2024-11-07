@@ -169,6 +169,7 @@ void offset_EEtoSYS(void)
     i++;
     WDT_Feed();
   }
+  printf("讀出EE_Buf_u16結束, i=%d\r\n", i);
 
   //整個系統運算的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
   i=UserAddr_Set;
@@ -192,6 +193,7 @@ void offset_EEtoSYS(void)
     i++;
     WDT_Feed();
   }
+  printf("讀出Syscfg結束, i=%d\r\n", i);
 
   Syscfg.history_max = -9990;    //給最大值, 最小值做溫度基準, EE_Buf_u16[UserAddr_history_max]
   Syscfg.history_min = 9990;    //給最小值, 最大值做溫度基準, EE_Buf_u16[UserAddr_history_min]

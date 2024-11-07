@@ -168,9 +168,12 @@ void I2C_EE_BufferRead(unsigned char* ptr_read,unsigned char address,unsigned ch
 
     unsigned char send_buffer[2] = {};
     unsigned char read_buffer[1] = {};
+    fsp_err_t  err;
 
     send_buffer[0] = address;
-    R_IIC_MASTER_Write(&EEPROM_ctrl, &send_buffer[0], 1, true);
+    err = R_IIC_MASTER_Write(&EEPROM_ctrl, &send_buffer[0], 1, true);
+    // R_BSP_SoftwareDelay(1U, BSP_DELAY_UNITS_MILLISECONDS);
+
     while ((I2C_MASTER_EVENT_TX_COMPLETE != g_i2c_callback_event) && timeout_ms)
     {
         R_BSP_SoftwareDelay(400U, BSP_DELAY_UNITS_MICROSECONDS);
@@ -179,8 +182,11 @@ void I2C_EE_BufferRead(unsigned char* ptr_read,unsigned char address,unsigned ch
     timeout_ms = 500;
 
     R_BSP_SoftwareDelay(250U, BSP_DELAY_UNITS_MICROSECONDS);
+    // R_BSP_SoftwareDelay(5U, BSP_DELAY_UNITS_MILLISECONDS);
 
-    R_IIC_MASTER_Read(&EEPROM_ctrl, ptr_read, byte, false);
+    err = R_IIC_MASTER_Read(&EEPROM_ctrl, ptr_read, byte, false);
+    // R_BSP_SoftwareDelay(5U, BSP_DELAY_UNITS_MILLISECONDS);
+    printf("Read_err = %d\r\n", err);
 
 }
 

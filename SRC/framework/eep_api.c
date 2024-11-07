@@ -158,50 +158,20 @@ void EEPROM_TEST(void)
   tdata[5] = 0x63;
   tdata[6] = 0x72;
   tdata[7] = 0x81;
-  
-  // printf("reset table test\r\n");
-  // I2C_EE_BufferWrite(tdata, 0x00, 8);
-  // printf("已恢復原廠參數值\r\n");
-  // I2C_EE_BufferRead(EE_Buf_Read, 0x00, 8);
 
   printf("reset table test\r\n");
   UserTabletoSytem();
-  EEP_ResetALL();
-  I2C_EE_BufferRead(EE_Buf_Read, 0x00, end_addr);
-  offset_EEtoSYS();
-  
-  // printf("單寫單獨\r\n");
-  // I2C_EE_BufferWrite(tdata, 0x00, 1);
-  // I2C_EE_BufferRead(tI2c_Buf_Read, 0x00, 1);
-
-  // printf("開始寫入\r\n");
-  // I2C_EE_BufferWrite( tdata, start_addr, length);
-  // R_BSP_SoftwareDelay(5, BSP_DELAY_UNITS_MILLISECONDS);
-  // // for(int i=0; i<4; i++)  //這邊是要對應tdata的值
-  // // {
-  // //   printf("寫入 addr=0x%x, data=0x%x\r\n", i, tdata[i]);
-  // //   R_BSP_SoftwareDelay(10, BSP_DELAY_UNITS_MILLISECONDS);
-  // //   WDT_Feed();
-  // // }
-
   // EEP_ResetALL();
-  // R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
+  I2C_EE_BufferRead(EE_Buf_Read, 0x00, 10);
+  I2C_EE_BufferRead(&EE_Buf_Read[10], 0x0B, 10);
+  I2C_EE_BufferRead(&EE_Buf_Read[20], 0x14, 10);
+  offset_EEtoSYS();
 
-  // printf("將eeprom內全部讀出\r\n");
-  // I2C_EE_BufferRead(EE_Buf_Read, 0x00, end_addr);
-  // R_BSP_SoftwareDelay(5, BSP_DELAY_UNITS_MILLISECONDS);
-  // for(int i=start_addr; i<(start_addr+length); i++) //這邊是實際要讀出來的值跟長度
-  // {
-  //   printf("印出 addr=0x%x, data=0x%x\r\n", i, tI2c_Buf_Read[i]);
-  //   R_BSP_SoftwareDelay(10, BSP_DELAY_UNITS_MILLISECONDS);
-  //   WDT_Feed();
-  // }
-
-  // offset_EEtoSYS();
   while (1)
   {
+    printf("while(1)\r\n");
+    R_BSP_SoftwareDelay(1000, BSP_DELAY_UNITS_MILLISECONDS);
     WDT_Feed();
-    // R_BSP_SoftwareDelay(500, BSP_DELAY_UNITS_MILLISECONDS);
   }
 }
 
