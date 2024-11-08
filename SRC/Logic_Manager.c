@@ -45,7 +45,7 @@ extern __IO uint32_t catch_ms[dly_end_ms];
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
 __IO bool clear_Max_flag=0, clear_Min_flag=0;
 __IO bool bootled_En=true;
-uint8_t EE_Buf_Read[SPIAddr_End];
+uint8_t EE_Buf_Read[255];
 uint8_t I2c_Buf_Reset[SPIAddr_End];
 
 /* static update_display_message API Functions -------------------------------*/

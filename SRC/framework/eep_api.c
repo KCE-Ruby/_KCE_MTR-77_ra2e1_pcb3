@@ -161,8 +161,10 @@ void EEPROM_TEST(void)
 
   printf("reset table test\r\n");
   UserTabletoSytem();
-  // EEP_ResetALL();
-  eep_read_all();
+  EEP_ResetALL();
+  I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
+  // R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
+  // eep_read_all();
   offset_EEtoSYS();
 
   while (1)
@@ -180,14 +182,15 @@ static void eep_read_all(void)
   uint8_t start_addr = 0x00;
 
   I2C_EE_BufferRead(EE_Buf_Read, 0x00, 6);
-  R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MICROSECONDS);
+  R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
   start_addr = 6;
   while(page)
   {
     I2C_EE_BufferRead(&EE_Buf_Read[start_addr], start_addr, length);
     page--;
     start_addr += length;
-    R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MICROSECONDS);
+    R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
     printf("start_addr = %d\r\n", start_addr);
+    WDT_Feed();
   }
 }
