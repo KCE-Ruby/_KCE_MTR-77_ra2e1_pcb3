@@ -46,7 +46,7 @@ extern uint8_t EE_Buf_Read[SPIAddr_End];
 extern uint8_t I2c_Buf_Reset[SPIAddr_End];
 
 /* Static Function definitions ------------------------------------------------------*/
-
+static void eep_read_all(void);
 
 /* Function definitions ------------------------------------------------------*/
 void EEP_Read_PWRON(void)
@@ -162,9 +162,7 @@ void EEPROM_TEST(void)
   printf("reset table test\r\n");
   UserTabletoSytem();
   // EEP_ResetALL();
-  I2C_EE_BufferRead(EE_Buf_Read, 0x00, 10);
-  I2C_EE_BufferRead(&EE_Buf_Read[10], 0x0B, 10);
-  I2C_EE_BufferRead(&EE_Buf_Read[20], 0x14, 10);
+  eep_read_all();
   offset_EEtoSYS();
 
   while (1)
@@ -175,4 +173,21 @@ void EEPROM_TEST(void)
   }
 }
 
+static void eep_read_all(void)
+{
+  uint8_t length = 10;
+  uint8_t page = (255/length);
+  uint8_t start_addr = 0x00;
 
+  I2C_EE_BufferRead(EE_Buf_Read, 0x00, 6);
+  R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MICROSECONDS);
+  start_addr = 6;
+  while(page)
+  {
+    I2C_EE_BufferRead(&EE_Buf_Read[start_addr], start_addr, length);
+    page--;
+    start_addr += length;
+    R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MICROSECONDS);
+    printf("start_addr = %d\r\n", start_addr);
+  }
+}
