@@ -125,10 +125,10 @@ void EEP_ResetALL(void)
     i++;
     WDT_Feed();
   }
+  printf("恢復原廠參數值\r\n");
 
   //寫入原廠設定
   I2C_EE_BufferWrite(I2c_Buf_Reset, 0x00, length);
-  printf("已恢復原廠參數值\r\n");
 
 }
 
@@ -161,36 +161,38 @@ void EEPROM_TEST(void)
 
   printf("reset table test\r\n");
   UserTabletoSytem();
+  printf("UserTabletoSytem\r\n");
   EEP_ResetALL();
+  printf("EEP_ResetALL\r\n");
   I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
-  // R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-  // eep_read_all();
+  printf("I2C_EE_BufferRead\r\n");
   offset_EEtoSYS();
+  WDT_Feed();
 
   while (1)
   {
+    WDT_Feed();
     printf("while(1)\r\n");
     R_BSP_SoftwareDelay(1000, BSP_DELAY_UNITS_MILLISECONDS);
-    WDT_Feed();
   }
 }
 
-static void eep_read_all(void)
-{
-  uint8_t length = 10;
-  uint8_t page = (255/length);
-  uint8_t start_addr = 0x00;
+// static void eep_read_all(void)
+// {
+//   uint8_t length = 10;
+//   uint8_t page = (255/length);
+//   uint8_t start_addr = 0x00;
 
-  I2C_EE_BufferRead(EE_Buf_Read, 0x00, 6);
-  R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-  start_addr = 6;
-  while(page)
-  {
-    I2C_EE_BufferRead(&EE_Buf_Read[start_addr], start_addr, length);
-    page--;
-    start_addr += length;
-    R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-    printf("start_addr = %d\r\n", start_addr);
-    WDT_Feed();
-  }
-}
+//   I2C_EE_BufferRead(EE_Buf_Read, 0x00, 6);
+//   R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
+//   start_addr = 6;
+//   while(page)
+//   {
+//     I2C_EE_BufferRead(&EE_Buf_Read[start_addr], start_addr, length);
+//     page--;
+//     start_addr += length;
+//     R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
+//     printf("start_addr = %d\r\n", start_addr);
+//     WDT_Feed();
+//   }
+// }
