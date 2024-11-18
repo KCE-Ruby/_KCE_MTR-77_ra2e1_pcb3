@@ -21,7 +21,6 @@
 
 #define DEBUG_PRINT                 (true)
 /* Private defines ----------------------------------------------------------*/
-#define GAIN_PARAMETER              (10)     //bytetable參數預設值的增益倍數
 #define LS_OFFSET                   (-500)   //參數的offset值, -50.0
 #define US_OFFSET                   (-500)   //參數的offset值, -50.0
 #define Ot_OFFSET                   (-120)   //參數的offset值, -12.0
@@ -29,14 +28,19 @@
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var Syscfg, Preload;
 extern ADC_TemperatureValue TempValue;
+extern uint8_t EE_Buf_Read[SPIAddr_End];
 
 /* variables -----------------------------------------------------------------*/
 static int8_t I2c_Buf_Write[eep_end] = {};    //TODO:這是暫時的, 應該要在eepapi才做設定
 __IO uint8_t bytetable_pr1[End];
 __IO uint8_t bytetable_pr2[End];
+
+int16_t EE_Buf_u16[UserAddr_End];
+__IO uint16_t rsttable[End];
+static __IO SYSTEM_TABLE systable[End];
 __IO ByteSettingTable bytetable[End] =
 {
-  {xxx,             0,             0,            0,     NaN}, //對齊參數用的而已
+  {xxx,             0,             1,           1,     NaN}, //對齊參數用的而已
   {Set,           -50,           110,        15.0,     NaN},
   //參數字元,  下限值,        上限值,        預設值,   權限層
   { Hy,           0.1,          25.5,          2.0,     Pr1},
@@ -113,58 +117,30 @@ __IO ByteSettingTable bytetable[End] =
   {Ptb,             0,             0,            0,     Pr2},
 };
 
-
-/* Static Function protocol -----------------------------------------------*/
-static int16_t offset_EEtoSYS_u8(uint8_t Table, uint8_t SPIaddr);
-static int16_t offset_EEtoSYS_u16(uint8_t Table, uint8_t SPIaddr);
+/* variables tranfer */
+void UserTabletoSytem(void)
+{
+  uint8_t i=0;
+  while(i<End)
+  {
+    systable[i].Range_Low = bytetable[i].Range_Low*10;
+    systable[i].Range_High = bytetable[i].Range_High*10;
+    systable[i].DefaultValue = bytetable[i].DefaultValue*10;
+    rsttable[i] = (uint16_t)(systable[i].DefaultValue - systable[i].Range_Low);
+    i++;
+  }
+}
 
 /* Parameters from EEPROM to SYSTEM API ------------------------------------------------------*/
-static int16_t offset_EEtoSYS_u8(uint8_t Table, uint8_t SPIaddr)
-{
-  uint8_t EE_Buf_Read[End] = {0};
-  int16_t ret=0, offset=0;
-
-  if(Table <= UserAddr_onF) // TODO:EEPROM的API會取代這整個if判斷式, offset可能要留下來
-  {  
-    offset = (bytetable[Table].Range_Low*GAIN_PARAMETER);
-    EE_Buf_Read[SPIaddr] = (uint8_t)(bytetable[Table].DefaultValue*GAIN_PARAMETER-offset); //TODO:EEPROM的API會取代這行
-  }
-  ret = (int16_t)(EE_Buf_Read[SPIaddr] + offset);
-
-  return ret;
-}
-
-static int16_t offset_EEtoSYS_u16(uint8_t Table, uint8_t SPIaddr)
-{
-  uint16_t base_u16=0;
-  uint8_t EE_Buf_Read[End] = {0};
-  int16_t ret=0, offset=0;
-
-  if(Table <= UserAddr_onF) // TODO:EEPROM的API會取代這整個if判斷式, offset可能要留下來
-  {
-    offset = (bytetable[Table].Range_Low*GAIN_PARAMETER);
-    base_u16 = (uint16_t)(bytetable[Table].DefaultValue*GAIN_PARAMETER-offset); //TODO:EEPROM的API會取代這行
-    EE_Buf_Read[SPIaddr+1] = base_u16 >> 8;      //取高位元, TODO:EEPROM的API會取代這行
-    EE_Buf_Read[SPIaddr] = base_u16 & 0xff;    //取低位元, TODO:EEPROM的API會取代這行
-  }
-  base_u16 = (int16_t)(EE_Buf_Read[SPIaddr+1]<<8) + EE_Buf_Read[SPIaddr];  //組合成變數
-  ret = (int16_t)(base_u16 + offset);
-
-  return ret;
-}
-
 void offset_EEtoSYS(void)
 {
-  //TODO: eeprom做好後要看一下怎麼整合這個API
-  //可能跟read_all_eeprom_data同功能
-
-  uint8_t i=Set, addr=SPIAddr_Set_L;
-  static int16_t EE_Buf_u16[UserAddr_End] = {0}; //這個陣列不會被改變, 拿來存eeprom讀出來的值而已
+  uint8_t i=xxx, addr=SPIAddr_Start;
+  // static int16_t EE_Buf_u16[UserAddr_End] = {0}; //這個陣列不會被改變, 拿來存eeprom讀出來的值而已
 
   //將所有eeprom的值讀出來到int16_t的陣列內, 只有非數值型的參數用u8取值 
   while(i < UserAddr_End)
   {
-    if((addr==SPIAddr_P2P)||(addr==SPIAddr_P3P)||(addr==SPIAddr_P4P)||(addr==SPIAddr_CF)|| \
+    if((addr==SPIAddr_Start)||(addr==SPIAddr_P2P)||(addr==SPIAddr_P3P)||(addr==SPIAddr_P4P)||(addr==SPIAddr_CF)|| \
       (addr==SPIAddr_rES)||(addr==SPIAddr_Lod)||(addr==SPIAddr_rEd)||(addr==SPIAddr_tdF)|| \
       (addr==SPIAddr_dFP)||(addr==SPIAddr_dFd)||(addr==SPIAddr_dPo)||(addr==SPIAddr_FnC)|| \
       (addr==SPIAddr_Fnd)||(addr==SPIAddr_FAP)||(addr==SPIAddr_ALC)||(addr==SPIAddr_AP2)|| \
@@ -172,17 +148,28 @@ void offset_EEtoSYS(void)
       (addr==SPIAddr_odc)||(addr==SPIAddr_rrd)||(addr==SPIAddr_PbC)||(addr==SPIAddr_onF)
       )
     {
-      EE_Buf_u16[i] = offset_EEtoSYS_u8(i, addr);
+      //把eeprom內uint8_t的值直接放入一格陣列, 並做offset
+      EE_Buf_u16[i] = EE_Buf_Read[addr];
+      EE_Buf_u16[i] += systable[i].Range_Low;
+      // printf("EE_Buf_u16 = %d\r\n", EE_Buf_u16[i]);
+      // printf("EE_Buf_Read = %d\r\n", EE_Buf_Read[addr]);
+      // printf("Range_Low = %d\r\n", systable[i].Range_Low);
       addr++;
     }
     else
     {
-      EE_Buf_u16[i] = offset_EEtoSYS_u16(i, addr);
+      EE_Buf_u16[i] = EE_Buf_Read[addr+1] << 8; //取高位元
+      EE_Buf_u16[i] |= EE_Buf_Read[addr];       //取低位元
+      EE_Buf_u16[i] += (int16_t)systable[i].Range_Low;     //做offset
+      // printf("EE_Buf_u16 = %d\r\n", EE_Buf_u16[i]);
+      // printf("EE_Buf_Read = %d\r\n", EE_Buf_Read[addr]);
+      // printf("Range_Low = %d\r\n", systable[i].Range_Low);
       addr+=2;
     }
     i++;
     WDT_Feed();
   }
+  printf("讀出EE_Buf_u16結束, i=%d\r\n", i);
 
   //整個系統運算的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
   i=UserAddr_Set;
@@ -206,14 +193,16 @@ void offset_EEtoSYS(void)
         break;
     }
     i++;
+    WDT_Feed();
   }
+  printf("讀出Syscfg結束, i=%d\r\n", i);
 
   Syscfg.history_max = -9990;    //給最大值, 最小值做溫度基準, EE_Buf_u16[UserAddr_history_max]
   Syscfg.history_min = 9990;    //給最小值, 最大值做溫度基準, EE_Buf_u16[UserAddr_history_min]
   
   Syscfg.value[rSE] = Syscfg.value[Set];
   Syscfg.value[rEL] = 10;           //v1.0
-  // printf("測試結束25\r\n");
+  printf("將讀出值做offset結束\r\n");
 }
 
 /* Function definitions ------------------------------------------------------*/
@@ -263,28 +252,26 @@ void get_Pv(void)
 
 void get_HistoryMax(void)
 {
-  uint8_t addr = eep_max_low;
-  uint8_t length = eep_size_max;
+  uint8_t length = 2;
 
   if(Syscfg.pv > Syscfg.history_max)
   {
     Syscfg.history_max = Syscfg.pv;
-    I2c_Buf_Write[addr] = Syscfg.history_max & 0xFF;
-    I2c_Buf_Write[addr+1] = Syscfg.history_max >> 8;
+    I2c_Buf_Write[SPIAddr_history_max_L] = Syscfg.history_max & 0xFF;
+    I2c_Buf_Write[SPIAddr_history_max_H] = Syscfg.history_max >> 8;
     // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
   }
 }
 
 void get_HistoryMin(void)
 {
-  uint8_t addr = eep_min_low;
-  uint8_t length = eep_size_min;
+  uint8_t length = 2;
 
   if(Syscfg.pv < Syscfg.history_min)
   {
     Syscfg.history_min = Syscfg.pv;
-    I2c_Buf_Write[addr] = Syscfg.history_min & 0xFF;
-    I2c_Buf_Write[addr+1] = Syscfg.history_min >> 8;
+    I2c_Buf_Write[SPIAddr_history_min_L] = Syscfg.history_min & 0xFF;
+    I2c_Buf_Write[SPIAddr_history_min_H] = Syscfg.history_min >> 8;
     // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
   }
 }

@@ -137,7 +137,16 @@ typedef struct
   uint8_t Mode;
 } ByteSettingTable;
 
+typedef struct
+{
+  int16_t Range_Low;
+  int16_t Range_High;
+  int16_t DefaultValue;
+} SYSTEM_TABLE;
+
 /* task function protocol -----------------------------------------------*/
+
+void UserTabletoSytem(void);
 void offset_EEtoSYS(void);
 void get_Pv(void);
 void get_HistoryMax(void);

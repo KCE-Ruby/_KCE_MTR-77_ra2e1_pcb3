@@ -16,11 +16,12 @@
 #include "INC/framework/Key.h"
 #include "INC/framework/datapool.h"
 #include "eeprom/i2c_ee.h"
+#include "INC/framework/eep_api.h"
 #include "INC/Logic_Manager.h"
 
 /* Private defines ----------------------------------------------------------*/
 #define BOOTonTIME                         (4500)      //4.5 = 1ms*4500 = 4500次
-#define BOOToffTIME                        (5000)      //+0.5s = 1ms*500 = 500次
+// #define BOOToffTIME                        (5000)      //+0.5s = 1ms*500 = 500次
 #define KEYLEAVE_SETTIME                      (3)      //按鍵離開設定層的閃爍時間, 單位:秒
 #define AUTOLEAVE_CHECKSETTIME               (12)      //檢查設定值多久後自動跳出, 單位:秒
 #define AUTOLEAVE_CHANGESETTIME              (15)      //修改設定值多久後自動跳出, 單位:秒
@@ -44,6 +45,8 @@ extern __IO uint32_t catch_ms[dly_end_ms];
 __IO uint8_t I2c_Buf_Read[eep_end] = {};
 __IO bool clear_Max_flag=0, clear_Min_flag=0;
 __IO bool bootled_En=true;
+uint8_t EE_Buf_Read[255];
+uint8_t I2c_Buf_Reset[SPIAddr_End];
 
 /* static update_display_message API Functions -------------------------------*/
 static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave);
@@ -59,10 +62,8 @@ static void check_set_value(void);
 static void change_set_value(void);
 static void leave_settingMode(void);
 static void update_display_message(void);
-static void reset_eeprom(void);
 
 /* Private function protocol -----------------------------------------------*/
-static void read_all_eeprom_data(void);
 static void boot_control(void);
 static void loop_100ms(void);
 static void loop_100us(void);
@@ -407,77 +408,29 @@ static void update_display_message(void)
   }
 }
 
-int8_t I2c_Buf_Reset[End] = {};
-uint16_t temp_value = 0;
-static void reset_eeprom(void)
-{
-  uint8_t start_addr = 0x00;
-  uint8_t length = End;
-  // int8_t I2c_Buf_Reset[End] = {};
-  uint8_t dataindex = Set;
-  // uint16_t temp_value = 0;
-  
-  while(dataindex < End)
-  {
-    // if(bytetable[dataindex].DefaultValue < 0)
-    // {
-    //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*-10);
-    //   temp_value |= 0x8000;   //舉起eeprom內的負數旗標
-    // }
-    // else
-    // {
-    //   temp_value = (uint16_t)(bytetable[dataindex].DefaultValue*10);
-    //   temp_value &= 0x7FFF;   //清除eeprom內的負數旗標
-    // }
-
-    switch (dataindex)
-    {
-      case Set:
-        temp_value = 0x8032;
-        I2c_Buf_Reset[eep_Set_low] = temp_value & 0xFF;
-        I2c_Buf_Reset[eep_Set_high] = temp_value >> 8;
-        dataindex++;
-        break;
-      
-      default:
-        dataindex = End;
-        break;
-    }
-  }
-
-  I2C_EE_BufferWrite( I2c_Buf_Reset, start_addr , length);
-}
-
 /* Static Function definitions ------------------------------------------------------*/
 static void boot_control(void)
 {
-  // static bool bootled_En=true;
-  // static uint16_t bootled_cnt;
+  /*
+  * 上電時, 讓LED全亮且eeprom reset後讀出數值並且分析成system值
+  * BOOToffTIME+500是指LED全滅至少要持續的時間為0.5s (500ms)
+  */
+  static bool boot_busy = true;
+  static uint8_t BOOToffTIME;
 
   if(bootled_En)
   {
-    if(tmr.Cnt_1ms < BOOTonTIME)
-      ALL_LED_ON();
-    else if(tmr.Cnt_1ms > BOOToffTIME)
+    if((tmr.Cnt_1ms<BOOTonTIME) || boot_busy)
     {
-      // reset_eeprom();  //平常不開, 用來重置參數的API
-//      read_all_eeprom_data();
+      ALL_LED_ON();
       CLOSE_LED_FLAG = false;
-      bootled_En = false;
+      BOOToffTIME = tmr.Cnt_1ms;
     }
+    else if(tmr.Cnt_1ms > BOOToffTIME+500)
+      bootled_En = false;
     else
       ALL_LED_OFF();
   }
-}
-
-static void read_all_eeprom_data(void)
-{
-  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  // I2C_EE_BufferRead(I2c_Buf_Read, 0x00 , eep_end);
-  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-
-  // 讀出eeprom後, 寫入mcu的對應值
-  offset_EEtoSYS();
 }
 
 static void loop_100ms(void)
@@ -526,14 +479,44 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x56;
+  const uint8_t test    = 0x57;
   Device_Version = Release*65536 + dev*256 + test;
 
+  // I2C_Test_1();
+  // EEPROM_TEST();   //單獨測試EEPROM寫入讀出功能
+
   System_Init();
+  //開機要做的事情, 放這邊, 會在螢幕亮起來的時候做
+  printf("read\r\n");
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  UserTabletoSytem();
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  
+  if(EE_Buf_Read[UserAddr_Start] != 10)
+  {
+    printf("reset all\r\n");
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+    EEP_ResetALL();
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+    I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+
+    // printf("reset all\r\n");
+    // UserTabletoSytem();
+    // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+    // EEP_ResetALL();
+    // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+    // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+    // I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
+    // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  }
+  offset_EEtoSYS();
   printf("初始化完成\r\n");
   printf("軟體版本: 0x%02X\r\n", Device_Version);
   tmr.Cnt_1ms = 0;
-  offset_EEtoSYS();
+
   while(1)
   {
     /*
