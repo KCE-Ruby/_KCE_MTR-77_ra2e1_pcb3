@@ -267,5 +267,6 @@ uint32_t EEP_Read_API(uint8_t addr);
 void EEP_Write_API(uint8_t addr, uint32_t value);
 
 void EEPROM_TEST(void);
+uint8_t I2C_Test_1(void);
 
 #endif /* INC_EEP_API_H_ */

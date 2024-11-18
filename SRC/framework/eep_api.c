@@ -145,7 +145,7 @@ void IsMCUneedRST(bool reset)
 }
 
 
-
+uint8_t EE_Buf_test[255];
 void EEPROM_TEST(void)
 {
   System_Init();
@@ -159,13 +159,17 @@ void EEPROM_TEST(void)
   tdata[6] = 0x72;
   tdata[7] = 0x81;
 
-  printf("reset table test\r\n");
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   UserTabletoSytem();
-  printf("UserTabletoSytem\r\n");
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   EEP_ResetALL();
-  printf("EEP_ResetALL\r\n");
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  // printf("EEP_ResetALL\r\n");
+  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
-  printf("I2C_EE_BufferRead\r\n");
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  // printf("I2C_EE_BufferRead\r\n");
+  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   offset_EEtoSYS();
   WDT_Feed();
 
@@ -177,22 +181,51 @@ void EEPROM_TEST(void)
   }
 }
 
-// static void eep_read_all(void)
-// {
-//   uint8_t length = 10;
-//   uint8_t page = (255/length);
-//   uint8_t start_addr = 0x00;
+unsigned char DATA_Size_test = 250;
+unsigned char I2c_Buf_Write_test[255] = {};
+unsigned char I2c_Buf_Read_test[255] = {};
+uint8_t I2C_Test_1(void)
+{
+  uint16_t i;
+  // unsigned char DATA_Size_test = 30;
+  // unsigned char I2c_Buf_Write_test[33] = {};
+  // unsigned char I2c_Buf_Read_test[33] = {};
 
-//   I2C_EE_BufferRead(EE_Buf_Read, 0x00, 6);
-//   R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-//   start_addr = 6;
-//   while(page)
-//   {
-//     I2C_EE_BufferRead(&EE_Buf_Read[start_addr], start_addr, length);
-//     page--;
-//     start_addr += length;
-//     R_BSP_SoftwareDelay(50, BSP_DELAY_UNITS_MILLISECONDS);
-//     printf("start_addr = %d\r\n", start_addr);
-//     WDT_Feed();
-//   }
-// }
+  System_Init();
+  printf("測試開始\r\n");
+
+  //将I2c_Buf_Write中顺序递增的数据写入EERPOM中
+  printf("寫入的數據_繁體\r\n");
+  for ( i=0; i<DATA_Size_test; i++ ) { //填充缓冲
+      I2c_Buf_Write_test[i] =i+5;
+      printf("0x%02X ", I2c_Buf_Write_test[i]);
+      if (i%16 == 15)
+          printf("\n");
+  }
+  I2C_EE_BufferWrite( I2c_Buf_Write_test, 0x00 , DATA_Size_test);
+
+
+
+  //将EEPROM读出数据顺序保持到I2c_Buf_Read中
+  printf("\r\n讀出的數據_繁體\n");
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  I2C_EE_BufferRead(I2c_Buf_Read_test, 0x00 , DATA_Size_test);
+
+
+  //将I2c_Buf_Read中的数据通过串口打印
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  for (i=0; i<DATA_Size_test; i++) {
+      if (I2c_Buf_Read_test[i] != I2c_Buf_Write_test[i]) {
+          printf("0x%02X \n", I2c_Buf_Read_test[i]);
+          printf("錯誤:I2C EEPROM寫入與讀出的數據不一致_繁體\n");
+          printf("%d\n",i);
+          return 0;
+      }
+      printf("0x%02X ", I2c_Buf_Read_test[i]);
+      if (i%16 == 15)
+          printf("\n");
+
+  }
+  printf("\r\nI2C(AT24C02)讀寫測試成功_繁體\n");
+  return 1;
+}
