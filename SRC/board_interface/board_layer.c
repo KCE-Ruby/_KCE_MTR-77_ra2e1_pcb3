@@ -46,8 +46,8 @@ void System_Init(void)
   Uart_init();
   ADC_init();
   I2C_EE_Init();
-  // Pr1_size = get_bytetable_pr1();  //開機時取得當次的用戶層相關table
-  // Pr2_size = get_bytetable_pr2();  //開機時取得當次的隱藏層相關table
+  Pr1_size = get_bytetable_pr1();  //開機時取得當次的用戶層相關table
+  Pr2_size = get_bytetable_pr2();  //開機時取得當次的隱藏層相關table
   //預設開機為小數點一位數, TODO:讀取eeprom後這行要拿掉
   // Syscfg.decimalIndex = DECIMAL_AT_1;
 }
