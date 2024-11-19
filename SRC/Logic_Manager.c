@@ -47,6 +47,7 @@ __IO bool clear_Max_flag=0, clear_Min_flag=0;
 __IO bool bootled_En=true;
 uint8_t EE_Buf_Read[255];
 uint8_t I2c_Buf_Reset[SPIAddr_End];
+uint32_t BOOToffTIME=0;
 
 /* static update_display_message API Functions -------------------------------*/
 static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave);
@@ -415,19 +416,23 @@ static void boot_control(void)
   * 上電時, 讓LED全亮且eeprom reset後讀出數值並且分析成system值
   * BOOToffTIME+500是指LED全滅至少要持續的時間為0.5s (500ms)
   */
-  static bool boot_busy = true;
-  static uint8_t BOOToffTIME;
+  // static bool boot_busy = true;
+  // static uint32_t BOOToffTIME=0;
 
   if(bootled_En)
   {
-    if((tmr.Cnt_1ms<BOOTonTIME) || boot_busy)
+    if(tmr.Cnt_1ms<BOOTonTIME)
     {
       ALL_LED_ON();
-      CLOSE_LED_FLAG = false;
-      BOOToffTIME = tmr.Cnt_1ms;
+      // CLOSE_LED_FLAG = false;
+      // if(BOOToffTIME==0)
+      //   BOOToffTIME = tmr.Cnt_1ms;
     }
-    else if(tmr.Cnt_1ms > BOOToffTIME+500)
+    else if(tmr.Cnt_1ms > BOOTonTIME+1000)
+    {
       bootled_En = false;
+      CLOSE_LED_FLAG = false;
+    }
     else
       ALL_LED_OFF();
   }
@@ -479,7 +484,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x57;
+  const uint8_t test    = 0x58;
   Device_Version = Release*65536 + dev*256 + test;
 
   // I2C_Test_1();
