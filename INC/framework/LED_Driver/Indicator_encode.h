@@ -149,5 +149,6 @@ void rESToDisplay(bool i);
 void LodToDisplay(uint8_t i);
 void noPToDisplay(void);
 void dFPToDisplay(uint8_t i);
+void tdFToDisplay(bool i);
 
 #endif /* INC_INDICATOR_ENCODE_H_ */

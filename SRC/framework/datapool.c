@@ -183,6 +183,7 @@ void offset_EEtoSYS(void)
       case UserAddr_COF:
       case UserAddr_Lod:
       case UserAddr_dFP:
+      case UserAddr_tdF:
         Preload.value[i] = EE_Buf_u16[i]/10;
         Syscfg.value[i] = Preload.value[i];
         break;
@@ -332,6 +333,7 @@ int16_t check_Limit_Value(int16_t data, int8_t index)
     case COF:
     case Lod:
     case dFP:
+    case tdF:
       //for level1&2參數內的數值使用, 直接顯示數值不*10倍
       max_data = (int16_t)(bytetable[index].Range_High);
       min_data = (int16_t)(bytetable[index].Range_Low);

@@ -693,7 +693,21 @@ void dFPToDisplay(uint8_t i)
   }
 }
 
-
+void tdFToDisplay(bool i)
+{
+  if(i==1)
+  {
+    char_M1(dig_n);
+    char_M2(dig_i);
+    char_M3(dig_off);
+  }
+  else
+  {
+    char_M1(dig_L);
+    char_M2(dig_E);
+    char_M3(dig_off);
+  }
+}
 
 
 

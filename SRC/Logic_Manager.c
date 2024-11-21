@@ -267,6 +267,10 @@ static void valuetodisplay(uint8_t table)
     case dFP:
       dFPToDisplay((uint8_t)Preload.value[table]);
       break;
+
+    case tdF:
+      tdFToDisplay((uint8_t)Preload.value[table]);
+      break;
   
     default:
       if(Syscfg.value[rES] == DECIMAL_AT_0)
@@ -484,7 +488,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x58;
+  const uint8_t test    = 0x59;
   Device_Version = Release*65536 + dev*256 + test;
 
   // I2C_Test_1();
