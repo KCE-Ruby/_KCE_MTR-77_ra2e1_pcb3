@@ -488,7 +488,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x59;
+  const uint8_t test    = 0x58;
   Device_Version = Release*65536 + dev*256 + test;
 
   // I2C_Test_1();
@@ -511,15 +511,6 @@ void Task_Main(void)
     R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
     I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
     R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-
-    // printf("reset all\r\n");
-    // UserTabletoSytem();
-    // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-    // EEP_ResetALL();
-    // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-    // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-    // I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
-    // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   }
   offset_EEtoSYS();
   printf("初始化完成\r\n");

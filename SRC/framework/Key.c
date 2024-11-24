@@ -13,6 +13,7 @@
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/Key.h"
 #include "INC/framework/datapool.h"
+#include "INC/framework/eep_api.h"
 #include "INC/framework/Display.h"
 
 /* Private defines ----------------------------------------------------------*/
@@ -42,6 +43,7 @@ extern __IO uint8_t Pr1_size, Pr2_size;
 extern __IO ByteSettingTable bytetable[End];
 extern __IO bool clear_Max_flag, clear_Min_flag;
 extern __IO icon_api_flag icon;
+extern __IO uint8_t eeplength;
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t disp_level;
@@ -407,7 +409,6 @@ static void key_up_function(void)
   {
     if((KeyUp.Cnt>KEY_cnt_3s) && (Syscfg.mode==homeMode))
       activateEnhancedCooling();
-    //TODO:看能不能把level1跟level2的code改成API call
     else if(KeyUp.shortPressed != 0)
     {
       Syscfg.keymode.Max_flag = false;
@@ -927,9 +928,18 @@ static void key_set_function(void)
             {
               sFlag.Level1_value = Vindex;
               upload_syscfg_data(bytetable_pr1[Syscfg.level1_index]);
-              if(pre_value[Syscfg.level1_index] != Preload.value[Syscfg.level1_index])
+              if(pre_value[bytetable_pr1[Syscfg.level1_index]] != Preload.value[bytetable_pr1[Syscfg.level1_index]])
               {
-                //TODO: 若參數有變動則寫入eeprom內
+                uint8_t eepaddr;
+                int16_t Preload_value = Preload.value[bytetable_pr1[Syscfg.level1_index]];
+                eepaddr = check_index_for_eep(bytetable_pr1[Syscfg.level1_index], eeplength);
+                pre_value[bytetable_pr1[Syscfg.level1_index]] = Preload.value[bytetable_pr1[Syscfg.level1_index]];
+
+                printf("Preload_value = %d\r\n", Preload_value);
+                printf("eepaddr = %d\r\n", eepaddr);
+                printf("eeplength = %d\r\n", eeplength);
+                // I2C_EE_BufferWrite(Preload_value, eepaddr, &eeplength);
+
               }
 
               //從參數值換成顯示字符時, 往後加一組

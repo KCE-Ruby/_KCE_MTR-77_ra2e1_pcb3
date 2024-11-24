@@ -37,6 +37,7 @@ extern __IO uint16_t rsttable[End];
 */
 // uint8_t u8_eep_Read[], u8_eep_write[];
 int16_t u16_eep_Read[End], u16_eep_write[End];
+__IO uint8_t eeplength;
 
 
 //EEPROM_TEST用
@@ -144,6 +145,39 @@ void IsMCUneedRST(bool reset)
   //   EEP_ResetALL();
 }
 
+uint8_t check_index_for_eep(uint8_t ind)
+{
+  uint8_t i=0, addr=0, next_addr;
+
+  eeplength=1;
+  while(i < UserAddr_onF)
+  {
+    addr = next_addr;   //紀錄當前真實的位置
+    if((addr==SPIAddr_Start)||(addr==SPIAddr_P2P)||(addr==SPIAddr_P3P)||(addr==SPIAddr_P4P)||(addr==SPIAddr_CF)|| \
+      (addr==SPIAddr_rES)||(addr==SPIAddr_Lod)||(addr==SPIAddr_rEd)||(addr==SPIAddr_tdF)|| \
+      (addr==SPIAddr_dFP)||(addr==SPIAddr_dFd)||(addr==SPIAddr_dPo)||(addr==SPIAddr_FnC)|| \
+      (addr==SPIAddr_Fnd)||(addr==SPIAddr_FAP)||(addr==SPIAddr_ALC)||(addr==SPIAddr_AP2)|| \
+      (addr==SPIAddr_bLL)||(addr==SPIAddr_AC2)||(addr==SPIAddr_i1P)||(addr==SPIAddr_i1F)|| \
+      (addr==SPIAddr_odc)||(addr==SPIAddr_rrd)||(addr==SPIAddr_PbC)||(addr==SPIAddr_onF)
+      )
+    {
+      next_addr++;
+      eeplength = 1;
+    }
+    else
+    {
+      next_addr+=2;
+      eeplength = 2;
+    }
+    if(ind==i)
+    {
+      i = UserAddr_onF;
+      return addr;
+    }
+    i++;
+    WDT_Feed();
+  }
+}
 
 uint8_t EE_Buf_test[255];
 void EEPROM_TEST(void)
