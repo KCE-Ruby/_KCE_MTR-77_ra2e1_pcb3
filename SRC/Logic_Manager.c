@@ -504,6 +504,7 @@ void Task_Main(void)
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   
   if(EE_Buf_Read[UserAddr_Start] != 10)
+  // if(1)
   {
     printf("reset all\r\n");
     R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);

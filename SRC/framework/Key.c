@@ -44,6 +44,7 @@ extern __IO ByteSettingTable bytetable[End];
 extern __IO bool clear_Max_flag, clear_Min_flag;
 extern __IO icon_api_flag icon;
 extern __IO uint8_t eeplength;
+extern __IO uint8_t Preload_value[2];
 
 /* variables -----------------------------------------------------------------*/
 __IO uint8_t disp_level;
@@ -784,7 +785,7 @@ static void key_defrost_function(void)
 static void key_set_function(void)
 {
   static uint8_t api_sta=API_FREE;
-  int16_t pre_value[End];
+  static int16_t pre_value[End];
   uint8_t pr2_index;
   /*<設定鍵功能>
   * homeMode狀態下, 單擊顯示目標設定點(Pv)切換成checkgMode
@@ -927,20 +928,23 @@ static void key_set_function(void)
             else
             {
               sFlag.Level1_value = Vindex;
-              upload_syscfg_data(bytetable_pr1[Syscfg.level1_index]);
-              if(pre_value[bytetable_pr1[Syscfg.level1_index]] != Preload.value[bytetable_pr1[Syscfg.level1_index]])
+              // upload_syscfg_data(bytetable_pr1[Syscfg.level1_index]);
+              if(Syscfg.value[bytetable_pr1[Syscfg.level1_index]] != Preload.value[bytetable_pr1[Syscfg.level1_index]])
               {
                 uint8_t eepaddr;
-                int16_t Preload_value = Preload.value[bytetable_pr1[Syscfg.level1_index]];
                 eepaddr = check_index_for_eep(bytetable_pr1[Syscfg.level1_index], eeplength);
-                pre_value[bytetable_pr1[Syscfg.level1_index]] = Preload.value[bytetable_pr1[Syscfg.level1_index]];
 
-                printf("Preload_value = %d\r\n", Preload_value);
+                printf("Preload_value[0] = %d\r\n", Preload_value[0]);
+                printf("Preload_value[1] = %d\r\n", Preload_value[1]);
                 printf("eepaddr = %d\r\n", eepaddr);
                 printf("eeplength = %d\r\n", eeplength);
-                // I2C_EE_BufferWrite(Preload_value, eepaddr, &eeplength);
-
+                R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+                I2C_EE_BufferWrite(Preload_value, eepaddr, eeplength);
+                R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+                Syscfg.value[bytetable_pr1[Syscfg.level1_index]] = Preload.value[bytetable_pr1[Syscfg.level1_index]];
               }
+              else
+                printf("沒--進入eeprom\r\n");
 
               //從參數值換成顯示字符時, 往後加一組
               Syscfg.level1_index++;

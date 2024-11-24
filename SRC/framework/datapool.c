@@ -37,7 +37,7 @@ __IO uint8_t bytetable_pr2[End];
 
 int16_t EE_Buf_u16[UserAddr_End];
 __IO uint16_t rsttable[End];
-static __IO SYSTEM_TABLE systable[End];
+__IO SYSTEM_TABLE systable[End];
 __IO ByteSettingTable bytetable[End] =
 {
   {xxx,             0,             1,           1,     NaN}, //對齊參數用的而已

@@ -19,9 +19,11 @@
 /* Private defines ----------------------------------------------------------*/
 
 /* extern variables -----------------------------------------------------------------*/
-extern __IO s_Var Syscfg;
+extern __IO s_Var Syscfg, Preload;
 // extern __IO ByteSettingTable bytetable[End];
 extern __IO uint16_t rsttable[End];
+extern __IO uint8_t bytetable_pr1[End];
+extern __IO SYSTEM_TABLE systable[End];
 
 /* variables -----------------------------------------------------------------*/
 /*eeprom內各參數用途解釋
@@ -38,6 +40,7 @@ extern __IO uint16_t rsttable[End];
 // uint8_t u8_eep_Read[], u8_eep_write[];
 int16_t u16_eep_Read[End], u16_eep_write[End];
 __IO uint8_t eeplength;
+__IO uint8_t Preload_value[2];
 
 
 //EEPROM_TEST用
@@ -148,8 +151,10 @@ void IsMCUneedRST(bool reset)
 uint8_t check_index_for_eep(uint8_t ind)
 {
   uint8_t i=0, addr=0, next_addr;
+  uint8_t sub_index = bytetable_pr1[Syscfg.level1_index];
+  uint16_t remake;
 
-  eeplength=1;
+  remake = (uint16_t)(Preload.value[sub_index] - systable[sub_index].Range_Low);
   while(i < UserAddr_onF)
   {
     addr = next_addr;   //紀錄當前真實的位置
@@ -161,11 +166,16 @@ uint8_t check_index_for_eep(uint8_t ind)
       (addr==SPIAddr_odc)||(addr==SPIAddr_rrd)||(addr==SPIAddr_PbC)||(addr==SPIAddr_onF)
       )
     {
+      //把RST內uint8_t的值直接放入一格陣列
+      Preload_value[0] = remake;
       next_addr++;
       eeplength = 1;
     }
     else
     {
+      //把RST內uint16_t的值拆成2個byte放入陣列
+      Preload_value[1] = remake >> 8;    //取高位元
+      Preload_value[0] = remake & 0xff;    //取低位元
       next_addr+=2;
       eeplength = 2;
     }
