@@ -100,7 +100,7 @@ __IO ByteSettingTable bytetable[End] =
   {AC2,       work_no,      work_yes,      work_no,     Pr2},
   {i1P,      polar_CL,      polar_OP,     polar_CL,     Pr2},
   {i1F,     alarm_EAL,      alarm_ES,    alarm_dor,     Pr2},
-  {did,             0,           255,           15,     Pr2},
+  {did,             0,           255,           15,     Pr2}, 
   {nPS,             0,            15,           15,     Pr2},
   {odc,      state_no,     state_F_C,    state_F_C,     Pr2},
   {rrd,       work_no,      work_yes,     work_yes,     Pr2},
