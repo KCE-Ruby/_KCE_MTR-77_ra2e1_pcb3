@@ -12,7 +12,6 @@
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/LED_Driver/Indicator_encode.h"
-#include "INC/framework/LED_Driver/app_menu_ctrl.h"
 #include "INC/framework/datapool.h"
 #include "INC/framework/ADC.h"
 #include "INC/framework/LED_Driver/app_icon_ctrl.h"

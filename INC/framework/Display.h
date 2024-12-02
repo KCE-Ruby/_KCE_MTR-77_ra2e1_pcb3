@@ -14,7 +14,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 #include "INC/framework/LED_Driver/app_icon_ctrl.h"
-#include "INC/framework/LED_Driver/app_menu_ctrl.h"
 #include "INC/framework/LED_Driver/Indicator_encode.h"
 
 /* Private define ----------------------------------------------------------*/

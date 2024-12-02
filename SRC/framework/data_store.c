@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/eep_api.h"
+#include "INC/framework/datapool.h"
 #include "INC/framework/data_store.h"
 
 
@@ -33,7 +34,6 @@
 /* variables -----------------------------------------------------------------*/
 __IO ByteSettingTable User_original[End] = 
 {
-
   {xxx,             0,             1,           1,     NaN}, //對齊參數用的而已
   {Set,           -50,           110,        15.0,     NaN},
   //參數字元,  下限值,        上限值,        預設值,   權限層
@@ -146,7 +146,6 @@ void original_to_reset(void)
       addr+=2;
     }
     i++;
-
     printf("User_int[%d]: %d\r\n",i , User_int[i]);
   }
 }
@@ -166,12 +165,432 @@ void eepread_to_systable(void)
   {
     sys_table[i] = (eep_read[i] + User_original[i].Range_Low)*10;
   }
-
 }
 
-void systable_to_eeprom(void)
+void systable_to_eeprom(uint8_t addr)
 {
+  uint8_t eep_write[2]={};
+  uint8_t u8_length = 0x01;
+  uint8_t u16_length = 0x02;
+  uint16_t sys_value = sys_table[addr] - (User_original[addr].Range_Low*10);
 
+  switch (addr)
+  {
+    case UserAddr_Start:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Start, u8_length);
+      break;
+
+    case UserAddr_Set:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Set_L, u16_length);
+      break;
+
+    case UserAddr_Hy:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Hy_L, u16_length);
+      break;
+
+    case UserAddr_LS:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_LS_L, u16_length);
+      break;
+
+    case UserAddr_US:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_US_L, u16_length);
+      break;
+
+    case UserAddr_Ot:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Ot_L, u16_length);
+      break;
+
+    case UserAddr_P2P:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_P2P, u8_length);
+      break;
+
+    case UserAddr_OE:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_OE_L, u16_length);
+      break;
+
+    case UserAddr_P3P:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_P3P, u8_length);
+      break;
+
+    case UserAddr_O3:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_O3_L, u16_length);
+      break;
+
+    case UserAddr_P4P:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_P4P, u8_length);
+      break;
+
+    case UserAddr_O4:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_O4_L, u16_length);
+      break;
+
+    case UserAddr_OdS:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_OdS_L, u16_length);
+      break;
+
+    case UserAddr_AC:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_AC_L, u16_length);
+      break;
+
+    case UserAddr_rtr:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_rtr_L, u16_length);
+      break;
+
+    case UserAddr_CCt:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_CCt_L, u16_length);
+      break;
+
+    case UserAddr_CCS:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_CCS_L, u16_length);
+      break;
+
+    case UserAddr_COn:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_COn_L, u16_length);
+      break;
+
+    case UserAddr_COF:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_COF_L, u16_length);
+      break;
+
+    case UserAddr_CF:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_CF, u8_length);
+      break;
+
+    case UserAddr_rES:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_rES, u8_length);
+      break;
+
+    case UserAddr_Lod:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Lod, u8_length);
+      break;
+
+    case UserAddr_rEd:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_rEd, u8_length);
+      break;
+
+    case UserAddr_dLY:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dLY_L, u16_length);
+      break;
+
+    case UserAddr_dtr:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dtr_L, u16_length);
+      break;
+
+    case UserAddr_tdF:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_tdF, u8_length);
+      break;
+
+    case UserAddr_dFP:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dFP, u8_length);
+      break;
+
+    case UserAddr_dtE:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dtE_L, u16_length);
+      break;
+
+    case UserAddr_IdF:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_IdF_L, u16_length);
+      break;
+
+    case UserAddr_MdF:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_MdF_L, u16_length);
+      break;
+
+    case UserAddr_dSd:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dSd_L, u16_length);
+      break;
+
+    case UserAddr_dFd:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dFd, u8_length);
+      break;
+
+    case UserAddr_dAd:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dAd_L, u16_length);
+      break;
+
+    case UserAddr_Fdt:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Fdt_L, u16_length);
+      break;
+
+    case UserAddr_dPo:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dPo, u8_length);
+      break;
+
+    case UserAddr_dAF:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dAF_L, u16_length);
+      break;
+
+    case UserAddr_FnC:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_FnC, u8_length);
+      break;
+
+    case UserAddr_Fnd:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Fnd, u8_length);
+      break;
+
+    case UserAddr_Fct:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Fct_L, u16_length);
+      break;
+
+    case UserAddr_FSt:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_FSt_L, u16_length);
+      break;
+
+    case UserAddr_Fon:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Fon_L, u16_length);
+      break;
+
+    case UserAddr_FoF:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_FoF_L, u16_length);
+      break;
+
+    case UserAddr_FAP:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_FAP, u8_length);
+      break;
+
+    case UserAddr_ALC:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_ALC, u8_length);
+      break;
+
+    case UserAddr_ALU:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_ALU_L, u16_length);
+      break;
+
+    case UserAddr_ALL:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_ALL_L, u16_length);
+      break;
+
+    case UserAddr_AFH:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_AFH_L, u16_length);
+      break;
+
+    case UserAddr_ALd:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_ALd_L, u16_length);
+      break;
+
+    case UserAddr_dAO:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dAO_L, u16_length);
+      break;
+
+    case UserAddr_AP2:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_AP2, u8_length);
+      break;
+
+    case UserAddr_AL2:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_AL2_L, u16_length);
+      break;
+
+    case UserAddr_Au2:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Au2_L, u16_length);
+      break;
+
+    case UserAddr_AH2:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_AH2_L, u16_length);
+      break;
+
+    case UserAddr_Ad2:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Ad2_L, u16_length);
+      break;
+
+    case UserAddr_dA2:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_dA2_L, u16_length);
+      break;
+
+    case UserAddr_bLL:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_bLL, u8_length);
+      break;
+
+    case UserAddr_AC2:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_AC2, u8_length);
+      break;
+
+    case UserAddr_i1P:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_i1P, u8_length);
+      break;
+
+    case UserAddr_i1F:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_i1F, u8_length);
+      break;
+
+    case UserAddr_did:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_did_L, u16_length);
+      break;
+
+    case UserAddr_nPS:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_nPS_L, u16_length);
+      break;
+
+    case UserAddr_odc:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_odc, u8_length);
+      break;
+
+    case UserAddr_rrd:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_rrd, u8_length);
+      break;
+
+    case UserAddr_HES:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_HES_L, u16_length);
+      break;
+
+    case UserAddr_Adr:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_Adr_L, u16_length);
+      break;
+
+    case UserAddr_PbC:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_PbC, u8_length);
+      break;
+
+    case UserAddr_onF:
+      eep_write[0] = sys_value;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_onF, u8_length);
+      break;
+
+    case UserAddr_history_min:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_history_min_L, u16_length);
+      break;
+
+    case UserAddr_history_max:
+      eep_write[0] = sys_value & 0xFF;
+      eep_write[1] = sys_value >> 8;
+      I2C_EE_BufferWrite(eep_write, SPIAddr_history_max_L, u16_length);
+      break;
+    
+    default:
+      break;
+  }
 }
 
 
+void test_datastore(void)
+{
+  uint8_t i=UserAddr_Start;
+
+  //產出reset的table, 建議每次上電都做
+  original_to_reset();
+
+  //將eeprom讀出後寫入system的table內直接使用
+  eepread_to_systable();
+
+  //測試將system的數值任意修改後寫入eeprom內
+  // while(i<UserAddr_End)
+  // {
+  //   systable_to_eeprom(i);
+  //   i++;
+  //   WDT_Feed();
+  // }
+
+  while(1)
+  {
+    WDT_Feed();
+  }
+}

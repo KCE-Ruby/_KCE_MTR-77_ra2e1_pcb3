@@ -12,7 +12,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 #include "INC/board_interface/board_layer.h"
-#include "INC/framework/LED_Driver/app_menu_ctrl.h"
 #include "INC/framework/datapool.h"
 #include "INC/framework/eep_api.h"
 
@@ -20,7 +19,6 @@
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var Syscfg, Preload;
-// extern __IO ByteSettingTable bytetable[End];
 extern __IO uint16_t rsttable[End];
 extern __IO uint8_t bytetable_pr1[End];
 extern __IO SYSTEM_TABLE systable[End];

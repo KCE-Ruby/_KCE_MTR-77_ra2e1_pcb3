@@ -35,7 +35,6 @@ extern __IO ADC_TemperatureValue TempValue;
 
 extern __IO bool CLOSE_LED_FLAG;
 extern __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
-// extern __IO ByteSettingTable bytetable[End];
 extern __IO uint8_t bytetable_pr1[End];
 extern __IO uint8_t bytetable_pr2[End];
 extern __IO uint32_t catch_s[dly_end_sec];
@@ -495,6 +494,9 @@ void Task_Main(void)
   // EEPROM_TEST();   //單獨測試EEPROM寫入讀出功能
 
   System_Init();
+  //測試新的EEPROM寫入跟讀出以及系統寫入測試
+  test_datastore();
+
   //開機要做的事情, 放這邊, 會在螢幕亮起來的時候做
   printf("read\r\n");
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
