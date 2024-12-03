@@ -27,6 +27,7 @@
 
 /* extern variables -----------------------------------------------------------------*/
 extern __IO s_Var Syscfg;
+extern __IO s_Flag sFlag;
 extern __IO icon_api_flag icon;
 extern __IO ADC_TemperatureValue TempValue;
 extern __IO uint16_t catch_min[dly_end_min];
@@ -37,6 +38,7 @@ extern __IO bool bootled_En;
 static out_api_flag out_sta;
 
 /* Private function protocol -----------------------------------------------*/
+static bool manual_defrost(bool flag);
 static void out1_FAN_on(void);
 static void out1_FAN_off(void);
 static void out1_FAN_api(void);
@@ -60,7 +62,7 @@ static void concof_logic(void);
 static void normal_refrigerate_logic(void);
 
 /* Function definitions ------------------------------------------------------*/
-bool manual_defrost(bool flag)
+static bool manual_defrost(bool flag)
 {
   if(Syscfg.pv < Syscfg.value[dtE])
     out3_Defrost_on();
@@ -440,6 +442,11 @@ void Out_main(void)
     out3_Defrost_api();
     out4_buzzer_api();
   }
+
+  //按鍵啟動融霜功能
+  if(sFlag.Defrost)
+    sFlag.Defrost = manual_defrost(sFlag.Defrost);
+
   
 }
 

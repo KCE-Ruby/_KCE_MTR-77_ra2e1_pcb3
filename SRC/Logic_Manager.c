@@ -65,7 +65,7 @@ static void update_display_message(void);
 
 /* Private function protocol -----------------------------------------------*/
 static void boot_control(void);
-static void loop_100ms(void);
+static void main_loop(void);
 static void loop_100us(void);
 
 /* static update_display_message API Functions -------------------------------*/
@@ -441,24 +441,28 @@ static void boot_control(void)
   }
 }
 
-static void loop_100ms(void)
+static void loop_100us(void)
+{
+  LED_Display();
+  Key_debounce();     //一定要在LED切換後做判斷
+  WDT_Feed();
+}
+
+static void main_loop(void)
 {
   if(tmr.Flag_1ms)
   {
     Key_main();   //按鍵相關邏輯
     tmr.Flag_1ms = false;
   }
+
   if(tmr.Flag_100ms)
   {
     ADC_Main();
     //TODO: 新增一個loop by dLY的, 以控制取得Pv值的刷新頻率
     get_Pv();
-    // Key_main();   //按鍵相關邏輯
+
     Out_main();
-    
-    //啟動融霜功能
-    if(sFlag.Defrost)
-      sFlag.Defrost = manual_defrost(sFlag.Defrost);
 
     //更新最大最小值
     if(Syscfg.pv != ERROR_AD)
@@ -469,13 +473,6 @@ static void loop_100ms(void)
 
     tmr.Flag_100ms = false;
   }
-}
-
-static void loop_100us(void)
-{
-  LED_Display();
-  Key_debounce();     //一定要在LED切換後做判斷
-  WDT_Feed();
 }
 
 
@@ -543,7 +540,7 @@ void Task_Main(void)
     */
     boot_control();
 
-    loop_100ms();
+    main_loop();
     loop_100us();
   }
 }

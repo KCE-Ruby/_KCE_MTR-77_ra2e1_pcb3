@@ -146,7 +146,7 @@ void original_to_reset(void)
       addr+=2;
     }
     i++;
-    printf("User_int[%d]: %d\r\n",i , User_int[i]);
+    printf("_User_int[%d]: %X\r\n",i , User_int[i]);
   }
 }
 

@@ -61,7 +61,7 @@ typedef struct
   uint8_t buzzer;
 } out_api_flag;
 /* task function protocol -----------------------------------------------*/
-bool manual_defrost(bool flag);
+
 void Out_main(void);
 
 #endif /* INC_OUTAPI_H_ */
