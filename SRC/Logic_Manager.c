@@ -492,7 +492,7 @@ void Task_Main(void)
 
   System_Init();
   //測試新的EEPROM寫入跟讀出以及系統寫入測試
-  test_datastore();
+  // test_datastore();
 
   //開機要做的事情, 放這邊, 會在螢幕亮起來的時候做
   printf("read\r\n");

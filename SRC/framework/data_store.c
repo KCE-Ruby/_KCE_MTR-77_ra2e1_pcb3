@@ -116,15 +116,17 @@ int16_t sys_table[End] = {};
 
 void original_to_reset(void)
 {
-  static uint8_t max_index = onF;
-  int16_t User_int[max_index] = {};
-  uint8_t i = Set;
+  uint8_t i = xxx;
   uint8_t addr=SPIAddr_Start;
 
-  while(i<max_index)
+  static uint8_t max_index = onF;
+  int16_t User_int[max_index] = {};
+
+  while(i<=max_index)
   {
     //把原始的使用者數值(小數點)轉換成10倍並shift成正整數
     User_int[i] = (User_original[i].DefaultValue - User_original[i].Range_Low)*10;
+    // printf("User_int[%d]: %d\r\n",i , User_int[i]);
 
     if((addr==SPIAddr_Start)||(addr==SPIAddr_P2P)||(addr==SPIAddr_P3P)||(addr==SPIAddr_P4P)||(addr==SPIAddr_CF)|| \
       (addr==SPIAddr_rES)||(addr==SPIAddr_Lod)||(addr==SPIAddr_rEd)||(addr==SPIAddr_tdF)|| \
@@ -146,14 +148,24 @@ void original_to_reset(void)
       addr+=2;
     }
     i++;
-    printf("_User_int[%d]: %X\r\n",i , User_int[i]);
   }
+  
+  printf("開始恢復原廠值\r\n");
+  //寫入原廠設定
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  I2C_EE_BufferWrite(User_reset, 0x00, SPIAddr_End);
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  printf("完成恢復原廠值\r\n");
 }
 
 void eepread_to_systable(void)
 {
+  uint8_t i = xxx;
+  uint8_t addr=SPIAddr_Start;
+
+  static uint8_t max_index = End;
   uint8_t eep_read[SPIAddr_End] = {};
-  uint8_t i = Set;
+  int16_t i16_value;
 
   //讀出eeprom的數值
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
@@ -161,9 +173,34 @@ void eepread_to_systable(void)
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
 
   //組合成int16_t的值並shift成User值
-  while(i)
+  while(i<=max_index)
   {
-    sys_table[i] = (eep_read[i] + User_original[i].Range_Low)*10;
+    if((addr==SPIAddr_Start)||(addr==SPIAddr_P2P)||(addr==SPIAddr_P3P)||(addr==SPIAddr_P4P)||(addr==SPIAddr_CF)|| \
+      (addr==SPIAddr_rES)||(addr==SPIAddr_Lod)||(addr==SPIAddr_rEd)||(addr==SPIAddr_tdF)|| \
+      (addr==SPIAddr_dFP)||(addr==SPIAddr_dFd)||(addr==SPIAddr_dPo)||(addr==SPIAddr_FnC)|| \
+      (addr==SPIAddr_Fnd)||(addr==SPIAddr_FAP)||(addr==SPIAddr_ALC)||(addr==SPIAddr_AP2)|| \
+      (addr==SPIAddr_bLL)||(addr==SPIAddr_AC2)||(addr==SPIAddr_i1P)||(addr==SPIAddr_i1F)|| \
+      (addr==SPIAddr_odc)||(addr==SPIAddr_rrd)||(addr==SPIAddr_PbC)||(addr==SPIAddr_onF)
+      )
+    {
+      //長度為1個byte的值
+      sys_table[i] = (eep_read[i] + User_original[i].Range_Low)*10;
+      // sys_table[i] = User_reset[addr] + (User_original[i].Range_Low*10);
+      addr++;
+      // printf("User_reset[%d]: %d\r\n",addr , User_reset[addr]);
+      // printf("User_original[%d]: %d\r\n",i , User_original[i].Range_Low);
+      printf("sys_table[%d]: %d\r\n",i , sys_table[i]);
+    }
+    else
+    {
+      //長度為2個byte的值
+      i16_value = (eep_read[addr+1]<<8) | eep_read[addr];
+      // i16_value = (User_reset[addr+1]<<8) | User_reset[addr];
+      sys_table[i] = i16_value + (User_original[i].Range_Low*10);
+      addr+=2;
+      printf("sys_table[%d]: %d\r\n",i , sys_table[i]);
+    }
+    i++;
   }
 }
 
