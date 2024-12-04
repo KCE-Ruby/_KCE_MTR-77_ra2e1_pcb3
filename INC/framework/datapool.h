@@ -110,6 +110,14 @@ enum UserDefineByteTables
     Adr,    //RS485地址, 範圍:1 ~ 244
     PbC,    //探頭類型選擇, Ptc=PTC探頭; ntc=NTC探頭
     onF,    //待機鍵操作功能, nu=無任何功能; oFF待機允許; ES=節能運行
+    
+  //非使用者可調整參數
+    RecordHigh,
+    RecordLow,
+
+    var_end,
+
+  //唯讀參數
     dp1,    //探頭1讀數, 庫溫
     dp2,    //探頭2讀數, 蒸發器溫度
     dp3,    //探頭3讀數, 輔助探頭, 有探頭才可用
@@ -136,10 +144,23 @@ enum MenuLevel
   Pr2,    //第二層中才能看到的參數, 進入第二層可看到所有參數
 };
 
+enum ProbeExist
+{
+  No_exist,
+  Yes_exist,
+};
+
 enum DegreeUnit
 {
   degree_C,
   degree_F,
+};
+
+enum NumberType
+{
+  NaNt,    //not a number too
+  dE,
+  in,
 };
 
 enum Paneldisplayselection
@@ -243,6 +264,7 @@ typedef struct
   float Range_High;
   float DefaultValue;
   uint8_t Mode;
+  uint8_t DataDigit;
 } ByteSettingTable;
 
 typedef struct

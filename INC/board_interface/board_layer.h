@@ -105,6 +105,9 @@ typedef struct
 
 typedef struct  //different timer flags
 {
+  //非初始化參數值
+  int16_t RecordHigh, RecordLow;
+  //其他
   int16_t value[78];            //大小為[End], 各參數內的數值, 有負數沒有小數, 以整數儲存
   int16_t pv_disp, pv, history_max, history_min; //3位數值, 含負數
   uint8_t mode;                 //顯示目前的模式, 首頁/設定模式

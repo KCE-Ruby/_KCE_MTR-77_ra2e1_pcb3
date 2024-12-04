@@ -399,6 +399,7 @@ static void key_up_function(void)
   * Setting狀態下, 單擊增加參數值
   * [組合鍵功能]
   * [上+下] = 鎖定or解鎖鍵盤
+  * api_sta代表目前是否有觸發此按鍵功能
   */
   int16_t data_bytetable;
   int8_t pr1_index, pr2_index;

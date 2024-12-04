@@ -418,6 +418,7 @@ static void boot_control(void)
   /*
   * 上電時, 讓LED全亮且eeprom reset後讀出數值並且分析成system值
   * BOOToffTIME+500是指LED全滅至少要持續的時間為0.5s (500ms)
+  * boot做在loop內是因為要讓AD值在全滅前做完濾波
   */
   // static bool boot_busy = true;
   // static uint32_t BOOToffTIME=0;
@@ -492,7 +493,7 @@ void Task_Main(void)
 
   System_Init();
   //測試新的EEPROM寫入跟讀出以及系統寫入測試
-  // test_datastore();
+  test_datastore();
 
   //開機要做的事情, 放這邊, 會在螢幕亮起來的時候做
   printf("read\r\n");

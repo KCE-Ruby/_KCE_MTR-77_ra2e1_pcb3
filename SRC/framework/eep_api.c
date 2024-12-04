@@ -148,7 +148,7 @@ void IsMCUneedRST(bool reset)
 
 uint8_t check_index_for_eep(uint8_t ind)
 {
-  uint8_t i=0, addr=0, next_addr;
+  uint8_t i=0, addr=0, next_addr=0;
   uint8_t sub_index = bytetable_pr1[Syscfg.level1_index];
   uint16_t remake;
 
