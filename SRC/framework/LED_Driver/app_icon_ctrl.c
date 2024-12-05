@@ -385,7 +385,7 @@ bool rStToDisplay_Flashing(void)
   }
   else
   {
-    CharToDisplay(xxx);
+    CharToDisplay(Str);
     if(pre_flag==true)
     {
       //計算切換了幾次

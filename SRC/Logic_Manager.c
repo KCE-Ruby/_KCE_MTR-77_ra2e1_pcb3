@@ -492,28 +492,33 @@ void Task_Main(void)
   // EEPROM_TEST();   //單獨測試EEPROM寫入讀出功能
 
   System_Init();
+
+//開機前要做的事情, 讀取eeprom填入系統值
+
   //測試新的EEPROM寫入跟讀出以及系統寫入測試
   test_datastore();
 
-  //開機要做的事情, 放這邊, 會在螢幕亮起來的時候做
-  printf("read\r\n");
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  UserTabletoSytem();
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  //原始步驟
+  // printf("read\r\n");
+  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  // UserTabletoSytem();
+  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  // I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
+  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   
-  if(EE_Buf_Read[UserAddr_Start] != 10)
-  // if(1)
-  {
-    printf("reset all\r\n");
-    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-    EEP_ResetALL();
-    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-    I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
-    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  }
-  offset_EEtoSYS();
+  // if(EE_Buf_Read[UserAddr_Start] != 10)
+  // // if(1)
+  // {
+  //   printf("reset all\r\n");
+  //   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  //   EEP_ResetALL();
+  //   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  //   I2C_EE_BufferRead(EE_Buf_Read, 0x00, 255);
+  //   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  // }
+  // offset_EEtoSYS();
+
+
   printf("初始化完成\r\n");
   printf("軟體版本: 0x%02X\r\n", Device_Version);
   tmr.Cnt_1ms = 0;

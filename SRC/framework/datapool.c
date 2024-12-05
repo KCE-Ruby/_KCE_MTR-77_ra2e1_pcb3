@@ -40,7 +40,7 @@ __IO SYSTEM_TABLE systable[End];
 /* variables -----------------------------------------------------------------*/
 __IO ByteSettingTable bytetable[End] = 
 {
-  {xxx,             0,             1,            1,     NaN,       in}, //對齊參數用的而已
+  {Str,             0,             1,            1,     NaN,       in}, //對齊參數用的而已
   {Set,           -50,         110.0,         -5.0,     NaN,       dE},
   //參數字元,  下限值,        上限值,        預設值,   權限層      位數
   { Hy,           0.1,          25.5,          2.0,     Pr1,       dE},
@@ -134,7 +134,7 @@ void UserTabletoSytem(void)
 /* Parameters from EEPROM to SYSTEM API ------------------------------------------------------*/
 void offset_EEtoSYS(void)
 {
-  uint8_t i=xxx, addr=SPIAddr_Start;
+  uint8_t i=Str, addr=SPIAddr_Start;
   // static int16_t EE_Buf_u16[UserAddr_End] = {0}; //這個陣列不會被改變, 拿來存eeprom讀出來的值而已
 
   //將所有eeprom的值讀出來到int16_t的陣列內, 只有非數值型的參數用u8取值 
@@ -198,8 +198,8 @@ void offset_EEtoSYS(void)
   }
   printf("讀出Syscfg結束, i=%d\r\n", i);
 
-  Syscfg.history_max = -9990;    //給最大值, 最小值做溫度基準, EE_Buf_u16[UserAddr_history_max]
-  Syscfg.history_min = 9990;    //給最小值, 最大值做溫度基準, EE_Buf_u16[UserAddr_history_min]
+  // Syscfg.history_max = -9990;
+  // Syscfg.history_min = 9990;
   
   Syscfg.value[rSE] = Syscfg.value[Set];
   Syscfg.value[rEL] = 10;           //v1.0
@@ -258,8 +258,8 @@ void get_HistoryMax(void)
   if(Syscfg.pv > Syscfg.history_max)
   {
     Syscfg.history_max = Syscfg.pv;
-    I2c_Buf_Write[SPIAddr_history_max_L] = Syscfg.history_max & 0xFF;
-    I2c_Buf_Write[SPIAddr_history_max_H] = Syscfg.history_max >> 8;
+    I2c_Buf_Write[SPIAddr_RecordHigh_L] = Syscfg.history_max & 0xFF;
+    I2c_Buf_Write[SPIAddr_RecordHigh_H] = Syscfg.history_max >> 8;
     // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
   }
 }
@@ -271,8 +271,8 @@ void get_HistoryMin(void)
   if(Syscfg.pv < Syscfg.history_min)
   {
     Syscfg.history_min = Syscfg.pv;
-    I2c_Buf_Write[SPIAddr_history_min_L] = Syscfg.history_min & 0xFF;
-    I2c_Buf_Write[SPIAddr_history_min_H] = Syscfg.history_min >> 8;
+    I2c_Buf_Write[SPIAddr_RecordLow_L] = Syscfg.history_min & 0xFF;
+    I2c_Buf_Write[SPIAddr_RecordLow_H] = Syscfg.history_min >> 8;
     // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
   }
 }

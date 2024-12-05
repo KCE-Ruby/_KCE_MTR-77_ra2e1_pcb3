@@ -16,7 +16,7 @@
 /* Enum type definitions -----------------------------------------------------*/
 enum UserDefineByteTables
 {
-  xxx,    // 0: all digits off
+  Str,    // Start, 0:New_eeprom, 1:No_problem, 2:Reset_eeprom
   Set,      //設定點, 範圍LS~US, 非設定層
   //7.1 調節參數
     Hy,     //當量測溫度>=SET+Hy時, 壓縮機運行, 當溫度小於SET時, 壓縮機停止
@@ -128,6 +128,13 @@ enum UserDefineByteTables
     pr2,    //進入隱藏層時顯示的字符, 只能顯示
 
   End,
+};
+
+enum Resetflag
+{
+  New_eeprom,
+  No_problem,
+  Reset_eeprom,
 };
 
 enum Levelflag

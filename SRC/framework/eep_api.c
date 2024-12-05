@@ -53,7 +53,7 @@ static void eep_read_all(void);
 /* Function definitions ------------------------------------------------------*/
 void EEP_Read_PWRON(void)
 {
-  uint8_t addr[SPIAddr_history_max_H], data[SPIAddr_End], length = SPIAddr_End;
+  uint8_t addr[SPIAddr_RecordHigh_H], data[SPIAddr_End], length = SPIAddr_End;
   uint8_t u8_eep_Read[SPIAddr_End]={};
 
   printf("[eep_api] 開始讀出原始值\r\n");
@@ -79,7 +79,7 @@ void EEP_Write_PWROFF(void)
   * 參數2, 為要寫入的起始addr,
   * 參數3, 為要寫入的長度
   */
-  uint8_t addr[SPIAddr_history_max_H], data[SPIAddr_End];
+  uint8_t addr[SPIAddr_RecordHigh_H], data[SPIAddr_End];
 
   printf("開始寫入\r\n");
   I2C_EE_BufferWrite(data, SPIAddr_Start, 0x04);
@@ -99,7 +99,7 @@ void EEP_ResetALL(void)
   * 拆除後陣列: I2c_Buf_Reset[SPIAddr_End]
   */
 
-  uint8_t i=xxx, addr=SPIAddr_Start;
+  uint8_t i=Str, addr=SPIAddr_Start;
   // uint8_t I2c_Buf_Reset[SPIAddr_End];
   uint8_t length = SPIAddr_onF;
 

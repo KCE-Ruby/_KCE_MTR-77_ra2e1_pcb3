@@ -36,7 +36,7 @@
 /* variables -----------------------------------------------------------------*/
 __IO ByteSettingTable User_original[End] = 
 {
-  {xxx,             0,             1,            1,     NaN,       in}, //對齊參數用的而已
+  {Str,  New_eeprom,  Reset_eeprom,   No_problem,     NaN,       in}, //對齊參數用的而已
   {Set,           -50,         110.0,         -5.0,     NaN,       dE},
   //參數字元,  下限值,        上限值,        預設值,   權限層      位數
   { Hy,           0.1,          25.5,          2.0,     Pr1,       dE},
@@ -113,103 +113,516 @@ __IO ByteSettingTable User_original[End] =
   {Ptb,             0,             0,            0,     Pr2,      NaNt},
 };
 
+static uint8_t max_index = var_end;
+int16_t User_int[var_end] = {};
 uint8_t User_reset[SPIAddr_End] = {};
+uint8_t eep_read[SPIAddr_End] = {};
 int16_t sys_table[End] = {};
+
+void user_to_eepreset(uint8_t index)
+{
+  bool user_to_eep_err=false;
+
+  switch (index)
+  {
+    //長度為1個byte的值
+    case Str:
+      User_reset[SPIAddr_Start] = User_int[index];
+      break;
+    case Hy:
+      User_reset[SPIAddr_Hy] = User_int[index];
+      break;
+    case Ot:
+      User_reset[SPIAddr_Ot] = User_int[index];
+      break;
+    case P2P:
+      User_reset[SPIAddr_P2P] = User_int[index];
+      break;
+    case OE:
+      User_reset[SPIAddr_OE] = User_int[index];
+      break;
+    case P3P:
+      User_reset[SPIAddr_P3P] = User_int[index];
+      break;
+    case O3:
+      User_reset[SPIAddr_O3] = User_int[index];
+      break;
+    case P4P:
+      User_reset[SPIAddr_P4P] = User_int[index];
+      break;
+    case O4:
+      User_reset[SPIAddr_O4] = User_int[index];
+      break;
+    case OdS:
+      User_reset[SPIAddr_OdS] = User_int[index];
+      break;
+    case AC:
+      User_reset[SPIAddr_AC] = User_int[index];
+      break;
+    case rtr:
+      User_reset[SPIAddr_rtr] = User_int[index];
+      break;
+    case CCt:
+      User_reset[SPIAddr_CCt] = User_int[index];
+      break;
+    case COn:
+      User_reset[SPIAddr_COn] = User_int[index];
+      break;
+    case COF:
+      User_reset[SPIAddr_COF] = User_int[index];
+      break;
+    case CF:
+      User_reset[SPIAddr_CF] = User_int[index];
+      break;
+    case rES:
+      User_reset[SPIAddr_rES] = User_int[index];
+      break;
+    case Lod:
+      User_reset[SPIAddr_Lod] = User_int[index];
+      break;
+    case rEd:
+      User_reset[SPIAddr_rEd] = User_int[index];
+      break;
+    case dLY:
+      User_reset[SPIAddr_dLY] = User_int[index];
+      break;
+    case dtr:
+      User_reset[SPIAddr_dtr] = User_int[index];
+      break;
+    case tdF:
+      User_reset[SPIAddr_tdF] = User_int[index];
+      break;
+    case dFP:
+      User_reset[SPIAddr_dFP] = User_int[index];
+      break;
+    case dtE:
+      User_reset[SPIAddr_dtE] = User_int[index];
+      break;
+    case IdF:
+      User_reset[SPIAddr_IdF] = User_int[index];
+      break;
+    case MdF:
+      User_reset[SPIAddr_MdF] = User_int[index];
+      break;
+    case dSd:
+      User_reset[SPIAddr_dSd] = User_int[index];
+      break;
+    case dFd:
+      User_reset[SPIAddr_dFd] = User_int[index];
+      break;
+    case dAd:
+      User_reset[SPIAddr_dAd] = User_int[index];
+      break;
+    case Fdt:
+      User_reset[SPIAddr_Fdt] = User_int[index];
+      break;
+    case dPo:
+      User_reset[SPIAddr_dPo] = User_int[index];
+      break;
+    case dAF:
+      User_reset[SPIAddr_dAF] = User_int[index];
+      break;
+    case FnC:
+      User_reset[SPIAddr_FnC] = User_int[index];
+      break;
+    case Fnd:
+      User_reset[SPIAddr_Fnd] = User_int[index];
+      break;
+    case Fct:
+      User_reset[SPIAddr_Fct] = User_int[index];
+      break;
+    case FSt:
+      User_reset[SPIAddr_FSt] = User_int[index];
+      break;
+    case Fon:
+      User_reset[SPIAddr_Fon] = User_int[index];
+      break;
+    case FoF:
+      User_reset[SPIAddr_FoF] = User_int[index];
+      break;
+    case FAP:
+      User_reset[SPIAddr_FAP] = User_int[index];
+      break;
+    case ALC:
+      User_reset[SPIAddr_ALC] = User_int[index];
+      break;
+    case AFH:
+      User_reset[SPIAddr_AFH] = User_int[index];
+      break;
+    case ALd:
+      User_reset[SPIAddr_ALd] = User_int[index];
+      break;
+    case dAO:
+      User_reset[SPIAddr_dAO] = User_int[index];
+      break;
+    case AP2:
+      User_reset[SPIAddr_AP2] = User_int[index];
+      break;
+    case AH2:
+      User_reset[SPIAddr_AH2] = User_int[index];
+      break;
+    case Ad2:
+      User_reset[SPIAddr_Ad2] = User_int[index];
+      break;
+    case dA2:
+      User_reset[SPIAddr_dA2] = User_int[index];
+      break;
+    case bLL:
+      User_reset[SPIAddr_bLL] = User_int[index];
+      break;
+    case AC2:
+      User_reset[SPIAddr_AC2] = User_int[index];
+      break;
+    case i1P:
+      User_reset[SPIAddr_i1P] = User_int[index];
+      break;
+    case i1F:
+      User_reset[SPIAddr_i1F] = User_int[index];
+      break;
+    case did:
+      User_reset[SPIAddr_did] = User_int[index];
+      break;
+    case nPS:
+      User_reset[SPIAddr_nPS] = User_int[index];
+      break;
+    case odc:
+      User_reset[SPIAddr_odc] = User_int[index];
+      break;
+    case rrd:
+      User_reset[SPIAddr_rrd] = User_int[index];
+      break;
+    case HES:
+      User_reset[SPIAddr_HES] = User_int[index];
+      break;
+    case Adr:
+      User_reset[SPIAddr_Adr] = User_int[index];
+      break;
+    case PbC:
+      User_reset[SPIAddr_PbC] = User_int[index];
+      break;
+    case onF:
+      User_reset[SPIAddr_onF] = User_int[index];
+      break;
+
+    //長度為2個byte的值
+    case Set:
+      User_reset[SPIAddr_Set_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_Set_L] = User_int[index] & 0xff;  //取低位元
+      break;
+    case LS:
+      User_reset[SPIAddr_LS_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_LS_L] = User_int[index] & 0xff;  //取低位元
+      break;
+    case US:
+      User_reset[SPIAddr_US_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_US_L] = User_int[index] & 0xff;  //取低位元
+      break;
+    case CCS:
+      User_reset[SPIAddr_CCS_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_CCS_L] = User_int[index] & 0xff;  //取低位元
+      break;
+    case ALU:
+      User_reset[SPIAddr_ALU_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_ALU_L] = User_int[index] & 0xff;  //取低位元
+      break;
+    case ALL:
+      User_reset[SPIAddr_ALL_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_ALL_L] = User_int[index] & 0xff;  //取低位元
+      break;
+    case AL2:
+      User_reset[SPIAddr_AL2_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_AL2_L] = User_int[index] & 0xff;  //取低位元
+      break;
+    case Au2:
+      User_reset[SPIAddr_Au2_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_Au2_L] = User_int[index] & 0xff;  //取低位元
+      break;
+
+    case RecordLow:
+      User_reset[SPIAddr_RecordLow_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_RecordLow_L] = User_int[index] & 0xff;  //取低位元
+      break;
+    case RecordHigh:
+      User_reset[SPIAddr_RecordHigh_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_RecordHigh_L] = User_int[index] & 0xff;  //取低位元
+      break;
+
+    default:
+      printf("user_to_eepreset輸入錯誤\r\n");
+      user_to_eep_err = true;
+      break;
+  }
+}
 
 void original_to_reset(void)
 {
-  uint8_t i = xxx;
-  uint8_t addr=SPIAddr_Start;
-  int16_t i16_value;
+  uint8_t i = Str;
+  float dE_value;
 
-  static uint8_t max_index = var_end;
-  int16_t User_int[max_index] = {};
-
-  while(i<=max_index)
+  while(i<max_index)
   {
-  //把原始的使用者數值(小數點)轉換成10倍並shift成正整數
-    i16_value = User_original[i].DefaultValue - User_original[i].Range_Low;
+  //把原始的使用者數值(小數點)shift成正數
+    dE_value = User_original[i].DefaultValue - User_original[i].Range_Low;
 
+  //判斷是否需轉換成10倍做eeprom的存取(亦為系統使用值)
     if(User_original[i].DataDigit == in)
-      User_int[i] = i16_value; //整數值直接讀取
+      User_int[i] = (int16_t)dE_value; //整數值直接讀取
     else if(User_original[i].DataDigit == dE)
-      User_int[i] = i16_value*10; //小數值需放大10倍
+      User_int[i] = (int16_t)(dE_value*10); //小數值需放大10倍
+    // printf("User_int[%d]: %d\r\n",i , User_int[i]);
 
-    printf("User_int[%d]: %d\r\n",i , User_int[i]);
-
-  //把原始的使用者數值(小數點)轉換成10倍後放入準備寫入eeprom的陣列內
-    if((addr==SPIAddr_Start)||(addr==SPIAddr_P2P)||(addr==SPIAddr_P3P)||(addr==SPIAddr_P4P)||(addr==SPIAddr_CF)|| \
-      (addr==SPIAddr_rES)||(addr==SPIAddr_Lod)||(addr==SPIAddr_rEd)||(addr==SPIAddr_tdF)|| \
-      (addr==SPIAddr_dFP)||(addr==SPIAddr_dFd)||(addr==SPIAddr_dPo)||(addr==SPIAddr_FnC)|| \
-      (addr==SPIAddr_Fnd)||(addr==SPIAddr_FAP)||(addr==SPIAddr_ALC)||(addr==SPIAddr_AP2)|| \
-      (addr==SPIAddr_bLL)||(addr==SPIAddr_AC2)||(addr==SPIAddr_i1P)||(addr==SPIAddr_i1F)|| \
-      (addr==SPIAddr_odc)||(addr==SPIAddr_rrd)||(addr==SPIAddr_PbC)||(addr==SPIAddr_onF)
-      )
-    {
-      //長度為1個byte的值
-      User_reset[addr] = User_int[i];
-      addr++;
-    }
-    else
-    {
-      //長度為2個byte的值
-      User_reset[addr+1] = User_int[i] >> 8;    //取高位元
-      User_reset[addr] = User_int[i] & 0xff;    //取低位元
-      addr+=2;
-    }
+  //把原始的使用者數值轉換後, 準備寫入eeprom的陣列內, addr的順序與Usertable排列不同
+    user_to_eepreset(i);
     i++;
   }
 
-// //寫入原廠設定
-//   printf("開始恢復原廠值\r\n");
-//   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-//   I2C_EE_BufferWrite(User_reset, 0x00, SPIAddr_End);
-//   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-//   printf("完成恢復原廠值\r\n");
+}
+
+void eepread_to_user(uint8_t index)
+{
+  int16_t i16_value=0;
+  uint8_t user_addr=0;
+  bool eeptouser_err=false;
+
+//設定對應的參數值
+  switch (index)
+  {
+  //長度為1個byte的值
+    case Str:
+      i16_value = eep_read[SPIAddr_Start];
+      break;
+    case Hy:
+      i16_value = eep_read[SPIAddr_Hy];
+      break;
+    case Ot:
+      i16_value = eep_read[SPIAddr_Ot];
+      break;
+    case P2P:
+      i16_value = eep_read[SPIAddr_P2P];
+      break;
+    case OE:
+      i16_value = eep_read[SPIAddr_OE];
+      break;
+    case P3P:
+      i16_value = eep_read[SPIAddr_P3P];
+      break;
+    case O3:
+      i16_value = eep_read[SPIAddr_O3];
+      break;
+    case P4P:
+      i16_value = eep_read[SPIAddr_P4P];
+      break;
+    case O4:
+      i16_value = eep_read[SPIAddr_O4];
+      break;
+    case OdS:
+      i16_value = eep_read[SPIAddr_OdS];
+      break;
+    case AC:
+      i16_value = eep_read[SPIAddr_AC];
+      break;
+    case rtr:
+      i16_value = eep_read[SPIAddr_rtr];
+      break;
+    case CCt:
+      i16_value = eep_read[SPIAddr_CCt];
+      break;
+    case COn:
+      i16_value = eep_read[SPIAddr_COn];
+      break;
+    case COF:
+      i16_value = eep_read[SPIAddr_COF];
+      break;
+    case CF:
+      i16_value = eep_read[SPIAddr_CF];
+      break;
+    case rES:
+      i16_value = eep_read[SPIAddr_rES];
+      break;
+    case Lod:
+      i16_value = eep_read[SPIAddr_Lod];
+      break;
+    case rEd:
+      i16_value = eep_read[SPIAddr_rEd];
+      break;
+    case dLY:
+      i16_value = eep_read[SPIAddr_dLY];
+      break;
+    case dtr:
+      i16_value = eep_read[SPIAddr_dtr];
+      break;
+    case tdF:
+      i16_value = eep_read[SPIAddr_tdF];
+      break;
+    case dFP:
+      i16_value = eep_read[SPIAddr_dFP];
+      break;
+    case dtE:
+      i16_value = eep_read[SPIAddr_dtE];
+      break;
+    case IdF:
+      i16_value = eep_read[SPIAddr_IdF];
+      break;
+    case MdF:
+      i16_value = eep_read[SPIAddr_MdF];
+      break;
+    case dSd:
+      i16_value = eep_read[SPIAddr_dSd];
+      break;
+    case dFd:
+      i16_value = eep_read[SPIAddr_dFd];
+      break;
+    case dAd:
+      i16_value = eep_read[SPIAddr_dAd];
+      break;
+    case Fdt:
+      i16_value = eep_read[SPIAddr_Fdt];
+      break;
+    case dPo:
+      i16_value = eep_read[SPIAddr_dPo];
+      break;
+    case dAF:
+      i16_value = eep_read[SPIAddr_dAF];
+      break;
+    case FnC:
+      i16_value = eep_read[SPIAddr_FnC];
+      break;
+    case Fnd:
+      i16_value = eep_read[SPIAddr_Fnd];
+      break;
+    case Fct:
+      i16_value = eep_read[SPIAddr_Fct];
+      break;
+    case FSt:
+      i16_value = eep_read[SPIAddr_FSt];
+      break;
+    case Fon:
+      i16_value = eep_read[SPIAddr_Fon];
+      break;
+    case FoF:
+      i16_value = eep_read[SPIAddr_FoF];
+      break;
+    case FAP:
+      i16_value = eep_read[SPIAddr_FAP];
+      break;
+    case ALC:
+      i16_value = eep_read[SPIAddr_ALC];
+      break;
+    case AFH:
+      i16_value = eep_read[SPIAddr_AFH];
+      break;
+    case ALd:
+      i16_value = eep_read[SPIAddr_ALd];
+      break;
+    case dAO:
+      i16_value = eep_read[SPIAddr_dAO];
+      break;
+    case AP2:
+      i16_value = eep_read[SPIAddr_AP2];
+      break;
+    case AH2:
+      i16_value = eep_read[SPIAddr_AH2];
+      break;
+    case Ad2:
+      i16_value = eep_read[SPIAddr_Ad2];
+      break;
+    case dA2:
+      i16_value = eep_read[SPIAddr_dA2];
+      break;
+    case bLL:
+      i16_value = eep_read[SPIAddr_bLL];
+      break;
+    case AC2:
+      i16_value = eep_read[SPIAddr_AC2];
+      break;
+    case i1P:
+      i16_value = eep_read[SPIAddr_i1P];
+      break;
+    case i1F:
+      i16_value = eep_read[SPIAddr_i1F];
+      break;
+    case did:
+      i16_value = eep_read[SPIAddr_did];
+      break;
+    case nPS:
+      i16_value = eep_read[SPIAddr_nPS];
+      break;
+    case odc:
+      i16_value = eep_read[SPIAddr_odc];
+      break;
+    case rrd:
+      i16_value = eep_read[SPIAddr_rrd];
+      break;
+    case HES:
+      i16_value = eep_read[SPIAddr_HES];
+      break;
+    case Adr:
+      i16_value = eep_read[SPIAddr_Adr];
+      break;
+    case PbC:
+      i16_value = eep_read[SPIAddr_PbC];
+      break;
+    case onF:
+      i16_value = eep_read[SPIAddr_onF];
+      break;
+
+  //長度為2個byte的值
+    case Set:
+      i16_value = (eep_read[SPIAddr_Set_H]<<8) | eep_read[SPIAddr_Set_L];
+      // i16_value = (User_reset[SPIAddr_Set_H]<<8) | User_reset[SPIAddr_Set_L];
+     break;
+    case LS:
+      i16_value = (eep_read[SPIAddr_LS_H]<<8) | eep_read[SPIAddr_LS_L];
+      break;
+    case US:
+      i16_value = (eep_read[SPIAddr_US_H]<<8) | eep_read[SPIAddr_US_L];
+      break;
+    case CCS:
+      i16_value = (eep_read[SPIAddr_CCS_H]<<8) | eep_read[SPIAddr_CCS_L];
+      break;
+    case ALU:
+      i16_value = (eep_read[SPIAddr_ALU_H]<<8) | eep_read[SPIAddr_ALU_L];
+      break;
+    case ALL:
+      i16_value = (eep_read[SPIAddr_ALL_H]<<8) | eep_read[SPIAddr_ALL_L];
+      break;
+    case AL2:
+      i16_value = (eep_read[SPIAddr_AL2_H]<<8) | eep_read[SPIAddr_AL2_L];
+      break;
+    case Au2:
+      i16_value = (eep_read[SPIAddr_Au2_H]<<8) | eep_read[SPIAddr_Au2_L];
+      break;
+    case RecordHigh:
+      i16_value = (eep_read[SPIAddr_RecordHigh_H]<<8) | eep_read[SPIAddr_RecordHigh_L];
+      break;
+    case RecordLow:
+      i16_value = (eep_read[SPIAddr_RecordLow_H]<<8) | eep_read[SPIAddr_RecordLow_L];
+      break;
+    
+    default:
+      printf("eepread_to_user輸入錯誤\r\n");
+      eeptouser_err = true;
+      break;
+  }
+
+//若輸入的address正確, 判斷是否需將offset做10倍的shift(亦為系統使用值)
+  if(eeptouser_err==false)
+  {
+    if(User_original[index].DataDigit == in)
+      sys_table[index] = i16_value + User_original[index].Range_Low; //整數值直接讀取
+    else if(User_original[index].DataDigit == dE)
+      User_int[index] = i16_value + (User_original[index].Range_Low*10); //小數值需放大10倍
+  }
 }
 
 void eepread_to_systable(void)
 {
-  uint8_t i = xxx;
-  uint8_t addr=SPIAddr_Start;
-
-  static uint8_t max_index = End;
-  uint8_t eep_read[SPIAddr_End] = {};
-  int16_t i16_value;
-
-  //讀出eeprom的數值
-  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  // I2C_EE_BufferRead(eep_read, 0x00, SPIAddr_End);
-  // R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  uint8_t i = Str;
 
 //組合成int16_t的值並shift成User值
-  while(i<=max_index)
+  while(i<max_index)
   {
-    if((addr==SPIAddr_Start)||(addr==SPIAddr_P2P)||(addr==SPIAddr_P3P)||(addr==SPIAddr_P4P)||(addr==SPIAddr_CF)|| \
-      (addr==SPIAddr_rES)||(addr==SPIAddr_Lod)||(addr==SPIAddr_rEd)||(addr==SPIAddr_tdF)|| \
-      (addr==SPIAddr_dFP)||(addr==SPIAddr_dFd)||(addr==SPIAddr_dPo)||(addr==SPIAddr_FnC)|| \
-      (addr==SPIAddr_Fnd)||(addr==SPIAddr_FAP)||(addr==SPIAddr_ALC)||(addr==SPIAddr_AP2)|| \
-      (addr==SPIAddr_bLL)||(addr==SPIAddr_AC2)||(addr==SPIAddr_i1P)||(addr==SPIAddr_i1F)|| \
-      (addr==SPIAddr_odc)||(addr==SPIAddr_rrd)||(addr==SPIAddr_PbC)||(addr==SPIAddr_onF)
-      )
-    {
-      //長度為1個byte的值
-      // sys_table[i] = (eep_read[i] + User_original[i].Range_Low)*10;
-      sys_table[i] = User_reset[addr] + (User_original[i].Range_Low*10);
-      addr++;
-      // printf("User_reset[%d]: %d\r\n",addr , User_reset[addr]);
-      // printf("User_original[%d]: %d\r\n",i , User_original[i].Range_Low);
-      printf("sys_table[%d]: %d\r\n",i , sys_table[i]);
-    }
-    else
-    {
-      //長度為2個byte的值
-      // i16_value = (eep_read[addr+1]<<8) | eep_read[addr];
-      i16_value = (User_reset[addr+1]<<8) | User_reset[addr];
-      sys_table[i] = i16_value + (User_original[i].Range_Low*10);
-      addr+=2;
-      printf("sys_table[%d]: %d\r\n",i , sys_table[i]);
-    }
+    eepread_to_user(i);
     i++;
   }
 
@@ -222,415 +635,269 @@ void eepread_to_systable(void)
 void systable_to_eeprom(uint8_t addr)
 {
   uint8_t eep_write[2]={};
+  uint8_t length=0;
   uint8_t u8_length = 0x01;
   uint8_t u16_length = 0x02;
   uint16_t sys_value = sys_table[addr] - (User_original[addr].Range_Low*10);
+  uint8_t spi_addr=0;
 
   switch (addr)
   {
-    case UserAddr_Start:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Start, u8_length);
+    case Str:
+      spi_addr = SPIAddr_Start;
       break;
-
-    case UserAddr_Set:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Set_L, u16_length);
+    case Hy:
+      spi_addr = SPIAddr_Start;
       break;
-
-    case UserAddr_Hy:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Hy_L, u16_length);
+    case Ot:
+      spi_addr = SPIAddr_Start;
       break;
-
-    case UserAddr_LS:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_LS_L, u16_length);
+    case P2P:
+      spi_addr = SPIAddr_P2P;
       break;
-
-    case UserAddr_US:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_US_L, u16_length);
+    case OE:
+      spi_addr = SPIAddr_OE;
       break;
-
-    case UserAddr_Ot:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Ot_L, u16_length);
+    case P3P:
+      spi_addr = SPIAddr_P3P;
       break;
-
-    case UserAddr_P2P:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_P2P, u8_length);
+    case O3:
+      spi_addr = SPIAddr_O3;
       break;
-
-    case UserAddr_OE:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_OE_L, u16_length);
+    case P4P:
+      spi_addr = SPIAddr_P4P;
       break;
-
-    case UserAddr_P3P:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_P3P, u8_length);
+    case O4:
+      spi_addr = SPIAddr_O4;
       break;
-
-    case UserAddr_O3:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_O3_L, u16_length);
+    case OdS:
+      spi_addr = SPIAddr_OdS;
       break;
-
-    case UserAddr_P4P:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_P4P, u8_length);
+    case AC:
+      spi_addr = SPIAddr_AC;
       break;
-
-    case UserAddr_O4:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_O4_L, u16_length);
+    case rtr:
+      spi_addr = SPIAddr_rtr;
       break;
-
-    case UserAddr_OdS:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_OdS_L, u16_length);
+    case CCt:
+      spi_addr = SPIAddr_CCt;
       break;
-
-    case UserAddr_AC:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_AC_L, u16_length);
+    case COn:
+      spi_addr = SPIAddr_COn;
       break;
-
-    case UserAddr_rtr:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_rtr_L, u16_length);
+    case COF:
+      spi_addr = SPIAddr_COF;
       break;
-
-    case UserAddr_CCt:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_CCt_L, u16_length);
+    case CF:
+      spi_addr = SPIAddr_CF;
       break;
-
-    case UserAddr_CCS:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_CCS_L, u16_length);
+    case rES:
+      spi_addr = SPIAddr_rES;
       break;
-
-    case UserAddr_COn:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_COn_L, u16_length);
+    case Lod:
+      spi_addr = SPIAddr_Lod;
       break;
-
-    case UserAddr_COF:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_COF_L, u16_length);
+    case rEd:
+      spi_addr = SPIAddr_rEd;
       break;
-
-    case UserAddr_CF:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_CF, u8_length);
+    case dLY:
+      spi_addr = SPIAddr_dLY;
       break;
-
-    case UserAddr_rES:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_rES, u8_length);
+    case dtr:
+      spi_addr = SPIAddr_dtr;
       break;
-
-    case UserAddr_Lod:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Lod, u8_length);
+    case tdF:
+      spi_addr = SPIAddr_tdF;
       break;
-
-    case UserAddr_rEd:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_rEd, u8_length);
+    case dFP:
+      spi_addr = SPIAddr_dFP;
       break;
-
-    case UserAddr_dLY:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dLY_L, u16_length);
+    case dtE:
+      spi_addr = SPIAddr_dtE;
       break;
-
-    case UserAddr_dtr:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dtr_L, u16_length);
+    case IdF:
+      spi_addr = SPIAddr_IdF;
       break;
-
-    case UserAddr_tdF:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_tdF, u8_length);
+    case MdF:
+      spi_addr = SPIAddr_MdF;
       break;
-
-    case UserAddr_dFP:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dFP, u8_length);
+    case dSd:
+      spi_addr = SPIAddr_dSd;
       break;
-
-    case UserAddr_dtE:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dtE_L, u16_length);
+    case dFd:
+      spi_addr = SPIAddr_dFd;
       break;
-
-    case UserAddr_IdF:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_IdF_L, u16_length);
+    case dAd:
+      spi_addr = SPIAddr_dAd;
       break;
-
-    case UserAddr_MdF:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_MdF_L, u16_length);
+    case Fdt:
+      spi_addr = SPIAddr_Fdt;
       break;
-
-    case UserAddr_dSd:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dSd_L, u16_length);
+    case dPo:
+      spi_addr = SPIAddr_dPo;
       break;
-
-    case UserAddr_dFd:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dFd, u8_length);
+    case dAF:
+      spi_addr = SPIAddr_dAF;
       break;
-
-    case UserAddr_dAd:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dAd_L, u16_length);
+    case FnC:
+      spi_addr = SPIAddr_FnC;
       break;
-
-    case UserAddr_Fdt:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Fdt_L, u16_length);
+    case Fnd:
+      spi_addr = SPIAddr_Fnd;
       break;
-
-    case UserAddr_dPo:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dPo, u8_length);
+    case Fct:
+      spi_addr = SPIAddr_Fct;
       break;
-
-    case UserAddr_dAF:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dAF_L, u16_length);
+    case FSt:
+      spi_addr = SPIAddr_FSt;
       break;
-
-    case UserAddr_FnC:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_FnC, u8_length);
+    case Fon:
+      spi_addr = SPIAddr_Fon;
       break;
-
-    case UserAddr_Fnd:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Fnd, u8_length);
+    case FoF:
+      spi_addr = SPIAddr_FoF;
       break;
-
-    case UserAddr_Fct:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Fct_L, u16_length);
+    case FAP:
+      spi_addr = SPIAddr_FAP;
       break;
-
-    case UserAddr_FSt:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_FSt_L, u16_length);
+    case ALC:
+      spi_addr = SPIAddr_ALC;
       break;
-
-    case UserAddr_Fon:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Fon_L, u16_length);
+    case AFH:
+      spi_addr = SPIAddr_AFH;
       break;
-
-    case UserAddr_FoF:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_FoF_L, u16_length);
+    case ALd:
+      spi_addr = SPIAddr_ALd;
       break;
-
-    case UserAddr_FAP:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_FAP, u8_length);
+    case dAO:
+      spi_addr = SPIAddr_dAO;
       break;
-
-    case UserAddr_ALC:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_ALC, u8_length);
+    case AP2:
+      spi_addr = SPIAddr_AP2;
       break;
-
-    case UserAddr_ALU:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_ALU_L, u16_length);
+    case AH2:
+      spi_addr = SPIAddr_AH2;
       break;
-
-    case UserAddr_ALL:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_ALL_L, u16_length);
+    case Ad2:
+      spi_addr = SPIAddr_Ad2;
       break;
-
-    case UserAddr_AFH:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_AFH_L, u16_length);
+    case dA2:
+      spi_addr = SPIAddr_dA2;
       break;
-
-    case UserAddr_ALd:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_ALd_L, u16_length);
+    case bLL:
+      spi_addr = SPIAddr_bLL;
       break;
-
-    case UserAddr_dAO:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dAO_L, u16_length);
+    case AC2:
+      spi_addr = SPIAddr_AC2;
       break;
-
-    case UserAddr_AP2:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_AP2, u8_length);
+    case i1P:
+      spi_addr = SPIAddr_i1P;
       break;
-
-    case UserAddr_AL2:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_AL2_L, u16_length);
+    case i1F:
+      spi_addr = SPIAddr_i1F;
       break;
-
-    case UserAddr_Au2:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Au2_L, u16_length);
+    case did:
+      spi_addr = SPIAddr_did;
       break;
-
-    case UserAddr_AH2:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_AH2_L, u16_length);
+    case nPS:
+      spi_addr = SPIAddr_nPS;
       break;
-
-    case UserAddr_Ad2:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Ad2_L, u16_length);
+    case odc:
+      spi_addr = SPIAddr_odc;
       break;
-
-    case UserAddr_dA2:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_dA2_L, u16_length);
+    case rrd:
+      spi_addr = SPIAddr_rrd;
       break;
-
-    case UserAddr_bLL:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_bLL, u8_length);
+    case HES:
+      spi_addr = SPIAddr_HES;
       break;
-
-    case UserAddr_AC2:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_AC2, u8_length);
+    case Adr:
+      spi_addr = SPIAddr_Adr;
       break;
-
-    case UserAddr_i1P:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_i1P, u8_length);
+    case PbC:
+      spi_addr = SPIAddr_PbC;
       break;
-
-    case UserAddr_i1F:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_i1F, u8_length);
+    case onF:
+      spi_addr = SPIAddr_onF;
       break;
 
-    case UserAddr_did:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_did_L, u16_length);
-      break;
 
-    case UserAddr_nPS:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_nPS_L, u16_length);
+    case Set:
+      spi_addr = SPIAddr_Set_L;
       break;
-
-    case UserAddr_odc:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_odc, u8_length);
+    case LS:
+      spi_addr = SPIAddr_LS_L;
       break;
-
-    case UserAddr_rrd:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_rrd, u8_length);
+    case US:
+      spi_addr = SPIAddr_US_L;
       break;
-
-    case UserAddr_HES:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_HES_L, u16_length);
+    case CCS:
+      spi_addr = SPIAddr_CCS_L;
       break;
-
-    case UserAddr_Adr:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_Adr_L, u16_length);
+    case ALU:
+      spi_addr = SPIAddr_ALU_L;
       break;
-
-    case UserAddr_PbC:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_PbC, u8_length);
+    case ALL:
+      spi_addr = SPIAddr_ALL_L;
       break;
-
-    case UserAddr_onF:
-      eep_write[0] = sys_value;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_onF, u8_length);
+    case AL2:
+      spi_addr = SPIAddr_AL2_L;
       break;
-
-    case UserAddr_history_min:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_history_min_L, u16_length);
+    case Au2:
+      spi_addr = SPIAddr_Au2_L;
+      break;
+    case RecordLow:
+      spi_addr = SPIAddr_RecordLow_L;
+      break;
+    case RecordHigh:
+      spi_addr = SPIAddr_RecordHigh_L;
       break;
 
-    case UserAddr_history_max:
-      eep_write[0] = sys_value & 0xFF;
-      eep_write[1] = sys_value >> 8;
-      I2C_EE_BufferWrite(eep_write, SPIAddr_history_max_L, u16_length);
-      break;
-    
     default:
       break;
+  }
+
+
+  if(length == u8_length)
+  {
+    eep_write[0] = sys_value;
+    I2C_EE_BufferWrite(eep_write, spi_addr, length);
+  }
+  else if(length == u16_length)
+  {
+    eep_write[0] = sys_value & 0xFF;
+    eep_write[1] = sys_value >> 8;
+    I2C_EE_BufferWrite(eep_write, spi_addr, length);
   }
 }
 
 
 void test_datastore(void)
 {
-  uint8_t i=UserAddr_Start;
+  uint8_t i=Str;
 
-  //產出reset的table, 建議每次上電都做
-  original_to_reset();
+//步驟1:讀出eeprom的數值 (eep_read[])
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  I2C_EE_BufferRead(eep_read, SPIAddr_Start, SPIAddr_End);
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  printf("eep_read讀出結束\r\n");
 
-  //將eeprom讀出後寫入system的table內直接使用
+//步驟2:判斷是否需要reset, 若要reset則產出reset的table
+  if(eep_read[Str] != No_problem)
+  {
+  //產出reset要用的table (User_reset[])
+    original_to_reset();
+  //寫入原廠設定
+    printf("開始恢復原廠值\r\n");
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+    I2C_EE_BufferWrite(User_reset, 0x00, SPIAddr_End);
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+    printf("完成恢復原廠值\r\n");
+  }
+  else
+    printf("系統值不須重置\r\n");
+
+//步驟3:將eepread值轉換成system值直接使用 (sys_table[])
   eepread_to_systable();
 
   //測試將system的數值任意修改後寫入eeprom內

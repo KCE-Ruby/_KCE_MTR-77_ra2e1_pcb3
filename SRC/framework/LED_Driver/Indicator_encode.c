@@ -79,7 +79,7 @@ static const uint8_t _char_LookupTable[][8] = {
 };
 
 static const uint8_t ByteTable[][3] = {
-  {dig_off,   dig_off,    dig_off},    // xxx
+  {dig_off,   dig_off,    dig_off},    // Str xxx(不顯示)
   {dig_off,   dig_off,    dig_off},    // Set
   //7.1 調節參數
   {dig_H,       dig_y,    dig_off},    // Hy 
