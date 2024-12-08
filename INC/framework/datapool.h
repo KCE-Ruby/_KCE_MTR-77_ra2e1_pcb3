@@ -292,6 +292,6 @@ uint8_t get_bytetable_pr1(void);
 uint8_t get_bytetable_pr2(void);
 int16_t check_Limit_Value(int16_t data, int8_t index);
 int16_t celsius_to_fahrenheit(int16_t pv);
-void upload_syscfg_data(int8_t pr_index);
+// void upload_syscfg_data(int8_t pr_index);
 
 #endif /* INC_DATAPOOL_H_ */

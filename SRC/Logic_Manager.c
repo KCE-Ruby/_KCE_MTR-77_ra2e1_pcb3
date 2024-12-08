@@ -386,7 +386,7 @@ static void update_display_message(void)
       // printf("HOME_leave_f = %d\r\n", leave_flag);
     break;
 
-    case historyMode:
+    case recordMode:
       historyModelogic(&dly_flag_H, &dly_flag_L, &leave_flag);
     break;
 

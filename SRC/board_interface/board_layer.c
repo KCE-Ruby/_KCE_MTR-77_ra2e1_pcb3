@@ -22,6 +22,9 @@
 #define Timer_Limit_Counter_Max  (600000) //10min; 600s
 
 /* variables -----------------------------------------------------------------*/
+bool Recordmode_High, Recordmode_Low, Recordmode_clear;
+
+
 static bool scan_complete_flag = false;
 __IO r_tmr tmr;
 __IO bsp_io_level_t KeyPin, pin_sta[7];

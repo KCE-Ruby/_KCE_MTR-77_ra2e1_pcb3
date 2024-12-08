@@ -38,7 +38,7 @@ __IO ByteSettingTable User_original[End] =
 {
   {Str,  New_eeprom,  Reset_eeprom,   No_problem,     NaN,       in}, //對齊參數用的而已
   {Set,           -50,         110.0,         -5.0,     NaN,       dE},
-  //參數字元,  下限值,        上限值,        預設值,   權限層      位數
+  //參數字元,  下限值,        上限值,        預設值,   權限層      整數
   { Hy,           0.1,          25.5,          2.0,     Pr1,       dE},
   { LS,         -50.0,         110.0,        -50.0,     Pr2,       dE},
   { US,         -50.0,         110.0,        110.0,     Pr2,       dE},
@@ -118,6 +118,7 @@ int16_t User_int[var_end] = {};
 uint8_t User_reset[SPIAddr_End] = {};
 uint8_t eep_read[SPIAddr_End] = {};
 int16_t sys_table[End] = {};
+int16_t pre_table[End] = {};
 
 void user_to_eepreset(uint8_t index)
 {
@@ -871,6 +872,11 @@ void systable_to_eeprom(uint8_t addr)
   }
 }
 
+
+void upload_syscfg_data(int8_t pr_index)
+{
+  sys_table[pr_index] = pre_table[pr_index];
+}
 
 void test_datastore(void)
 {

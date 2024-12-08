@@ -39,7 +39,7 @@ enum DISPLAY_SPECIAL
 enum SYSTEM_MODE
 {
   homeMode,
-  historyMode,
+  recordMode,
   level1Mode,
   level2Mode,
   checkgMode,
@@ -107,13 +107,13 @@ typedef struct  //different timer flags
 {
   //非初始化參數值
   int16_t RecordHigh, RecordLow;
+  uint8_t mode;                       //顯示目前的模式, 首頁/設定模式
+  int8_t level1_index, level2_index;  //用戶層的參數名稱指標
   //其他
   int16_t value[78];            //大小為[End], 各參數內的數值, 有負數沒有小數, 以整數儲存
   int16_t pv_disp, pv, history_max, history_min; //3位數值, 含負數
-  uint8_t mode;                 //顯示目前的模式, 首頁/設定模式
   uint8_t decimalIndex;         //顯示的小數點位
   s_EEPROM eep;                 //有被存入EEPROM的參數們
-  int8_t level1_index, level2_index; //用戶層的參數名稱指標
   f_menu keymode;               //按鍵切換旗標用
 }s_Var;
 

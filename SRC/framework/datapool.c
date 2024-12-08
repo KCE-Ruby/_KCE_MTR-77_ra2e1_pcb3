@@ -378,10 +378,10 @@ int16_t celsius_to_fahrenheit(int16_t pv)
 }
 
 /* upload data Function definitions ------------------------------------------------------*/
-void upload_syscfg_data(int8_t pr_index)
-{
-  Syscfg.value[pr_index] = Preload.value[pr_index];
-}
+// void upload_syscfg_data(int8_t pr_index)
+// {
+//   sys_table[pr_index] = pre_table[pr_index];
+// }
 
 
 

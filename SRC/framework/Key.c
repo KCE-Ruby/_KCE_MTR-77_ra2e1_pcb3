@@ -33,6 +33,11 @@
 #define KEY_cnt_min                      (1)
 
 /* extern variables -----------------------------------------------------------------*/
+extern int16_t sys_table[End];
+extern int16_t pre_table[End];
+extern bool Recordmode_High, Recordmode_Low, Recordmode_clear;
+extern __IO ByteSettingTable User_original[End];
+
 extern __IO bsp_io_level_t KeyPin, pin_sta[6];
 extern __IO s_Var Syscfg, Preload;
 extern __IO s_Flag sFlag;
@@ -52,6 +57,8 @@ __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
 static uint8_t api_sta=API_FREE;
 
 /* Private function protocol -----------------------------------------------*/
+static void Vindex_process_DataDigit(int8_t pr_index);
+
 static void levelmode_handle(uint8_t *index, bool iskeyup);
 static void levelmode_keydown_handle(uint8_t *index);
 static void Vindex_process_keyup(int8_t pr_index);
@@ -210,7 +217,8 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
                     bytetable_pr2[(*level_index)];
 
         //要先處理某些需要先特殊處理的參數
-        Vindex_process_keyup(pr_index);
+        Vindex_process_DataDigit(pr_index);
+        // Vindex_process_keyup(pr_index);
       }
       else
       {
@@ -223,7 +231,8 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
                     bytetable_pr2[(*level_index)];
 
         //要先處理某些需要先特殊處理的參數
-        Vindex_process_keydown(pr_index);
+        Vindex_process_DataDigit(pr_index);
+        // Vindex_process_keydown(pr_index);
       }
 
     }
@@ -232,20 +241,32 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
       //pr_index就是要被放到總表當index的, 所以在總表的onF以下都是可以改的數值
       if(pr_index <= onF)
       {
-        //數值需要先被加過後再檢查最大最小值
+        //數值需要先被加/減過後再檢查最大最小值
         if(iskeyup)
         {
-          if(Syscfg.value[rES] == DECIMAL_AT_0)
-            Preload.value[pr_index] += 10;
-          else if(Syscfg.value[rES] == DECIMAL_AT_1)
-            Preload.value[pr_index]++;
+          //若本來是小數的則10倍數增加
+          if(User_original[pr_index].DataDigit == dE)
+          {
+            if(sys_table[rES] == DECIMAL_AT_0)
+              pre_table[pr_index] += 10;
+            else if(sys_table[rES] == DECIMAL_AT_1)
+              pre_table[pr_index]++;
+          }
+          else
+            pre_table[pr_index]++;
         }
         else
         {
-          if(Syscfg.value[rES] == DECIMAL_AT_0)
-            Preload.value[pr_index] -= 10;
-          else if(Syscfg.value[rES] == DECIMAL_AT_1)
-            Preload.value[pr_index]--;
+          //若本來是小數的則10倍數減少
+          if(User_original[pr_index].DataDigit == dE)
+          {
+            if(sys_table[rES] == DECIMAL_AT_0)
+              pre_table[pr_index] -= 10;
+            else if(sys_table[rES] == DECIMAL_AT_1)
+              pre_table[pr_index]--;
+          }
+          else
+            pre_table[pr_index]--;
         }
 
         // 更新 pr_index 到最新值(一定要這樣寫)
@@ -253,8 +274,8 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
                     bytetable_pr1[(*level_index)] : 
                     bytetable_pr2[(*level_index)];
 
-        Preload.value[pr_index] = check_Limit_Value(Preload.value[pr_index], pr_index);
-        // printf("數值 = %d\r\n", Preload.value[pr_index]);
+        pre_table[pr_index] = check_Limit_Value(pre_table[pr_index], pr_index);
+        // printf("數值 = %d\r\n", pre_table[pr_index]);
       }
     }
   }
@@ -264,6 +285,15 @@ static void levelmode_handle(uint8_t *index, bool iskeyup)
     KeyUp.Cnt = 0;
     Syscfg.mode = homeMode;
   }
+}
+
+static void Vindex_process_DataDigit(int8_t pr_index)
+{
+  //數值為整數單位
+  if(User_original[pr_index].DataDigit == in)
+    sFlag.Vvalue_int = true;
+  else
+    sFlag.Vvalue_int = false;
 }
 
 static void Vindex_process_keyup(int8_t pr_index)
@@ -334,12 +364,7 @@ static void Vvalue_process_keydown(int8_t pr_index)
   }
 }
 
-static void activateEnhancedCooling(void)
-{
-  icon.Enhanced_Cooling_sta = icon_EC_enable;
-  api_sta = API_BUSY1;
-}
-
+//下鍵相關的API
 static void intoPr2(void)
 {
   if(sFlag.Level1_value == Pr2_symbol)
@@ -390,10 +415,57 @@ static Key_Manager key_detect(Key_Manager key)
   return key;
 }
 
+//上鍵相關的API
+static void activateEnhancedCooling(void)
+{
+  api_sta = API_BUSY1;
+  icon.Enhanced_Cooling_sta = icon_EC_enable;
+}
+
+static void keyupshortpressed(void)
+{
+  //上鍵短按時, 各模式下功能
+  api_sta = API_BUSY2;
+  Recordmode_High = false;
+  Recordmode_Low = false;   //為了避免卡在歷史低點畫面
+
+  switch (Syscfg.mode)
+  {
+    case homeMode:
+      Recordmode_High = true;
+      Syscfg.mode = recordMode;
+    break;
+
+    case recordMode:
+      Recordmode_High = false;
+      Syscfg.mode = homeMode;
+    break;
+
+    case level1Mode:
+      levelmode_handle(&sFlag.Level1_value, true);
+    break;
+
+    case level2Mode:
+      levelmode_handle(&sFlag.Level2_value, true);
+    break;
+
+    case settingMode:
+      pre_table[Set]++;
+      pre_table[Set] = check_Limit_Value(pre_table[Set], Set);
+    break;
+
+    default:
+      Recordmode_High = false;
+      Recordmode_Low = false;   //為了避免卡在歷史低點畫面
+    break;
+  }
+  KeyUp.shortPressed = 0;
+}
+
 static void key_up_function(void)
 {
   /*[上鍵功能]
-  * 長按3秒進入加強製冷模式(舉起flag)
+  * Home狀態下, 長按3秒進入加強製冷模式(舉起flag)
   * Home狀態下, 單擊可查看最大值
   * Menu狀態下, 單擊向下(參數表)瀏覽參數
   * Setting狀態下, 單擊增加參數值
@@ -406,57 +478,17 @@ static void key_up_function(void)
   static uint32_t lastIncrementTime_up = 0;
   uint8_t AUTO_INCREMENT_DELAY;
 
-
   if(api_sta==API_FREE)
   {
     if((KeyUp.Cnt>KEY_cnt_3s) && (Syscfg.mode==homeMode))
       activateEnhancedCooling();
     else if(KeyUp.shortPressed != 0)
-    {
-      Syscfg.keymode.Max_flag = false;
-      Syscfg.keymode.Min_flag = false;
-      switch (Syscfg.mode)
-      {
-        case homeMode:
-          Syscfg.keymode.Max_flag = true;
-          Syscfg.mode = historyMode;
-        break;
-
-        case historyMode:
-          Syscfg.keymode.Max_flag = false;
-          Syscfg.mode = homeMode;
-        break;
-
-        case level1Mode:
-          levelmode_handle(&sFlag.Level1_value, true);
-        break;
-
-        case level2Mode:
-          levelmode_handle(&sFlag.Level2_value, true);
-        break;
-
-        case settingMode:
-          //TODO: get設定值的最大值API, 不要extern 整個table
-          if(Syscfg.value[rES] == DECIMAL_AT_0)
-            Preload.value[Set] += 10;
-          else if(Syscfg.value[rES] == DECIMAL_AT_1)
-            Preload.value[Set]++;
-
-          Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
-          // if(Preload.value[Set] > 1100) Preload.value[Set] = 1100;
-        break;
-
-        default:
-          Syscfg.keymode.Max_flag = false;
-          Syscfg.keymode.Min_flag = false;
-        break;
-      }
-      KeyUp.shortPressed = 0;
-    }
+      keyupshortpressed();
     else if(KeyUp.conti_pressed==true)
     {
       //檢測是否為連加, 數值大於onF的只可讀不可寫
       {
+        api_sta = API_BUSY3;
         //依據長按的時間不同, 按越久間隔越短
         if(KeyUp.Cnt > CONTI_PRESS_times_H)
           AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_H;
@@ -466,7 +498,7 @@ static void key_up_function(void)
           AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_L;
 
         //檢測是否到了自動累加的時間間隔
-        if (tmr.Cnt_1ms - lastIncrementTime_up >= AUTO_INCREMENT_DELAY)
+        if(tmr.Cnt_1ms - lastIncrementTime_up >= AUTO_INCREMENT_DELAY)
         {
           lastIncrementTime_up = tmr.Cnt_1ms;  //更新累加時間
           if((Syscfg.mode==level1Mode) && (pr1_index<=onF))
@@ -474,17 +506,17 @@ static void key_up_function(void)
             //處理長時間連加數值的動作
             if(sFlag.Level1_value == Vvalue)
             {
-              //要被修改的index應該是pr1的table, 而不是Syscfg.value的table
+              //要被修改的index應該是pr1的table, 而不是pre_table
               pr1_index = bytetable_pr1[Syscfg.level1_index];
               if(pr1_index <= onF)
-                Preload.value[pr1_index]++;    //onF以後的參數只能讀不能改
+                pre_table[pr1_index]++;    //onF以後的參數只能讀不能改
 
               //檢查最大最小值, index要放pr1的不是總表的
-              data_bytetable = Preload.value[pr1_index];
               // printf("-------------連加測試開始-------------\r\n");
+              data_bytetable = pre_table[pr1_index];
               // printf("data_bytetable = %d\r\n", data_bytetable);
-              Preload.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-              // printf("keyup數值 = %d\r\n", Preload.value[pr1_index]);
+              pre_table[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+              // printf("keyup數值 = %d\r\n", pre_table[pr1_index]);
             }
           }
           else if((Syscfg.mode==level2Mode) && (pr2_index<=onF))
@@ -495,24 +527,20 @@ static void key_up_function(void)
               //要被修改的index應該是pr2的table, 而不是Syscfg.value的table
               pr2_index = bytetable_pr2[Syscfg.level2_index];
               if(pr2_index <= onF)
-                Preload.value[pr2_index]++;    //onF以後的參數只能讀不能改
+                pre_table[pr2_index]++;    //onF以後的參數只能讀不能改
 
               //檢查最大最小值, index要放pr1的不是總表的
-              data_bytetable = Preload.value[pr2_index];
               // printf("-------------連加測試開始-------------\r\n");
+              data_bytetable = pre_table[pr2_index];
               // printf("data_bytetable = %d\r\n", data_bytetable);
-              Preload.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-              // printf("keyup數值 = %d\r\n", Preload.value[pr1_index]);
+              pre_table[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+              // printf("keyup數值 = %d\r\n", pre_table[pr1_index]);
             }
           }
           else if(Syscfg.mode==settingMode)
           {
-            if(Syscfg.value[rES] == DECIMAL_AT_0)
-              Preload.value[Set] += 10;
-            else if(Syscfg.value[rES] == DECIMAL_AT_1)
-              Preload.value[Set]++;
-
-            Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
+            pre_table[Set]++;
+            pre_table[Set] = check_Limit_Value(pre_table[Set], Set);
           }
         }
       }
@@ -527,6 +555,14 @@ static void key_up_function(void)
         KeyUp.LongPressed = 0;
         KeyUp.shortPressed = 0;
         KeyUp.conti_pressed = 0;
+        api_sta = API_FREE;
+        break;
+
+      case API_BUSY2:
+      case API_BUSY3:
+      case API_BUSY4:
+      case API_BUSY5:
+        api_sta = API_FREE;
         break;
       
       default:
@@ -557,10 +593,10 @@ static void key_down_function(void)
       {
         case homeMode:
           Syscfg.keymode.Min_flag = true;
-          Syscfg.mode = historyMode;
+          Syscfg.mode = recordMode;
         break;
 
-        case historyMode:
+        case recordMode:
           Syscfg.keymode.Min_flag = false;
           Syscfg.mode = homeMode;
         break;
@@ -575,12 +611,12 @@ static void key_down_function(void)
 
         case settingMode:
           //TODO: get設定值的最小值API, 不要extern 整個table
-          if(Syscfg.value[rES] == DECIMAL_AT_0)
-            Preload.value[Set] -= 10;
-          else if(Syscfg.value[rES] == DECIMAL_AT_1)
-            Preload.value[Set]--;
+          // if(Syscfg.value[rES] == DECIMAL_AT_0)
+          //   Preload.value[Set] -= 10;
+          // else if(Syscfg.value[rES] == DECIMAL_AT_1)
+          //   Preload.value[Set]--;
 
-          Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
+          // Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
         break;
 
         default:
@@ -685,7 +721,7 @@ static void key_standby_function(void)
     //TODO: 按下按鍵後的功能
     switch (Syscfg.mode)
     {
-      case historyMode:
+      case recordMode:
         Syscfg.keymode.Max_flag = false;
         Syscfg.keymode.Min_flag = false;
         Syscfg.mode = homeMode;
@@ -709,7 +745,7 @@ static void key_bulb_function(void)
     //TODO: 按下按鍵後的功能
     switch (Syscfg.mode)
     {
-      case historyMode:
+      case recordMode:
         Syscfg.keymode.Max_flag = false;
         Syscfg.keymode.Min_flag = false;
         Syscfg.mode = homeMode;
@@ -737,7 +773,7 @@ static void key_defrost_function(void)
         sFlag.Defrost = true;
       break;
 
-      case historyMode:
+      case recordMode:
         Syscfg.keymode.Max_flag = false;
         Syscfg.keymode.Min_flag = false;
         Syscfg.mode = homeMode;
@@ -770,7 +806,7 @@ static void key_defrost_function(void)
     //TODO: 按下按鍵後的功能
     switch (Syscfg.mode)
     {
-      case historyMode:
+      case recordMode:
         Syscfg.keymode.Max_flag = false;
         Syscfg.keymode.Min_flag = false;
         Syscfg.mode = homeMode;
@@ -822,7 +858,7 @@ static void key_set_function(void)
         }
         break;
 
-        case historyMode:
+        case recordMode:
         //TODO: 要顯示rSt三秒然後reset歷史極值
         if(KeySet.Cnt > KEY_cnt_2s)
         {
@@ -889,7 +925,7 @@ static void key_set_function(void)
       }
       printf("api_sta = %d\r\n", api_sta);
     }
-    else if(Syscfg.mode==historyMode)
+    else if(Syscfg.mode==recordMode)
     {
       Syscfg.keymode.Max_flag = false;
       Syscfg.keymode.Min_flag = false;
@@ -909,7 +945,7 @@ static void key_set_function(void)
           Syscfg.keymode.SET_value_flag = true;
         break;
 
-        case historyMode:
+        case recordMode:
           Syscfg.keymode.Max_flag = false;
           Syscfg.keymode.Min_flag = false;
           Syscfg.mode = homeMode;
