@@ -449,6 +449,22 @@ static Key_Manager key_detect(Key_Manager key)
 }
 
 //設定鍵相關的API
+
+static void keysetshortpressed(void)
+{
+
+}
+
+static void keysetconti_pressed(void)
+{
+
+}
+
+static void keysetclearcnt(void)
+{
+
+}
+
 static void key_set_function(void)
 {
   static uint8_t api_sta=API_FREE;
@@ -493,16 +509,16 @@ static void key_set_function(void)
         if(KeySet.Cnt > KEY_cnt_2s)
         {
           //只要觸發閃爍rSt功能必須閃完三次, 不會被中斷
-          Syscfg.keymode.clear_flag = true;
+          Recordmode_clear = true;
 
           if(clear_Max_flag)
           {
-            Syscfg.history_max = Syscfg.pv;
+            Syscfg.RecordHigh = Syscfg.pv;
             clear_Max_flag = false;
           }
           else if(clear_Min_flag)
           {
-            Syscfg.history_min = Syscfg.pv;
+            Syscfg.RecordLow = Syscfg.pv;
             clear_Min_flag = false;
           }
         }

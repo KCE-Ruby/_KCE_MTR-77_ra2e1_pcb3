@@ -285,9 +285,9 @@ typedef struct
 
 void UserTabletoSytem(void);
 void offset_EEtoSYS(void);
-void get_Pv(void);
-void get_HistoryMax(void);
-void get_HistoryMin(void);
+void get_Pv_old(void);
+void get_HistoryMax_old(void);
+void get_HistoryMin_old(void);
 uint8_t get_bytetable_pr1(void);
 uint8_t get_bytetable_pr2(void);
 int16_t check_Limit_Value(int16_t data, int8_t index);

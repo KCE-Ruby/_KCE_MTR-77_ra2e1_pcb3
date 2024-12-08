@@ -27,6 +27,10 @@
 #define AUTOLEAVE_CHANGESETTIME              (15)      //修改設定值多久後自動跳出, 單位:秒
 
 /* extern variables -----------------------------------------------------------------*/
+extern int16_t sys_table[End];
+extern int16_t pre_table[End];
+extern bool Recordmode_High, Recordmode_Low, Recordmode_clear;
+
 extern r_tmr tmr;
 extern volatile uint8_t data;
 extern __IO s_Var Syscfg, Preload;
@@ -127,9 +131,9 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
   *fHigh = false;
   *fLow = false;
   *fLeave = false;
-  Syscfg.keymode.Max_flag = false;
-  Syscfg.keymode.Min_flag = false;
-  Syscfg.keymode.clear_flag = false;
+  Recordmode_High = false;
+  Recordmode_Low = false;
+  Recordmode_clear = false;
   catch_ms[dly_fHigh] = 0;
   catch_ms[dly_fLow] = 0;
   catch_ms[dly_fLeave] = 0;
@@ -137,7 +141,7 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
 
 static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
 {
-  if(Syscfg.keymode.Max_flag)
+  if(Recordmode_High)
   {
     clear_Max_flag = true;
     clear_Min_flag = false;
@@ -150,9 +154,9 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     {
       //顯示數值, 5秒後離開這層
       if(Syscfg.value[rES] == DECIMAL_AT_0)
-        NumToDisplay(Syscfg.history_max/10);
+        NumToDisplay(Syscfg.RecordHigh/10);
       else if(Syscfg.value[rES] == DECIMAL_AT_1)
-        NumToDisplay(Syscfg.history_max);
+        NumToDisplay(Syscfg.RecordHigh);
 
       if(*fLeave == false)
         *fLeave = Mydelay_ms(dly_fLeave, 5000);
@@ -161,7 +165,7 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     }
     // printf("HIS_dly_f_H = %d\r\n", *fHigh);
   }
-  else if(Syscfg.keymode.Min_flag)
+  else if(Recordmode_Low)
   {
     clear_Min_flag = true;
     clear_Max_flag = false;
@@ -174,9 +178,9 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     {
       //顯示數值, 5秒後離開這層
       if(Syscfg.value[rES] == DECIMAL_AT_0)
-        NumToDisplay(Syscfg.history_min/10);
+        NumToDisplay(Syscfg.RecordLow/10);
       else if(Syscfg.value[rES] == DECIMAL_AT_1)
-        NumToDisplay(Syscfg.history_min);
+        NumToDisplay(Syscfg.RecordLow);
 
       if(*fLeave == false)
         *fLeave = Mydelay_ms(dly_fLeave, 5000);
@@ -187,14 +191,14 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
   }
   else  //非正在顯示極值時
   {
-    if(Syscfg.keymode.clear_flag)
+    if(Recordmode_clear)
     {
       //代表長按SET超過3秒, 開始閃爍
       if(rStToDisplay_Flashing()==true)
       {
         //閃爍rSt3次後離開
         Syscfg.mode = homeMode;
-        Syscfg.keymode.clear_flag = false;
+        Recordmode_clear = false;
       }
     }
     else  //長按SET的時候長亮rSt鍵
@@ -284,8 +288,8 @@ static void valuetodisplay(uint8_t table)
 static void update_history_value(void)
 {
   //取得目前Pv值的歷史最大最小值
-  get_HistoryMax();
-  get_HistoryMin();
+  get_RecordHigh();
+  get_RecordLow();
 }
 
 static void update_icon(void)

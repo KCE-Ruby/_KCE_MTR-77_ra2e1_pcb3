@@ -198,16 +198,13 @@ void offset_EEtoSYS(void)
   }
   printf("讀出Syscfg結束, i=%d\r\n", i);
 
-  // Syscfg.history_max = -9990;
-  // Syscfg.history_min = 9990;
-  
   Syscfg.value[rSE] = Syscfg.value[Set];
   Syscfg.value[rEL] = 10;           //v1.0
   printf("將讀出值做offset結束\r\n");
 }
 
 /* Function definitions ------------------------------------------------------*/
-void get_Pv(void)
+void get_Pv_old(void)
 {
   //Syscfg.value參數基準點為小數後一位, 所以數值已經放大10倍, 取整數的話要除10回來
   const uint16_t rtr_const = Syscfg.value[rtr]/10;
@@ -251,28 +248,28 @@ void get_Pv(void)
   // printf("Syscfg.pv = %d\r\n", Syscfg.pv);
 }
 
-void get_HistoryMax(void)
+void get_HistoryMax_old(void)
 {
   uint8_t length = 2;
 
-  if(Syscfg.pv > Syscfg.history_max)
+  if(Syscfg.pv > Syscfg.RecordHigh)
   {
-    Syscfg.history_max = Syscfg.pv;
-    I2c_Buf_Write[SPIAddr_RecordHigh_L] = Syscfg.history_max & 0xFF;
-    I2c_Buf_Write[SPIAddr_RecordHigh_H] = Syscfg.history_max >> 8;
+    Syscfg.RecordHigh = Syscfg.pv;
+    I2c_Buf_Write[SPIAddr_RecordHigh_L] = Syscfg.RecordHigh & 0xFF;
+    I2c_Buf_Write[SPIAddr_RecordHigh_H] = Syscfg.RecordHigh >> 8;
     // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
   }
 }
 
-void get_HistoryMin(void)
+void get_HistoryMin_old(void)
 {
   uint8_t length = 2;
 
-  if(Syscfg.pv < Syscfg.history_min)
+  if(Syscfg.pv < Syscfg.RecordLow)
   {
-    Syscfg.history_min = Syscfg.pv;
-    I2c_Buf_Write[SPIAddr_RecordLow_L] = Syscfg.history_min & 0xFF;
-    I2c_Buf_Write[SPIAddr_RecordLow_H] = Syscfg.history_min >> 8;
+    Syscfg.RecordLow = Syscfg.pv;
+    I2c_Buf_Write[SPIAddr_RecordLow_L] = Syscfg.RecordLow & 0xFF;
+    I2c_Buf_Write[SPIAddr_RecordLow_H] = Syscfg.RecordLow >> 8;
     // I2C_EE_BufferWrite( I2c_Buf_Write, addr, length);
   }
 }

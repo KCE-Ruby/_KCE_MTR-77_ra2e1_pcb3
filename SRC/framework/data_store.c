@@ -26,6 +26,7 @@
 #include "INC/board_interface/board_layer.h"
 #include "INC/framework/eep_api.h"
 #include "INC/framework/datapool.h"
+#include "INC/framework/outAPI.h"
 #include "INC/framework/data_store.h"
 
 
@@ -37,6 +38,8 @@ static void eepread_to_systable(void);
 static void systable_to_eeprom(uint8_t addr);
 
 /* extern variables -----------------------------------------------------------------*/
+extern __IO s_Var Syscfg;
+extern __IO ADC_TemperatureValue TempValue;
 
 /* variables -----------------------------------------------------------------*/
 //請記得如果修改了User_original的陣列, 需要讓系統重置請將eep_read[Str]旗標寫成NeedtoReset
@@ -886,13 +889,76 @@ static void systable_to_eeprom(uint8_t addr)
   }
 }
 
+void datastore_boot(void)
+
+
+//系統共用數值轉換
+void get_Pv(void)
+{
+  //Syscfg.value參數基準點為小數後一位, 所以數值已經放大10倍, 取整數的話要除10回來
+  const uint16_t rtr_const = sys_table[rtr]/10;
+  const uint16_t dtr_const = sys_table[dtr]/10;
+  const uint8_t source = 8;
+  int16_t pv_1, pv_2, pv_3, pv_4;
+  int16_t t1_f, t2_f, t3_f, t4_f;
+
+  //目前判斷點是依據rtr參數將P1與P2的比例做調整, 整合後為pv值使用
+  if(sys_table[CF] == degree_F)
+  {
+    t1_f = celsius_to_fahrenheit(TempValue.sensor1);
+    t2_f = celsius_to_fahrenheit(TempValue.sensor2);
+    t3_f = celsius_to_fahrenheit(TempValue.sensor3);
+    t4_f = celsius_to_fahrenheit(TempValue.sensor4);
+
+    pv_1 = t1_f + sys_table[Ot];
+    pv_2 = t2_f + sys_table[OE];
+    pv_3 = t3_f + sys_table[O3];
+    pv_4 = t4_f + sys_table[O4];
+  }
+  else
+  {
+    pv_1 = TempValue.sensor1 + sys_table[Ot];
+    pv_2 = TempValue.sensor2 + sys_table[OE];
+    pv_3 = TempValue.sensor3 + sys_table[O3];
+    pv_4 = TempValue.sensor4 + sys_table[O4];
+  }
+  if(sys_table[Lod] == disp_dtr)
+    Syscfg.pv_disp = (dtr_const * (pv_1-pv_2) /100) + pv_2;
+  else if (sys_table[Lod] == disp_P1)
+    Syscfg.pv_disp = pv_1;
+  else if (sys_table[Lod] == disp_P2)
+    Syscfg.pv_disp = pv_2;
+
+  Syscfg.pv = (rtr_const * (pv_1-pv_2) /100) + pv_2;
+}
+
+void get_RecordLow(void)
+{
+  uint8_t length = 2;
+
+  if(Syscfg.pv < Syscfg.RecordLow)
+  {
+    Syscfg.RecordLow = Syscfg.pv;
+    systable_to_eeprom(SPIAddr_RecordLow_L);
+  }
+}
+
+void get_RecordHigh(void)
+{
+  uint8_t length = 2;
+
+  if(Syscfg.pv > Syscfg.RecordHigh)
+  {
+    Syscfg.RecordHigh = Syscfg.pv;
+    systable_to_eeprom(SPIAddr_RecordHigh_L);
+  }
+}
 
 void upload_syscfg_data(int8_t pr_index)
 {
   sys_table[pr_index] = pre_table[pr_index];
 }
 
-void datastore_boot(void)
 {
   uint8_t i=Str;
   uint8_t length = SPIAddr_End-1;
