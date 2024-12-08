@@ -39,9 +39,10 @@ static void systable_to_eeprom(uint8_t addr);
 /* extern variables -----------------------------------------------------------------*/
 
 /* variables -----------------------------------------------------------------*/
+//請記得如果修改了User_original的陣列, 需要讓系統重置請將eep_read[Str]旗標寫成NeedtoReset
 __IO ByteSettingTable User_original[End] = 
 {
-  {Str,  New_eeprom,  Reset_eeprom,   No_problem,     NaN,       in}, //對齊參數用的而已
+  {Str,  New_eeprom,  NeedtoReset,   No_problem,     NaN,       in}, //對齊參數用的而已
   {Set,           -50,         110.0,         -5.0,     NaN,       dE},
   //參數字元,  下限值,        上限值,        預設值,   權限層      整數
   { Hy,           0.1,          25.5,          2.0,     Pr1,       dE},
@@ -382,11 +383,11 @@ static void original_to_reset(void)
       User_int[i] = (uint16_t)dE_value; //整數值直接讀取
     else if(User_original[i].DataDigit == dE)
       User_int[i] = (uint16_t)(dE_value*10); //小數值需放大10倍
-    printf("外面User_int[%d]: %d\r\n",i , User_int[i]);
+    // printf("外面User_int[%d]: %d\r\n",i , User_int[i]);
 
   //把原始的使用者數值轉換後, 準備寫入eeprom的陣列內, addr的順序與Usertable排列不同
     user_to_eepreset(i);
-    printf("外面User_reset[%d]: %d\r\n",i , User_reset[i]);
+    // printf("外面User_reset[%d]: %d\r\n",i , User_reset[i]);
     i++;
   }
 
@@ -643,7 +644,7 @@ static void eepread_to_systable(void)
 //整個系統運算的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
   sys_table[rSE] = sys_table[Set];
   sys_table[rEL] = 10;           //v1.0
-  printf("offset結束\r\n");
+  // printf("offset結束\r\n");
 }
 
 static void systable_to_eeprom(uint8_t addr)
@@ -891,65 +892,50 @@ void upload_syscfg_data(int8_t pr_index)
   sys_table[pr_index] = pre_table[pr_index];
 }
 
-void test_datastore(void)
+void datastore_boot(void)
 {
   uint8_t i=Str;
   uint8_t length = SPIAddr_End-1;
 
-  System_Init();
 //產出reset要用的table (User_reset[])
   original_to_reset();
 
-  printf("測試開始\r\n");
 //步驟1:讀出eeprom的數值 (eep_read[])
+  printf("步驟1:讀出eeprom的數值\r\n");
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   I2C_EE_BufferRead(eep_read, 0x00, length);
   R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
 
-  //将I2c_Buf_Read中的数据通过串口打印
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  for (i=0; i<length; i++) {
-      printf("0x%02X ", eep_read[i]);
-      if (i%16 == 15)
-          printf("\n");
-  }
-  printf("\n");
-  printf("eep_read讀出結束\r\n");
+//請記得如果修改了User_original的陣列, 需要讓系統重置請將eep_read[Str]旗標寫成NeedtoReset
+//也就是把這段打開就好
+  // #define resetsystem
+  #ifdef resetsystem
+    eep_read[Str] = NeedtoReset;
+    printf("成功修改User_original陣列_繁體\r\n");
+  #endif
 
 //步驟2:判斷是否需要reset, 若要reset則產出reset的table
-  // if(eep_read[Str] != No_problem)
-  if(1)
+  printf("步驟2:判斷是否需要reset\r\n");
+  if(eep_read[Str] != No_problem)
   {
-  //寫入原廠設定
-  printf("寫入的數據_繁體\r\n");
-  for ( i=0; i<length; i++ ) { //填充缓冲
-      printf("0x%02X ", User_reset[i]);
-      if (i%16 == 15)
-          printf("\n");
-  }
-  printf("\n");
-  printf("開始恢復原廠值\r\n");
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-    I2C_EE_BufferWrite(User_reset, 0x00, length);
-  R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
-    printf("完成恢復原廠值\r\n");
+    //寫入原廠設定
+    printf("寫入的數據_繁體\r\n");
+    for ( i=0; i<length; i++ ) { //填充缓冲
+        printf("0x%02X ", User_reset[i]);
+        if (i%16 == 15)
+            printf("\n");
+    }
+    printf("\n");
+    printf("開始恢復原廠值\r\n");
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+      I2C_EE_BufferWrite(User_reset, 0x00, length);
+    R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
+      printf("完成恢復原廠值\r\n");
   }
   else
     printf("系統值不須重置\r\n");
 
 //步驟3:將eepread值轉換成system值直接使用 (sys_table[])
+  printf("步驟3:將eepread值轉換成system值\r\n");
   eepread_to_systable();
-
-  //測試將system的數值任意修改後寫入eeprom內
-  // while(i<UserAddr_End)
-  // {
-  //   systable_to_eeprom(i);
-  //   i++;
-  //   WDT_Feed();
-  // }
-
-  while(1)
-  {
-    WDT_Feed();
-  }
 }

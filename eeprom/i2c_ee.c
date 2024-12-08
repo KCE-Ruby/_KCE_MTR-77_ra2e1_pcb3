@@ -186,7 +186,7 @@ void I2C_EE_BufferRead(unsigned char* ptr_read,unsigned char address,unsigned ch
 
     err = R_IIC_MASTER_Read(&EEPROM_ctrl, ptr_read, byte, false);
     // R_BSP_SoftwareDelay(5U, BSP_DELAY_UNITS_MILLISECONDS);
-    printf("Read_err = %d\r\n", err);
+    // printf("Read_err = %d\r\n", err);
 
 }
 

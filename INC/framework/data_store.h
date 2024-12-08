@@ -19,6 +19,6 @@
 
 /* function protocol -----------------------------------------------*/
 void upload_syscfg_data(int8_t pr_index);
-void test_datastore(void);
+void datastore_boot(void);
 
 #endif /* INC_DATA_STORE_H_ */
