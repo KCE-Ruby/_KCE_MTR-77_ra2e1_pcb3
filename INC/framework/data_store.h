@@ -18,9 +18,6 @@
 /* typedef definitions -----------------------------------------------------*/
 
 /* function protocol -----------------------------------------------*/
-void original_to_reset(void);
-void eepread_to_systable(void);
-void systable_to_eeprom(uint8_t addr);
 void upload_syscfg_data(int8_t pr_index);
 void test_datastore(void);
 

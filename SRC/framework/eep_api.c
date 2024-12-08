@@ -236,22 +236,39 @@ uint8_t I2C_Test_1(void)
   System_Init();
   printf("測試開始\r\n");
 
+  printf("\r\n第一次讀出的數據_繁體\n");
+  I2c_Buf_Read_test[0] = 0xFF;
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  I2C_EE_BufferRead(I2c_Buf_Read_test, 0x00 , DATA_Size_test);
+  R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
+
+  //将I2c_Buf_Read中的数据通过串口打印
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  for (i=0; i<DATA_Size_test; i++) {
+      printf("0x%02X ", I2c_Buf_Read_test[i]);
+      if (i%16 == 15)
+          printf("\n");
+
+  }
+  printf("\r\n第一次讀取結束_繁體\n");
+
   //将I2c_Buf_Write中顺序递增的数据写入EERPOM中
   printf("寫入的數據_繁體\r\n");
   for ( i=0; i<DATA_Size_test; i++ ) { //填充缓冲
-      I2c_Buf_Write_test[i] =i+5;
+      I2c_Buf_Write_test[i] =i+2;
       printf("0x%02X ", I2c_Buf_Write_test[i]);
       if (i%16 == 15)
           printf("\n");
   }
   I2C_EE_BufferWrite( I2c_Buf_Write_test, 0x00 , DATA_Size_test);
-
-
+  R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
 
   //将EEPROM读出数据顺序保持到I2c_Buf_Read中
   printf("\r\n讀出的數據_繁體\n");
+  I2c_Buf_Read_test[0] = 0xFF;
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
   I2C_EE_BufferRead(I2c_Buf_Read_test, 0x00 , DATA_Size_test);
+  R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
 
 
   //将I2c_Buf_Read中的数据通过串口打印

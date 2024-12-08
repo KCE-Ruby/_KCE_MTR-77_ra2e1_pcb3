@@ -30,6 +30,11 @@
 
 
 /* Private defines ----------------------------------------------------------*/
+static void user_to_eepreset(uint8_t index);
+static void original_to_reset(void);
+static void eepread_to_user(uint8_t index);
+static void eepread_to_systable(void);
+static void systable_to_eeprom(uint8_t addr);
 
 /* extern variables -----------------------------------------------------------------*/
 
@@ -114,13 +119,13 @@ __IO ByteSettingTable User_original[End] =
 };
 
 static uint8_t max_index = var_end;
-int16_t User_int[var_end] = {};
-uint8_t User_reset[SPIAddr_End] = {};
-uint8_t eep_read[SPIAddr_End] = {};
+uint16_t User_int[var_end] = {};
+static uint8_t User_reset[SPIAddr_End] = {};
+uint8_t eep_read[255] = {};
 int16_t sys_table[End] = {};
 int16_t pre_table[End] = {};
 
-void user_to_eepreset(uint8_t index)
+static void user_to_eepreset(uint8_t index)
 {
   bool user_to_eep_err=false;
 
@@ -129,12 +134,18 @@ void user_to_eepreset(uint8_t index)
     //長度為1個byte的值
     case Str:
       User_reset[SPIAddr_Start] = User_int[index];
+      // printf("Str裡面User_int[%d]: %d\r\n",index , User_int[index]);
+      // printf("Str裡面User_reset[%d]: %d\r\n",SPIAddr_Start , User_reset[SPIAddr_Start]);
       break;
     case Hy:
       User_reset[SPIAddr_Hy] = User_int[index];
+      // printf("Hy裡面User_int[%d]: %d\r\n",index , User_int[index]);
+      // printf("Hy裡面User_reset[%d]: %d\r\n",SPIAddr_Hy , User_reset[SPIAddr_Hy]);
       break;
     case Ot:
       User_reset[SPIAddr_Ot] = User_int[index];
+      // printf("Ot裡面User_int[%d]: %d\r\n",index , User_int[index]);
+      // printf("Ot裡面User_reset[%d]: %d\r\n",SPIAddr_Ot , User_reset[SPIAddr_Ot]);
       break;
     case P2P:
       User_reset[SPIAddr_P2P] = User_int[index];
@@ -195,9 +206,6 @@ void user_to_eepreset(uint8_t index)
       break;
     case dFP:
       User_reset[SPIAddr_dFP] = User_int[index];
-      break;
-    case dtE:
-      User_reset[SPIAddr_dtE] = User_int[index];
       break;
     case IdF:
       User_reset[SPIAddr_IdF] = User_int[index];
@@ -322,6 +330,10 @@ void user_to_eepreset(uint8_t index)
       User_reset[SPIAddr_CCS_H] = User_int[index] >> 8;    //取高位元
       User_reset[SPIAddr_CCS_L] = User_int[index] & 0xff;  //取低位元
       break;
+    case dtE:
+      User_reset[SPIAddr_dtE_H] = User_int[index] >> 8;    //取高位元
+      User_reset[SPIAddr_dtE_L] = User_int[index] & 0xff;  //取低位元
+      break;
     case ALU:
       User_reset[SPIAddr_ALU_H] = User_int[index] >> 8;    //取高位元
       User_reset[SPIAddr_ALU_L] = User_int[index] & 0xff;  //取低位元
@@ -355,7 +367,7 @@ void user_to_eepreset(uint8_t index)
   }
 }
 
-void original_to_reset(void)
+static void original_to_reset(void)
 {
   uint8_t i = Str;
   float dE_value;
@@ -367,19 +379,20 @@ void original_to_reset(void)
 
   //判斷是否需轉換成10倍做eeprom的存取(亦為系統使用值)
     if(User_original[i].DataDigit == in)
-      User_int[i] = (int16_t)dE_value; //整數值直接讀取
+      User_int[i] = (uint16_t)dE_value; //整數值直接讀取
     else if(User_original[i].DataDigit == dE)
-      User_int[i] = (int16_t)(dE_value*10); //小數值需放大10倍
-    // printf("User_int[%d]: %d\r\n",i , User_int[i]);
+      User_int[i] = (uint16_t)(dE_value*10); //小數值需放大10倍
+    printf("外面User_int[%d]: %d\r\n",i , User_int[i]);
 
   //把原始的使用者數值轉換後, 準備寫入eeprom的陣列內, addr的順序與Usertable排列不同
     user_to_eepreset(i);
+    printf("外面User_reset[%d]: %d\r\n",i , User_reset[i]);
     i++;
   }
 
 }
 
-void eepread_to_user(uint8_t index)
+static void eepread_to_user(uint8_t index)
 {
   int16_t i16_value=0;
   uint8_t user_addr=0;
@@ -457,9 +470,6 @@ void eepread_to_user(uint8_t index)
       break;
     case dFP:
       i16_value = eep_read[SPIAddr_dFP];
-      break;
-    case dtE:
-      i16_value = eep_read[SPIAddr_dtE];
       break;
     case IdF:
       i16_value = eep_read[SPIAddr_IdF];
@@ -581,6 +591,9 @@ void eepread_to_user(uint8_t index)
     case CCS:
       i16_value = (eep_read[SPIAddr_CCS_H]<<8) | eep_read[SPIAddr_CCS_L];
       break;
+    case dtE:
+      i16_value = (eep_read[SPIAddr_dtE_H]<<8) | eep_read[SPIAddr_dtE_L];
+      break;
     case ALU:
       i16_value = (eep_read[SPIAddr_ALU_H]<<8) | eep_read[SPIAddr_ALU_L];
       break;
@@ -612,11 +625,11 @@ void eepread_to_user(uint8_t index)
     if(User_original[index].DataDigit == in)
       sys_table[index] = i16_value + User_original[index].Range_Low; //整數值直接讀取
     else if(User_original[index].DataDigit == dE)
-      User_int[index] = i16_value + (User_original[index].Range_Low*10); //小數值需放大10倍
+      sys_table[index] = i16_value + (User_original[index].Range_Low*10); //小數值需放大10倍
   }
 }
 
-void eepread_to_systable(void)
+static void eepread_to_systable(void)
 {
   uint8_t i = Str;
 
@@ -633,7 +646,7 @@ void eepread_to_systable(void)
   printf("offset結束\r\n");
 }
 
-void systable_to_eeprom(uint8_t addr)
+static void systable_to_eeprom(uint8_t addr)
 {
   uint8_t eep_write[2]={};
   uint8_t length=0;
@@ -712,9 +725,6 @@ void systable_to_eeprom(uint8_t addr)
       break;
     case dFP:
       spi_addr = SPIAddr_dFP;
-      break;
-    case dtE:
-      spi_addr = SPIAddr_dtE;
       break;
     case IdF:
       spi_addr = SPIAddr_IdF;
@@ -835,6 +845,9 @@ void systable_to_eeprom(uint8_t addr)
     case CCS:
       spi_addr = SPIAddr_CCS_L;
       break;
+    case dtE:
+      spi_addr = SPIAddr_dtE_L;
+      break;
     case ALU:
       spi_addr = SPIAddr_ALU_L;
       break;
@@ -881,23 +894,44 @@ void upload_syscfg_data(int8_t pr_index)
 void test_datastore(void)
 {
   uint8_t i=Str;
+  uint8_t length = SPIAddr_End-1;
 
+  System_Init();
+//產出reset要用的table (User_reset[])
+  original_to_reset();
+
+  printf("測試開始\r\n");
 //步驟1:讀出eeprom的數值 (eep_read[])
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  I2C_EE_BufferRead(eep_read, SPIAddr_Start, SPIAddr_End);
+  I2C_EE_BufferRead(eep_read, 0x00, length);
+  R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
+
+  //将I2c_Buf_Read中的数据通过串口打印
   R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  for (i=0; i<length; i++) {
+      printf("0x%02X ", eep_read[i]);
+      if (i%16 == 15)
+          printf("\n");
+  }
+  printf("\n");
   printf("eep_read讀出結束\r\n");
 
 //步驟2:判斷是否需要reset, 若要reset則產出reset的table
-  if(eep_read[Str] != No_problem)
+  // if(eep_read[Str] != No_problem)
+  if(1)
   {
-  //產出reset要用的table (User_reset[])
-    original_to_reset();
   //寫入原廠設定
-    printf("開始恢復原廠值\r\n");
-    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-    I2C_EE_BufferWrite(User_reset, 0x00, SPIAddr_End);
-    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  printf("寫入的數據_繁體\r\n");
+  for ( i=0; i<length; i++ ) { //填充缓冲
+      printf("0x%02X ", User_reset[i]);
+      if (i%16 == 15)
+          printf("\n");
+  }
+  printf("\n");
+  printf("開始恢復原廠值\r\n");
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+    I2C_EE_BufferWrite(User_reset, 0x00, length);
+  R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
     printf("完成恢復原廠值\r\n");
   }
   else

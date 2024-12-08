@@ -57,23 +57,49 @@ __IO Key_Manager KeyUp, KeyDown, KeyStandby, KeyBulb, KeyDefrost, KeySet;
 static uint8_t api_sta=API_FREE;
 
 /* Private function protocol -----------------------------------------------*/
-static void Vindex_process_DataDigit(int8_t pr_index);
-
+//共用的按鍵API
 static void levelmode_handle(uint8_t *index, bool iskeyup);
+static void Vindex_process_DataDigit(int8_t pr_index);
+static void clear_Recordmode_sta(void);
+
+//設定鍵相關的API
+static void key_set_function(void);
+
+//上鍵相關的API
+static void activateEnhancedCooling(void);
+static void keyupshortpressed(void);
+static void keyupconti_pressed(void);
+static void keyupclearcnt(void);
+static void key_up_function(void);
+
+//下鍵相關的API
+static void keydownshortpressed(void);
+static void keydownconti_pressed(void);
+static void keydownclearcnt(void);
+static void key_down_function(void);
+
+//待機鍵相關的API
+static void keystandbyshortpressed(void);
+static void keystandbyclearcnt(void);
+static void key_standby_function(void);
+
+//燈泡鍵相關的API
+static void keybulbshortpressed(void);
+static void keybulbclearcnt(void);
+static void key_bulb_function(void);
+
+//融霜鍵相關的API
+static void keydefrostshortpressed(void);
+static void keydefrostclearcnt(void);
+static void key_defrost_function(void);
+
 static void levelmode_keydown_handle(uint8_t *index);
 static void Vindex_process_keyup(int8_t pr_index);
 static void Vindex_process_keydown(int8_t pr_index);
 static void Vvalue_process_keyup(int8_t pr_index);
 static void Vvalue_process_keydown(int8_t pr_index);
-static void activateEnhancedCooling(void);
 static void intoPr2(void);
 static Key_Manager key_detect(Key_Manager key);
-static void key_up_function(void);
-static void key_down_function(void);
-static void key_standby_function(void);
-static void key_bulb_function(void);
-static void key_defrost_function(void);
-static void key_set_function(void);
 
 /* Function definitions ------------------------------------------------------*/
 void Key_main(void)
@@ -169,6 +195,7 @@ bool IsAnyKeyPressed(void)
 }
 
 /* Static Function definitions ------------------------------------------------------*/
+//共用的按鍵API
 static void levelmode_handle(uint8_t *index, bool iskeyup)
 {
   /*[處理單擊上鍵後進入level1 or level2的功能]
@@ -296,6 +323,13 @@ static void Vindex_process_DataDigit(int8_t pr_index)
     sFlag.Vvalue_int = false;
 }
 
+static void clear_Recordmode_sta(void)
+{
+  Recordmode_High = false;
+  Recordmode_Low = false;
+}
+
+
 static void Vindex_process_keyup(int8_t pr_index)
 {
   sFlag.Vvalue_int = false;
@@ -364,7 +398,6 @@ static void Vvalue_process_keydown(int8_t pr_index)
   }
 }
 
-//下鍵相關的API
 static void intoPr2(void)
 {
   if(sFlag.Level1_value == Pr2_symbol)
@@ -415,410 +448,7 @@ static Key_Manager key_detect(Key_Manager key)
   return key;
 }
 
-//上鍵相關的API
-static void activateEnhancedCooling(void)
-{
-  api_sta = API_BUSY1;
-  icon.Enhanced_Cooling_sta = icon_EC_enable;
-}
-
-static void keyupshortpressed(void)
-{
-  //上鍵短按時, 各模式下功能
-  api_sta = API_BUSY2;
-  Recordmode_High = false;
-  Recordmode_Low = false;   //為了避免卡在歷史低點畫面
-
-  switch (Syscfg.mode)
-  {
-    case homeMode:
-      Recordmode_High = true;
-      Syscfg.mode = recordMode;
-    break;
-
-    case recordMode:
-      Recordmode_High = false;
-      Syscfg.mode = homeMode;
-    break;
-
-    case level1Mode:
-      levelmode_handle(&sFlag.Level1_value, true);
-    break;
-
-    case level2Mode:
-      levelmode_handle(&sFlag.Level2_value, true);
-    break;
-
-    case settingMode:
-      pre_table[Set]++;
-      pre_table[Set] = check_Limit_Value(pre_table[Set], Set);
-    break;
-
-    default:
-      Recordmode_High = false;
-      Recordmode_Low = false;   //為了避免卡在歷史低點畫面
-    break;
-  }
-  KeyUp.shortPressed = 0;
-}
-
-static void key_up_function(void)
-{
-  /*[上鍵功能]
-  * Home狀態下, 長按3秒進入加強製冷模式(舉起flag)
-  * Home狀態下, 單擊可查看最大值
-  * Menu狀態下, 單擊向下(參數表)瀏覽參數
-  * Setting狀態下, 單擊增加參數值
-  * [組合鍵功能]
-  * [上+下] = 鎖定or解鎖鍵盤
-  * api_sta代表目前是否有觸發此按鍵功能
-  */
-  int16_t data_bytetable;
-  int8_t pr1_index, pr2_index;
-  static uint32_t lastIncrementTime_up = 0;
-  uint8_t AUTO_INCREMENT_DELAY;
-
-  if(api_sta==API_FREE)
-  {
-    if((KeyUp.Cnt>KEY_cnt_3s) && (Syscfg.mode==homeMode))
-      activateEnhancedCooling();
-    else if(KeyUp.shortPressed != 0)
-      keyupshortpressed();
-    else if(KeyUp.conti_pressed==true)
-    {
-      //檢測是否為連加, 數值大於onF的只可讀不可寫
-      {
-        api_sta = API_BUSY3;
-        //依據長按的時間不同, 按越久間隔越短
-        if(KeyUp.Cnt > CONTI_PRESS_times_H)
-          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_H;
-        else if(KeyUp.Cnt > CONTI_PRESS_times_M)
-          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_M;
-        else
-          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_L;
-
-        //檢測是否到了自動累加的時間間隔
-        if(tmr.Cnt_1ms - lastIncrementTime_up >= AUTO_INCREMENT_DELAY)
-        {
-          lastIncrementTime_up = tmr.Cnt_1ms;  //更新累加時間
-          if((Syscfg.mode==level1Mode) && (pr1_index<=onF))
-          {
-            //處理長時間連加數值的動作
-            if(sFlag.Level1_value == Vvalue)
-            {
-              //要被修改的index應該是pr1的table, 而不是pre_table
-              pr1_index = bytetable_pr1[Syscfg.level1_index];
-              if(pr1_index <= onF)
-                pre_table[pr1_index]++;    //onF以後的參數只能讀不能改
-
-              //檢查最大最小值, index要放pr1的不是總表的
-              // printf("-------------連加測試開始-------------\r\n");
-              data_bytetable = pre_table[pr1_index];
-              // printf("data_bytetable = %d\r\n", data_bytetable);
-              pre_table[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-              // printf("keyup數值 = %d\r\n", pre_table[pr1_index]);
-            }
-          }
-          else if((Syscfg.mode==level2Mode) && (pr2_index<=onF))
-          {
-            //處理長時間連加數值的動作
-            if(sFlag.Level2_value == Vvalue)
-            {
-              //要被修改的index應該是pr2的table, 而不是Syscfg.value的table
-              pr2_index = bytetable_pr2[Syscfg.level2_index];
-              if(pr2_index <= onF)
-                pre_table[pr2_index]++;    //onF以後的參數只能讀不能改
-
-              //檢查最大最小值, index要放pr1的不是總表的
-              // printf("-------------連加測試開始-------------\r\n");
-              data_bytetable = pre_table[pr2_index];
-              // printf("data_bytetable = %d\r\n", data_bytetable);
-              pre_table[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-              // printf("keyup數值 = %d\r\n", pre_table[pr1_index]);
-            }
-          }
-          else if(Syscfg.mode==settingMode)
-          {
-            pre_table[Set]++;
-            pre_table[Set] = check_Limit_Value(pre_table[Set], Set);
-          }
-        }
-      }
-    }
-
-  }
-  else if(KeyUp.Cnt==0)
-  {
-    switch (api_sta)
-    {
-      case API_BUSY1:
-        KeyUp.LongPressed = 0;
-        KeyUp.shortPressed = 0;
-        KeyUp.conti_pressed = 0;
-        api_sta = API_FREE;
-        break;
-
-      case API_BUSY2:
-      case API_BUSY3:
-      case API_BUSY4:
-      case API_BUSY5:
-        api_sta = API_FREE;
-        break;
-      
-      default:
-        break;
-    }
-  }
-}
-
-static void key_down_function(void)
-{
-  /*[下鍵功能]
-  * Home狀態下, 單擊可查看最小值
-  * Menu狀態下, 單擊向上(參數表)瀏覽參數
-  * Setting狀態下, 單擊減少參數值
-  */
-  int16_t data_bytetable;
-  int8_t pr1_index, pr2_index;
-  static uint32_t lastIncrementTime_down = 0;
-  uint8_t AUTO_INCREMENT_DELAY;
-
-  if(api_sta==API_FREE)
-  {
-    if(KeyDown.shortPressed)
-    {
-      Syscfg.keymode.Max_flag = false;
-      Syscfg.keymode.Min_flag = false;
-      switch (Syscfg.mode)
-      {
-        case homeMode:
-          Syscfg.keymode.Min_flag = true;
-          Syscfg.mode = recordMode;
-        break;
-
-        case recordMode:
-          Syscfg.keymode.Min_flag = false;
-          Syscfg.mode = homeMode;
-        break;
-
-        case level1Mode:
-          levelmode_handle(&sFlag.Level1_value, false);
-        break;
-
-        case level2Mode:
-          levelmode_handle(&sFlag.Level2_value, false);
-        break;
-
-        case settingMode:
-          //TODO: get設定值的最小值API, 不要extern 整個table
-          // if(Syscfg.value[rES] == DECIMAL_AT_0)
-          //   Preload.value[Set] -= 10;
-          // else if(Syscfg.value[rES] == DECIMAL_AT_1)
-          //   Preload.value[Set]--;
-
-          // Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
-        break;
-
-        default:
-          Syscfg.keymode.Max_flag = false;
-          Syscfg.keymode.Min_flag = false;
-        break;
-      }
-      KeyDown.shortPressed = 0;
-    }
-    else if(KeyDown.conti_pressed==true)
-    {
-      //檢測是否為連減, 數值大於onF的只可讀不可寫
-      {
-        //依據長按的時間不同, 按越久間隔越短
-        if(KeyDown.Cnt > CONTI_PRESS_times_H)
-          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_H;
-        else if(KeyDown.Cnt > CONTI_PRESS_times_M)
-        {
-          //主要看一下間隔多久, 發現放在100ms內的話大約是200ms跑一次
-          // printf("tmr.Cnt_1ms: %d\r\n", tmr.Cnt_1ms);
-          // printf("lastIncrementTime_down: %d\r\n", lastIncrementTime_down);
-          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_M;
-        }
-        else
-          AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_L;
-
-        //檢測是否到了自動累減的時間間隔
-        if (tmr.Cnt_1ms - lastIncrementTime_down >= AUTO_INCREMENT_DELAY)
-        {
-          lastIncrementTime_down = tmr.Cnt_1ms;  //更新累加時間
-          if(Syscfg.mode==level1Mode)
-          {
-            //處理長時間連減數值的動作
-            if(sFlag.Level1_value == Vvalue)
-            {
-              //要被修改的index應該是pr1的table, 而不是Syscfg.value的table
-              pr1_index = bytetable_pr1[Syscfg.level1_index];
-              if(pr1_index<=onF)
-              {
-                Preload.value[pr1_index]--;
-
-                //檢查最大最小值, index要放pr1的不是總表的
-                data_bytetable = Preload.value[pr1_index];
-                // printf("-------------連加測試開始-------------\r\n");
-                // printf("data_bytetable = %d\r\n", data_bytetable);
-                Preload.value[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
-                // printf("keyup數值 = %d\r\n", Preload.value[pr1_index]);
-              }
-            }
-          }
-          else if(Syscfg.mode==level2Mode)
-          {
-            //處理長時間連加數值的動作
-            if(sFlag.Level2_value == Vvalue)
-            {
-              //要被修改的index應該是pr1的table, 而不是Syscfg.value的table
-              pr2_index = bytetable_pr2[Syscfg.level2_index];
-              if(pr2_index<=onF)
-              {
-                Preload.value[pr2_index]--;
-
-                //檢查最大最小值, index要放pr1的不是總表的
-                data_bytetable = Preload.value[pr2_index];
-                // printf("-------------連加測試開始-------------\r\n");
-                // printf("data_bytetable = %d\r\n", data_bytetable);
-                Preload.value[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
-                // printf("keyup數值 = %d\r\n", Preload.value[pr1_index]);
-              }
-            }
-          }
-          else if(Syscfg.mode==settingMode)
-          {
-            if(Syscfg.value[rES] == DECIMAL_AT_0)
-              Preload.value[Set] -= 10;
-            else if(Syscfg.value[rES] == DECIMAL_AT_1)
-              Preload.value[Set]--;
-
-            Preload.value[Set] = check_Limit_Value(Preload.value[Set], Set);
-          }
-        }
-      }
-    }
-
-  }
-  else
-  {
-    KeyDown.LongPressed = 0;
-    KeyDown.shortPressed = 0;
-    KeyDown.conti_pressed = 0;
-  }
-}
-
-static void key_standby_function(void)
-{
-  /*[待機鍵功能]
-  * 在參數 onF=oFF時, 單擊進入待機功能;
-  * 在參數 onF=ES時, 單擊進入節能運行功能;
-  */
-
- if(KeyStandby.shortPressed)
- {
-    //TODO: 按下按鍵後的功能
-    switch (Syscfg.mode)
-    {
-      case recordMode:
-        Syscfg.keymode.Max_flag = false;
-        Syscfg.keymode.Min_flag = false;
-        Syscfg.mode = homeMode;
-      break;
-    
-    default:
-      break;
-    }
-    KeyStandby.shortPressed = 0;
- }
-}
-
-static void key_bulb_function(void)
-{
-  /*[燈開關鍵功能]
-  * 此鍵不可用(無作用)
-  */
-
- if(KeyBulb.shortPressed)
- {
-    //TODO: 按下按鍵後的功能
-    switch (Syscfg.mode)
-    {
-      case recordMode:
-        Syscfg.keymode.Max_flag = false;
-        Syscfg.keymode.Min_flag = false;
-        Syscfg.mode = homeMode;
-      break;
-    
-    default:
-      break;
-    }
-    KeyBulb.shortPressed = 0;
- }
-}
-
-static void key_defrost_function(void)
-{
-  /*[融霜鍵功能]
-  * Home狀態下, 單擊啟動一次手動融霜
-  * Menu狀態下, 無作用
-  */
-
- if(KeyDefrost.Cnt > KEY_cnt_2s)
- {
-    switch (Syscfg.mode)
-    {
-      case homeMode:
-        sFlag.Defrost = true;
-      break;
-
-      case recordMode:
-        Syscfg.keymode.Max_flag = false;
-        Syscfg.keymode.Min_flag = false;
-        Syscfg.mode = homeMode;
-      break;
-
-      case level1Mode:
-      
-      break;
-
-      case level2Mode:
-      
-      break;
-
-      case settingMode:
-
-      break;
-
-      default:
-      
-      break;
-    }
- }
- else if(KeyDefrost.LongPressed != 0)
- {
-    KeyDefrost.LongPressed = 0;
-    KeyDefrost.shortPressed = 0;
- }
- else if(KeyDefrost.shortPressed)
- {
-    //TODO: 按下按鍵後的功能
-    switch (Syscfg.mode)
-    {
-      case recordMode:
-        Syscfg.keymode.Max_flag = false;
-        Syscfg.keymode.Min_flag = false;
-        Syscfg.mode = homeMode;
-      break;
-    
-    default:
-      break;
-    }
-    KeyDefrost.shortPressed = 0;
- }
-}
-
+//設定鍵相關的API
 static void key_set_function(void)
 {
   static uint8_t api_sta=API_FREE;
@@ -927,8 +557,7 @@ static void key_set_function(void)
     }
     else if(Syscfg.mode==recordMode)
     {
-      Syscfg.keymode.Max_flag = false;
-      Syscfg.keymode.Min_flag = false;
+      clear_Recordmode_sta();   //為了避免卡在歷史低點畫面
     }
   }
   else if(KeySet.LongPressed != 0) //放開後判斷為長按時的動作
@@ -1067,6 +696,410 @@ static void key_set_function(void)
   }
  }
 
+}
+
+//上鍵相關的API
+static void activateEnhancedCooling(void)
+{
+  api_sta = API_BUSY1;
+  icon.Enhanced_Cooling_sta = icon_EC_enable;
+}
+
+static void keyupshortpressed(void)
+{
+  //上鍵短按時, 各模式下功能
+  clear_Recordmode_sta();   //為了避免卡在歷史低點畫面
+
+  switch (Syscfg.mode)
+  {
+    case homeMode:
+      Recordmode_High = true;
+      Syscfg.mode = recordMode;
+    break;
+
+    case recordMode:
+      Recordmode_High = false;
+      Syscfg.mode = homeMode;
+    break;
+
+    case level1Mode:
+      levelmode_handle(&sFlag.Level1_value, true);
+    break;
+
+    case level2Mode:
+      levelmode_handle(&sFlag.Level2_value, true);
+    break;
+
+    case settingMode:
+      pre_table[Set]++;
+      pre_table[Set] = check_Limit_Value(pre_table[Set], Set);
+    break;
+
+    default:
+      clear_Recordmode_sta();   //為了避免卡在歷史低點畫面
+    break;
+  }
+  KeyUp.shortPressed = 0;
+}
+
+static void keyupconti_pressed(void)
+{
+  int16_t data_bytetable;
+  int8_t pr1_index, pr2_index;
+  static uint32_t lastIncrementTime_up = 0;
+  uint8_t AUTO_INCREMENT_DELAY;
+
+  //檢測是否為連加, 數值大於onF的只可讀不可寫
+  {
+    //依據長按的時間不同, 按越久間隔越短
+    if(KeyUp.Cnt > CONTI_PRESS_times_H)
+      AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_H;
+    else if(KeyUp.Cnt > CONTI_PRESS_times_M)
+      AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_M;
+    else
+      AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_L;
+
+    //檢測是否到了自動累加的時間間隔
+    if(tmr.Cnt_1ms - lastIncrementTime_up >= AUTO_INCREMENT_DELAY)
+    {
+      lastIncrementTime_up = tmr.Cnt_1ms;  //更新累加時間
+      if((Syscfg.mode==level1Mode) && (pr1_index<=onF))
+      {
+        //處理長時間連加數值的動作
+        if(sFlag.Level1_value == Vvalue)
+        {
+          //要被修改的index應該是pr1的table, 而不是pre_table
+          pr1_index = bytetable_pr1[Syscfg.level1_index];
+          if(pr1_index <= onF)
+            pre_table[pr1_index]++;    //onF以後的參數只能讀不能改
+
+          //檢查最大最小值, index要放pr1的不是總表的
+          // printf("-------------連加測試開始-------------\r\n");
+          data_bytetable = pre_table[pr1_index];
+          // printf("data_bytetable = %d\r\n", data_bytetable);
+          pre_table[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+          // printf("keyup數值 = %d\r\n", pre_table[pr1_index]);
+        }
+      }
+      else if((Syscfg.mode==level2Mode) && (pr2_index<=onF))
+      {
+        //處理長時間連加數值的動作
+        if(sFlag.Level2_value == Vvalue)
+        {
+          //要被修改的index應該是pr2的table, 而不是Syscfg.value的table
+          pr2_index = bytetable_pr2[Syscfg.level2_index];
+          if(pr2_index <= onF)
+            pre_table[pr2_index]++;    //onF以後的參數只能讀不能改
+
+          //檢查最大最小值, index要放pr1的不是總表的
+          // printf("-------------連加測試開始-------------\r\n");
+          data_bytetable = pre_table[pr2_index];
+          // printf("data_bytetable = %d\r\n", data_bytetable);
+          pre_table[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+          // printf("keyup數值 = %d\r\n", pre_table[pr1_index]);
+        }
+      }
+      else if(Syscfg.mode==settingMode)
+      {
+        pre_table[Set]++;
+        pre_table[Set] = check_Limit_Value(pre_table[Set], Set);
+      }
+    }
+  }
+}
+
+static void keyupclearcnt(void)
+{
+  switch (api_sta)
+  {
+    case API_BUSY1:
+      KeyUp.LongPressed = 0;
+      KeyUp.shortPressed = 0;
+      KeyUp.conti_pressed = 0;
+      api_sta = API_FREE;
+      break;
+
+    default:
+      break;
+  }
+}
+
+static void key_up_function(void)
+{
+  /*[上鍵功能]
+  * Home狀態下, 長按3秒進入加強製冷模式(舉起flag)
+  * Home狀態下, 單擊可查看最大值
+  * Menu狀態下, 單擊向下(參數表)瀏覽參數
+  * Setting狀態下, 單擊增加參數值
+  * [組合鍵功能]
+  * [上+下] = 鎖定or解鎖鍵盤
+  * api_sta代表目前是否有觸發此按鍵功能
+  */
+
+  if(api_sta==API_FREE)
+  {
+    if((KeyUp.Cnt>KEY_cnt_3s) && (Syscfg.mode==homeMode))
+      activateEnhancedCooling();
+    else if(KeyUp.shortPressed != 0)
+      keyupshortpressed();
+    else if(KeyUp.conti_pressed==true)
+      keyupconti_pressed();
+  }
+  else if(KeyUp.Cnt==0)
+    keyupclearcnt();
+}
+
+//下鍵相關的API
+static void keydownshortpressed(void)
+{
+  clear_Recordmode_sta();
+  switch (Syscfg.mode)
+  {
+    case homeMode:
+      Recordmode_Low = true;
+      Syscfg.mode = recordMode;
+    break;
+
+    case recordMode:
+      Recordmode_Low = false;
+      Syscfg.mode = homeMode;
+    break;
+
+    case level1Mode:
+      levelmode_handle(&sFlag.Level1_value, false);
+    break;
+
+    case level2Mode:
+      levelmode_handle(&sFlag.Level2_value, false);
+    break;
+
+    case settingMode:
+      pre_table[Set]--;
+      pre_table[Set] = check_Limit_Value(pre_table[Set], Set);
+    break;
+
+    default:
+      clear_Recordmode_sta();
+    break;
+  }
+  KeyDown.shortPressed = 0;
+}
+
+static void keydownconti_pressed(void)
+{
+  int16_t data_bytetable;
+  int8_t pr1_index, pr2_index;
+  static uint32_t lastIncrementTime_down = 0;
+  uint8_t AUTO_INCREMENT_DELAY;
+
+  //檢測是否為連減, 數值大於onF的只可讀不可寫
+  {
+    //依據長按的時間不同, 按越久間隔越短
+    if(KeyDown.Cnt > CONTI_PRESS_times_H)
+      AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_H;
+    else if(KeyDown.Cnt > CONTI_PRESS_times_M)
+    {
+      //主要看一下間隔多久, 發現放在100ms內的話大約是200ms跑一次
+      // printf("tmr.Cnt_1ms: %d\r\n", tmr.Cnt_1ms);
+      // printf("lastIncrementTime_down: %d\r\n", lastIncrementTime_down);
+      AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_M;
+    }
+    else
+      AUTO_INCREMENT_DELAY = AUTO_INCREMENT_DELAY_L;
+
+    //檢測是否到了自動累減的時間間隔
+    if (tmr.Cnt_1ms - lastIncrementTime_down >= AUTO_INCREMENT_DELAY)
+    {
+      lastIncrementTime_down = tmr.Cnt_1ms;  //更新累加時間
+      if(Syscfg.mode==level1Mode)
+      {
+        //處理長時間連減數值的動作
+        if(sFlag.Level1_value == Vvalue)
+        {
+          //要被修改的index應該是pr1的table, 而不是Syscfg.value的table
+          pr1_index = bytetable_pr1[Syscfg.level1_index];
+          if(pr1_index<=onF)
+          {
+            pre_table[pr1_index]--;
+
+            //檢查最大最小值, index要放pr1的不是總表的
+            data_bytetable = pre_table[pr1_index];
+            // printf("-------------連加測試開始-------------\r\n");
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            pre_table[pr1_index] = check_Limit_Value(data_bytetable, pr1_index);
+            // printf("keyup數值 = %d\r\n", pre_table[pr1_index]);
+          }
+        }
+      }
+      else if(Syscfg.mode==level2Mode)
+      {
+        //處理長時間連加數值的動作
+        if(sFlag.Level2_value == Vvalue)
+        {
+          //要被修改的index應該是pr1的table, 而不是Syscfg.value的table
+          pr2_index = bytetable_pr2[Syscfg.level2_index];
+          if(pr2_index<=onF)
+          {
+            pre_table[pr2_index]--;
+
+            //檢查最大最小值, index要放pr1的不是總表的
+            data_bytetable = pre_table[pr2_index];
+            // printf("-------------連加測試開始-------------\r\n");
+            // printf("data_bytetable = %d\r\n", data_bytetable);
+            pre_table[pr2_index] = check_Limit_Value(data_bytetable, pr2_index);
+            // printf("keyup數值 = %d\r\n", pre_table[pr1_index]);
+          }
+        }
+      }
+      else if(Syscfg.mode==settingMode)
+      {
+        pre_table[Set]--;
+        pre_table[Set] = check_Limit_Value(pre_table[Set], Set);
+      }
+    }
+  }
+
+}
+
+static void keydownclearcnt(void)
+{
+  KeyDown.LongPressed = 0;
+  KeyDown.shortPressed = 0;
+  KeyDown.conti_pressed = 0;
+}
+
+static void key_down_function(void)
+{
+  /*[下鍵功能]
+  * Home狀態下, 單擊可查看最小值
+  * Menu狀態下, 單擊向上(參數表)瀏覽參數
+  * Setting狀態下, 單擊減少參數值
+  */
+
+  if(api_sta==API_FREE)
+  {
+    if(KeyDown.shortPressed)
+      keydownshortpressed();
+    else if(KeyDown.conti_pressed==true)
+      keydownconti_pressed();
+  }
+  else
+    keydownclearcnt();
+}
+
+//待機鍵相關的API
+static void keystandbyshortpressed(void)
+{
+  switch (Syscfg.mode)
+  {
+    case recordMode:
+      clear_Recordmode_sta();
+      Syscfg.mode = homeMode;
+    break;
+  
+  default:
+    break;
+  }
+  KeyStandby.shortPressed = 0;
+}
+
+static void keystandbyclearcnt(void)
+{
+  KeyStandby.LongPressed = 0;
+  KeyStandby.shortPressed = 0;
+  KeyStandby.conti_pressed = 0;
+}
+
+static void key_standby_function(void)
+{
+  /*[待機鍵功能] TODO:功能還沒做
+  * 在參數 onF=oFF時, 單擊進入待機功能;
+  * 在參數 onF=ES時, 單擊進入節能運行功能;
+  */
+
+  if(KeyStandby.shortPressed)
+    keystandbyshortpressed();
+  else
+    keystandbyclearcnt();
+}
+
+//燈泡鍵相關的API
+static void keybulbshortpressed(void)
+{
+  switch (Syscfg.mode)
+  {
+    case recordMode:
+      Syscfg.keymode.Max_flag = false;
+      Syscfg.keymode.Min_flag = false;
+      Syscfg.mode = homeMode;
+    break;
+  
+  default:
+    break;
+  }
+  KeyBulb.shortPressed = 0;
+}
+
+static void keybulbclearcnt(void)
+{
+  KeyBulb.LongPressed = 0;
+  KeyBulb.shortPressed = 0;
+  KeyBulb.conti_pressed = 0;
+}
+
+static void key_bulb_function(void)
+{
+  /*[燈開關鍵功能]
+  * 此鍵不可用(無作用)
+  */
+
+ if(KeyBulb.shortPressed)
+   keybulbshortpressed();
+}
+
+//融霜鍵相關的API
+static void keydefrostlongpressed(void)
+{
+  keydefrostclearcnt();
+}
+
+static void keydefrostshortpressed(void)
+{
+  switch (Syscfg.mode)
+  {
+    case homeMode:
+      sFlag.Defrost = true;
+    break;
+
+    case recordMode:
+      clear_Recordmode_sta();
+      Syscfg.mode = homeMode;
+    break;
+  
+  default:
+    break;
+  }
+  KeyDefrost.shortPressed = 0;
+}
+
+static void keydefrostclearcnt(void)
+{
+  KeyDefrost.LongPressed = 0;
+  KeyDefrost.shortPressed = 0;
+  KeyDefrost.conti_pressed = 0;
+}
+
+static void key_defrost_function(void)
+{
+  /*[融霜鍵功能]
+  * Home狀態下, 單擊啟動一次手動融霜
+  * Menu狀態下, 無作用
+  */
+
+ if(KeyDefrost.LongPressed != 0)
+  keydefrostlongpressed();
+ else if(KeyDefrost.shortPressed != 0)
+  keydefrostshortpressed();
 }
 
 /*--------------------------- for test key funcitons ---------------------------*/

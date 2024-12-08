@@ -45,7 +45,6 @@ enum SPIAddr
   SPIAddr_dtr,
   SPIAddr_tdF,    //0=EL; 1=in
   SPIAddr_dFP,    //0=nP; 1=P1; 2=P2; 3=P3; 4=P4
-  SPIAddr_dtE,    //-50.0 ~ 50.0 讀出的值需要offset
   SPIAddr_IdF,
   SPIAddr_MdF,
   SPIAddr_dSd,
@@ -90,6 +89,8 @@ enum SPIAddr
   SPIAddr_US_H,
   SPIAddr_CCS_L,
   SPIAddr_CCS_H,
+  SPIAddr_dtE_L,  //-50.0 ~ 50.0 讀出的值需要offset
+  SPIAddr_dtE_H,
   SPIAddr_ALU_L,  //0.0 ~ 110.0
   SPIAddr_ALU_H,  
   SPIAddr_ALL_L,  //-50.0 ~ 50.0 讀出的值需要offset

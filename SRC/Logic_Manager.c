@@ -489,14 +489,19 @@ void Task_Main(void)
   Device_Version = Release*65536 + dev*256 + test;
 
   // I2C_Test_1();
+  // while(1)
+  // {
+  //   WDT_Feed();
+  // }
   // EEPROM_TEST();   //單獨測試EEPROM寫入讀出功能
+  
+  //測試新的EEPROM寫入跟讀出以及系統寫入測試
+  test_datastore();
 
   System_Init();
 
 //開機前要做的事情, 讀取eeprom填入系統值
 
-  //測試新的EEPROM寫入跟讀出以及系統寫入測試
-  test_datastore();
 
   //原始步驟
   // printf("read\r\n");

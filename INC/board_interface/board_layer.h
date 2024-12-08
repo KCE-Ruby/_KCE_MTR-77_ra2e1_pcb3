@@ -21,7 +21,7 @@
 /* Enum type definitions -----------------------------------------------------*/
 enum API_STATE
 {
-  //一次只能執行一件事情
+  //所有按鍵共用一次只能執行一件事情
   API_FREE = 0,
   API_BUSY1 = 1,
   API_BUSY2 = 2,
