@@ -29,6 +29,6 @@ typedef struct
 } TemperatureAdTable;
 
 /* task function protocol -----------------------------------------------*/
-void ADC_Main(void);
+uint8_t ADC_Main(void);
 
 #endif /* INC_ADC_H_ */

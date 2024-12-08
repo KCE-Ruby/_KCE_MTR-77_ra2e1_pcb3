@@ -626,7 +626,9 @@ static void eepread_to_user(uint8_t index)
 //若輸入的address正確, 判斷是否需將offset做10倍的shift(亦為系統使用值)
   if(eeptouser_err==false)
   {
-    if(User_original[index].DataDigit == in)
+    if((index==RecordHigh) || (index==RecordLow))
+      sys_table[index] = i16_value + (-50); //最大最小值額外處理
+    else if(User_original[index].DataDigit == in)
       sys_table[index] = i16_value + User_original[index].Range_Low; //整數值直接讀取
     else if(User_original[index].DataDigit == dE)
       sys_table[index] = i16_value + (User_original[index].Range_Low*10); //小數值需放大10倍
@@ -647,231 +649,314 @@ static void eepread_to_systable(void)
 //整個系統運算的值無小數點, 已放大10倍計算, ex. (12.5)->(125), (-55.9)->(-559)
   sys_table[rSE] = sys_table[Set];
   sys_table[rEL] = 10;           //v1.0
+  printf("RecordHigh = %d\r\n", sys_table[RecordHigh]);
+  printf("RecordLow = %d\r\n", sys_table[RecordLow]);
   // printf("offset結束\r\n");
 }
 
 static void systable_to_eeprom(uint8_t addr)
 {
+  uint8_t eep_temp[2]={};
+
   uint8_t eep_write[2]={};
   uint8_t length=0;
   uint8_t u8_length = 0x01;
   uint8_t u16_length = 0x02;
-  uint16_t sys_value = sys_table[addr] - (User_original[addr].Range_Low*10);
+  uint16_t sys_value=0;
   uint8_t spi_addr=0;
+
+  printf("addr = %d\r\n", addr);
+
+  if(addr < RecordHigh)
+    sys_value = sys_table[addr] - (User_original[addr].Range_Low*10);
+  else
+    sys_value = sys_table[addr] - (-50);  //最大最小值都有可能是負數
 
   switch (addr)
   {
     case Str:
+      length = u8_length;
       spi_addr = SPIAddr_Start;
       break;
     case Hy:
-      spi_addr = SPIAddr_Start;
+      length = u8_length;
+      spi_addr = SPIAddr_Hy;
       break;
     case Ot:
-      spi_addr = SPIAddr_Start;
+      length = u8_length;
+      spi_addr = SPIAddr_Ot;
       break;
     case P2P:
+      length = u8_length;
       spi_addr = SPIAddr_P2P;
       break;
     case OE:
+      length = u8_length;
       spi_addr = SPIAddr_OE;
       break;
     case P3P:
+      length = u8_length;
       spi_addr = SPIAddr_P3P;
       break;
     case O3:
+      length = u8_length;
       spi_addr = SPIAddr_O3;
       break;
     case P4P:
+      length = u8_length;
       spi_addr = SPIAddr_P4P;
       break;
     case O4:
+      length = u8_length;
       spi_addr = SPIAddr_O4;
       break;
     case OdS:
+      length = u8_length;
       spi_addr = SPIAddr_OdS;
       break;
     case AC:
+      length = u8_length;
       spi_addr = SPIAddr_AC;
       break;
     case rtr:
+      length = u8_length;
       spi_addr = SPIAddr_rtr;
       break;
     case CCt:
+      length = u8_length;
       spi_addr = SPIAddr_CCt;
       break;
     case COn:
+      length = u8_length;
       spi_addr = SPIAddr_COn;
       break;
     case COF:
+      length = u8_length;
       spi_addr = SPIAddr_COF;
       break;
     case CF:
+      length = u8_length;
       spi_addr = SPIAddr_CF;
       break;
     case rES:
+      length = u8_length;
       spi_addr = SPIAddr_rES;
       break;
     case Lod:
+      length = u8_length;
       spi_addr = SPIAddr_Lod;
       break;
     case rEd:
+      length = u8_length;
       spi_addr = SPIAddr_rEd;
       break;
     case dLY:
+      length = u8_length;
       spi_addr = SPIAddr_dLY;
       break;
     case dtr:
+      length = u8_length;
       spi_addr = SPIAddr_dtr;
       break;
     case tdF:
+      length = u8_length;
       spi_addr = SPIAddr_tdF;
       break;
     case dFP:
+      length = u8_length;
       spi_addr = SPIAddr_dFP;
       break;
     case IdF:
+      length = u8_length;
       spi_addr = SPIAddr_IdF;
       break;
     case MdF:
+      length = u8_length;
       spi_addr = SPIAddr_MdF;
       break;
     case dSd:
+      length = u8_length;
       spi_addr = SPIAddr_dSd;
       break;
     case dFd:
+      length = u8_length;
       spi_addr = SPIAddr_dFd;
       break;
     case dAd:
+      length = u8_length;
       spi_addr = SPIAddr_dAd;
       break;
     case Fdt:
+      length = u8_length;
       spi_addr = SPIAddr_Fdt;
       break;
     case dPo:
+      length = u8_length;
       spi_addr = SPIAddr_dPo;
       break;
     case dAF:
+      length = u8_length;
       spi_addr = SPIAddr_dAF;
       break;
     case FnC:
+      length = u8_length;
       spi_addr = SPIAddr_FnC;
       break;
     case Fnd:
+      length = u8_length;
       spi_addr = SPIAddr_Fnd;
       break;
     case Fct:
+      length = u8_length;
       spi_addr = SPIAddr_Fct;
       break;
     case FSt:
+      length = u8_length;
       spi_addr = SPIAddr_FSt;
       break;
     case Fon:
+      length = u8_length;
       spi_addr = SPIAddr_Fon;
       break;
     case FoF:
+      length = u8_length;
       spi_addr = SPIAddr_FoF;
       break;
     case FAP:
+      length = u8_length;
       spi_addr = SPIAddr_FAP;
       break;
     case ALC:
+      length = u8_length;
       spi_addr = SPIAddr_ALC;
       break;
     case AFH:
+      length = u8_length;
       spi_addr = SPIAddr_AFH;
       break;
     case ALd:
+      length = u8_length;
       spi_addr = SPIAddr_ALd;
       break;
     case dAO:
+      length = u8_length;
       spi_addr = SPIAddr_dAO;
       break;
     case AP2:
+      length = u8_length;
       spi_addr = SPIAddr_AP2;
       break;
     case AH2:
+      length = u8_length;
       spi_addr = SPIAddr_AH2;
       break;
     case Ad2:
+      length = u8_length;
       spi_addr = SPIAddr_Ad2;
       break;
     case dA2:
+      length = u8_length;
       spi_addr = SPIAddr_dA2;
       break;
     case bLL:
+      length = u8_length;
       spi_addr = SPIAddr_bLL;
       break;
     case AC2:
+      length = u8_length;
       spi_addr = SPIAddr_AC2;
       break;
     case i1P:
+      length = u8_length;
       spi_addr = SPIAddr_i1P;
       break;
     case i1F:
+      length = u8_length;
       spi_addr = SPIAddr_i1F;
       break;
     case did:
+      length = u8_length;
       spi_addr = SPIAddr_did;
       break;
     case nPS:
+      length = u8_length;
       spi_addr = SPIAddr_nPS;
       break;
     case odc:
+      length = u8_length;
       spi_addr = SPIAddr_odc;
       break;
     case rrd:
+      length = u8_length;
       spi_addr = SPIAddr_rrd;
       break;
     case HES:
+      length = u8_length;
       spi_addr = SPIAddr_HES;
       break;
     case Adr:
+      length = u8_length;
       spi_addr = SPIAddr_Adr;
       break;
     case PbC:
+      length = u8_length;
       spi_addr = SPIAddr_PbC;
       break;
     case onF:
+      length = u8_length;
       spi_addr = SPIAddr_onF;
       break;
 
 
     case Set:
+      length = u16_length;
       spi_addr = SPIAddr_Set_L;
       break;
     case LS:
+      length = u16_length;
       spi_addr = SPIAddr_LS_L;
       break;
     case US:
+      length = u16_length;
       spi_addr = SPIAddr_US_L;
       break;
     case CCS:
+      length = u16_length;
       spi_addr = SPIAddr_CCS_L;
       break;
     case dtE:
+      length = u16_length;
       spi_addr = SPIAddr_dtE_L;
       break;
     case ALU:
+      length = u16_length;
       spi_addr = SPIAddr_ALU_L;
       break;
     case ALL:
+      length = u16_length;
       spi_addr = SPIAddr_ALL_L;
       break;
     case AL2:
+      length = u16_length;
       spi_addr = SPIAddr_AL2_L;
       break;
     case Au2:
+      length = u16_length;
       spi_addr = SPIAddr_Au2_L;
       break;
     case RecordLow:
+      length = u16_length;
       spi_addr = SPIAddr_RecordLow_L;
+      printf("SPIAddr_RecordLow_L\r\n");
       break;
     case RecordHigh:
+      length = u16_length;
       spi_addr = SPIAddr_RecordHigh_L;
+      printf("SPIAddr_RecordHigh_L\r\n");
       break;
 
     default:
+      printf("寫入eeprom地址輸入錯誤\r\n");
       break;
   }
 
@@ -879,18 +964,76 @@ static void systable_to_eeprom(uint8_t addr)
   if(length == u8_length)
   {
     eep_write[0] = sys_value;
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
     I2C_EE_BufferWrite(eep_write, spi_addr, length);
+    R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
+    printf("eep_write[%d] = %d\r\n", addr, eep_write[0]);
   }
   else if(length == u16_length)
   {
     eep_write[0] = sys_value & 0xFF;
     eep_write[1] = sys_value >> 8;
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
     I2C_EE_BufferWrite(eep_write, spi_addr, length);
+    R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
+    printf("eep_write[%d] = %d\r\n", addr, eep_write[0]);
+    printf("eep_write[%d] = %d\r\n", addr, eep_write[1]);
+
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+    I2C_EE_BufferRead(eep_temp, 0x00, 0x02);
+    R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
+    printf("eep_temp[%d] = %d\r\n", addr, eep_temp[0]);
+    printf("eep_temp[%d] = %d\r\n", addr, eep_temp[1]);
   }
 }
 
 void datastore_boot(void)
+{
+  uint8_t i=Str;
+  uint8_t length = SPIAddr_End;
 
+//產出reset要用的table (User_reset[])
+  original_to_reset();
+
+//步驟1:讀出eeprom的數值 (eep_read[])
+  printf("步驟1:讀出eeprom的數值\r\n");
+  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+  I2C_EE_BufferRead(eep_read, 0x00, length);
+  R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
+
+//請記得如果修改了User_original的陣列, 需要讓系統重置請將eep_read[Str]旗標寫成NeedtoReset
+//也就是把這段打開就好
+  // #define resetsystem
+  #ifdef resetsystem
+    eep_read[Str] = NeedtoReset;
+    printf("成功修改User_original陣列_繁體\r\n");
+  #endif
+
+//步驟2:判斷是否需要reset, 若要reset則產出reset的table
+  printf("步驟2:判斷是否需要reset\r\n");
+  if(eep_read[Str] != No_problem)
+  {
+    //寫入原廠設定
+    printf("寫入的數據_繁體\r\n");
+    for ( i=0; i<length; i++ ) { //填充缓冲
+        printf("0x%02X ", User_reset[i]);
+        if (i%16 == 15)
+            printf("\n");
+    }
+    printf("\n");
+    printf("開始恢復原廠值\r\n");
+    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
+      I2C_EE_BufferWrite(User_reset, 0x00, length);
+    R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
+      printf("完成恢復原廠值\r\n");
+  }
+  else
+    printf("系統值不須重置\r\n");
+
+//步驟3:將eepread值轉換成system值直接使用 (sys_table[])
+  printf("步驟3:將eepread值轉換成system值\r\n");
+  eepread_to_systable();
+}
 
 //系統共用數值轉換
 void get_Pv(void)
@@ -936,10 +1079,11 @@ void get_RecordLow(void)
 {
   uint8_t length = 2;
 
-  if(Syscfg.pv < Syscfg.RecordLow)
+  if(Syscfg.pv < sys_table[RecordLow])
   {
-    Syscfg.RecordLow = Syscfg.pv;
-    systable_to_eeprom(SPIAddr_RecordLow_L);
+    sys_table[RecordLow] = Syscfg.pv;
+    systable_to_eeprom(RecordLow);
+    printf("寫入最小值成功 = %d\r\n", sys_table[RecordLow]);
   }
 }
 
@@ -947,61 +1091,15 @@ void get_RecordHigh(void)
 {
   uint8_t length = 2;
 
-  if(Syscfg.pv > Syscfg.RecordHigh)
+  if(Syscfg.pv > sys_table[RecordHigh])
   {
-    Syscfg.RecordHigh = Syscfg.pv;
-    systable_to_eeprom(SPIAddr_RecordHigh_L);
+    sys_table[RecordHigh] = Syscfg.pv;
+    systable_to_eeprom(RecordHigh);
+    printf("寫入最大值成功\r\n");
   }
 }
 
 void upload_syscfg_data(int8_t pr_index)
 {
   sys_table[pr_index] = pre_table[pr_index];
-}
-
-{
-  uint8_t i=Str;
-  uint8_t length = SPIAddr_End-1;
-
-//產出reset要用的table (User_reset[])
-  original_to_reset();
-
-//步驟1:讀出eeprom的數值 (eep_read[])
-  printf("步驟1:讀出eeprom的數值\r\n");
-  R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-  I2C_EE_BufferRead(eep_read, 0x00, length);
-  R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
-
-//請記得如果修改了User_original的陣列, 需要讓系統重置請將eep_read[Str]旗標寫成NeedtoReset
-//也就是把這段打開就好
-  // #define resetsystem
-  #ifdef resetsystem
-    eep_read[Str] = NeedtoReset;
-    printf("成功修改User_original陣列_繁體\r\n");
-  #endif
-
-//步驟2:判斷是否需要reset, 若要reset則產出reset的table
-  printf("步驟2:判斷是否需要reset\r\n");
-  if(eep_read[Str] != No_problem)
-  {
-    //寫入原廠設定
-    printf("寫入的數據_繁體\r\n");
-    for ( i=0; i<length; i++ ) { //填充缓冲
-        printf("0x%02X ", User_reset[i]);
-        if (i%16 == 15)
-            printf("\n");
-    }
-    printf("\n");
-    printf("開始恢復原廠值\r\n");
-    R_BSP_SoftwareDelay(10U, BSP_DELAY_UNITS_MILLISECONDS);
-      I2C_EE_BufferWrite(User_reset, 0x00, length);
-    R_BSP_SoftwareDelay(100U, BSP_DELAY_UNITS_MILLISECONDS);
-      printf("完成恢復原廠值\r\n");
-  }
-  else
-    printf("系統值不須重置\r\n");
-
-//步驟3:將eepread值轉換成system值直接使用 (sys_table[])
-  printf("步驟3:將eepread值轉換成system值\r\n");
-  eepread_to_systable();
 }

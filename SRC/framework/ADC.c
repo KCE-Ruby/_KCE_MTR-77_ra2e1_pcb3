@@ -58,17 +58,19 @@ static int16_t converADtoNTC_multiply10(uint16_t adValue);
 //Convert AD to NTC temperature value
 static int16_t ADCtest(adc_channel_t const channel);
 
-uint8_t adcnt;
 /*---------------------- Function definitions ----------------------*/
-void ADC_Main(void)
+uint8_t ADC_Main(void)
 {
+  static uint8_t adcnt;
+
   //取完AD值, 將值轉換成NTC的溫度值, 且放大10倍後存在sensor1準備給顯示區處理
   if((adcnt%2)==0)
     TempValue.sensor1 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_1));
   else
     TempValue.sensor2 = converADtoNTC_multiply10(getFiltedAD(ADC_CHANNEL_2));
 
-  adcnt++;
+  adcnt++; if(adcnt>250) adcnt = 101; //值不可以亂寫不然channel2不會更新
+  return adcnt;
 }
 
 /*---------------------- Static Function definitions ----------------------*/

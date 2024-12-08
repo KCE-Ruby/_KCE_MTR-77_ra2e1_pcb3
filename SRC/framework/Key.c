@@ -513,12 +513,12 @@ static void key_set_function(void)
 
           if(clear_Max_flag)
           {
-            Syscfg.RecordHigh = Syscfg.pv;
+            sys_table[RecordHigh] = Syscfg.pv;
             clear_Max_flag = false;
           }
           else if(clear_Min_flag)
           {
-            Syscfg.RecordLow = Syscfg.pv;
+            sys_table[RecordLow] = Syscfg.pv;
             clear_Min_flag = false;
           }
         }

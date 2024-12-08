@@ -76,7 +76,7 @@ static void loop_100us(void);
 static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
 {
   bool pv_err=1;
-  switch (Syscfg.value[Lod])
+  switch (sys_table[Lod])
   {
     case disp_P1:
       //顯示目前量測到的溫度P1
@@ -99,10 +99,10 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
       PvToDisplay_Flashing();
       break;
     case disp_SEt:
-      if(Syscfg.value[rES] == DECIMAL_AT_0)
-        NumToDisplay(Syscfg.value[Set]/10);
-      else if(Syscfg.value[rES] == DECIMAL_AT_1)
-        NumToDisplay(Syscfg.value[Set]);
+      if(sys_table[rES] == DECIMAL_AT_0)
+        NumToDisplay(sys_table[Set]/10);
+      else if(sys_table[rES] == DECIMAL_AT_1)
+        NumToDisplay(sys_table[Set]);
       break;
     case disp_dtr:
       //顯示目前量測到的溫度P2
@@ -118,9 +118,9 @@ static void homeModelogic(bool* fHigh, bool* fLow, bool* fLeave)
 
   if(pv_err==0)
   {
-    if(Syscfg.value[rES] == DECIMAL_AT_0)
+    if(sys_table[rES] == DECIMAL_AT_0)
       NumToDisplay(Syscfg.pv_disp/10);
-    else if(Syscfg.value[rES] == DECIMAL_AT_1)
+    else if(sys_table[rES] == DECIMAL_AT_1)
       NumToDisplay(Syscfg.pv_disp);
   }
 
@@ -153,10 +153,10 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     else
     {
       //顯示數值, 5秒後離開這層
-      if(Syscfg.value[rES] == DECIMAL_AT_0)
-        NumToDisplay(Syscfg.RecordHigh/10);
-      else if(Syscfg.value[rES] == DECIMAL_AT_1)
-        NumToDisplay(Syscfg.RecordHigh);
+      if(sys_table[rES] == DECIMAL_AT_0)
+        NumToDisplay(sys_table[RecordHigh]/10);
+      else if(sys_table[rES] == DECIMAL_AT_1)
+        NumToDisplay(sys_table[RecordHigh]);
 
       if(*fLeave == false)
         *fLeave = Mydelay_ms(dly_fLeave, 5000);
@@ -177,10 +177,10 @@ static void historyModelogic(bool* fHigh, bool* fLow, bool* fLeave)
     else
     {
       //顯示數值, 5秒後離開這層
-      if(Syscfg.value[rES] == DECIMAL_AT_0)
-        NumToDisplay(Syscfg.RecordLow/10);
-      else if(Syscfg.value[rES] == DECIMAL_AT_1)
-        NumToDisplay(Syscfg.RecordLow);
+      if(sys_table[rES] == DECIMAL_AT_0)
+        NumToDisplay(sys_table[RecordLow]/10);
+      else if(sys_table[rES] == DECIMAL_AT_1)
+        NumToDisplay(sys_table[RecordLow]);
 
       if(*fLeave == false)
         *fLeave = Mydelay_ms(dly_fLeave, 5000);
@@ -276,9 +276,9 @@ static void valuetodisplay(uint8_t table)
       break;
   
     default:
-      if(Syscfg.value[rES] == DECIMAL_AT_0)
+      if(sys_table[rES] == DECIMAL_AT_0)
         NumToDisplay(Preload.value[table]/10);
-      else if(Syscfg.value[rES] == DECIMAL_AT_1)
+      else if(sys_table[rES] == DECIMAL_AT_1)
         NumToDisplay(Preload.value[table]);
       break;
   }
@@ -316,10 +316,10 @@ static void check_set_value(void)
   static uint32_t check_set_value_cnt=0;
   if(Syscfg.keymode.SET_value_flag)
   {
-    if(Syscfg.value[rES] == DECIMAL_AT_0)
-      NumToDisplay(Syscfg.value[Set]/10);
-    else if(Syscfg.value[rES] == DECIMAL_AT_1)
-      NumToDisplay(Syscfg.value[Set]);
+    if(sys_table[rES] == DECIMAL_AT_0)
+      NumToDisplay(sys_table[Set]/10);
+    else if(sys_table[rES] == DECIMAL_AT_1)
+      NumToDisplay(sys_table[Set]);
 
     if(check_set_value_cnt == 0)
       check_set_value_cnt = tmr.Cnt_1s;
@@ -341,9 +341,9 @@ static void change_set_value(void)
 
   if(Syscfg.keymode.SET_value_flag)
   {
-    if(Syscfg.value[rES] == DECIMAL_AT_0)
+    if(sys_table[rES] == DECIMAL_AT_0)
       NumToDisplay(Preload.value[Set]/10);
-    else if(Syscfg.value[rES] == DECIMAL_AT_1)
+    else if(sys_table[rES] == DECIMAL_AT_1)
       NumToDisplay(Preload.value[Set]);
 
     ICON_degrees_Flashing();
@@ -455,6 +455,7 @@ static void loop_100us(void)
 
 static void main_loop(void)
 {
+  uint8_t adcnt;
   if(tmr.Flag_1ms)
   {
     Key_main();   //按鍵相關邏輯
@@ -463,14 +464,14 @@ static void main_loop(void)
 
   if(tmr.Flag_100ms)
   {
-    ADC_Main();
+    adcnt = ADC_Main();
     //TODO: 新增一個loop by dLY的, 以控制取得Pv值的刷新頻率
     get_Pv();
 
     Out_main();
 
     //更新最大最小值
-    if(Syscfg.pv != ERROR_AD)
+    if((Syscfg.pv!=ERROR_AD) && (adcnt>100))
       update_history_value();
 
     //主要顯示控制區, 切換顯示模式等等..
@@ -489,7 +490,7 @@ void Task_Main(void)
 
   const uint8_t Release = 0x00;
   const uint8_t dev     = 0x00;
-  const uint8_t test    = 0x58;
+  const uint8_t test    = 0x59;
   Device_Version = Release*65536 + dev*256 + test;
 
   System_Init();
